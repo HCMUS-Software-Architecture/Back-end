@@ -78,6 +78,38 @@ services:
       - prometheus
 ```
 
+### Start Monitoring Stack
+
+**Bash (Linux/macOS):**
+```bash
+cd docker
+docker compose -f docker-compose.monitoring.yml up -d
+
+# Verify services
+docker compose -f docker-compose.monitoring.yml ps
+
+# Access Prometheus
+open http://localhost:9090
+
+# Access Grafana
+open http://localhost:3001
+```
+
+**PowerShell (Windows 10/11):**
+```powershell
+Set-Location docker
+docker compose -f docker-compose.monitoring.yml up -d
+
+# Verify services
+docker compose -f docker-compose.monitoring.yml ps
+
+# Access Prometheus
+Start-Process http://localhost:9090
+
+# Access Grafana
+Start-Process http://localhost:3001
+```
+
 ### Spring Boot Integration
 
 Add to `pom.xml`:
@@ -250,6 +282,42 @@ spec:
       target:
         type: Utilization
         averageUtilization: 70
+```
+
+### Kubernetes Commands
+
+**Bash (Linux/macOS):**
+```bash
+# Apply manifests
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/
+
+# Check deployment status
+kubectl get deployments -n trading-platform
+kubectl get pods -n trading-platform
+
+# Check logs
+kubectl logs -f deployment/backend-api -n trading-platform
+
+# Port forward for local access
+kubectl port-forward svc/trading-api 8080:80 -n trading-platform
+```
+
+**PowerShell (Windows 10/11):**
+```powershell
+# Apply manifests
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/
+
+# Check deployment status
+kubectl get deployments -n trading-platform
+kubectl get pods -n trading-platform
+
+# Check logs
+kubectl logs -f deployment/backend-api -n trading-platform
+
+# Port forward for local access
+kubectl port-forward svc/trading-api 8080:80 -n trading-platform
 ```
 
 ---
