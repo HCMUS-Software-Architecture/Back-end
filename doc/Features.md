@@ -1,161 +1,297 @@
 # Features and Functional Flows
 
-Based on the project description, here are the main features, their functional flows, and acceptance criteria.
+This document describes the core features of the Trading Platform, their functional flows, and acceptance criteria. Features are aligned with [CoreRequirements.md](./CoreRequirements.md).
 
-## 1) News Ingestion (Crawler)
-- Description: Automatically collect articles from multiple sources and store raw HTML + metadata.
-- Flow:
-  1. Scheduler (Quartz/Kubernetes Cron) selects sources to crawl.
-  2. Crawler fetches pages (HTTP client or headless Selenium when JS rendering is necessary).
-  3. Extractor uses selectors/heuristics to extract title, body, publish date, authors, tags, and referenced symbols.
-  4. Publish a message to Kafka topic `raw-articles` and persist the raw payload in MongoDB `raw_articles`.
-- Acceptance criteria: dedupe by URL/hash, retry on failure, and crawl success rate >= 90% per source.
-
-## 2) Normalization & Storage
-- Description: Normalize article content into a common schema.
-- Flow:
-  1. Normalizer (Kafka consumer) reads `raw-articles`.
-  2. Parse HTML and extract structured fields (title, body, published_at, symbols).
-  3. Normalize date formats and metadata fields.
-  4. Store normalized documents in MongoDB `articles`. If necessary, create mapping records in Postgres for fast joins.
-- Acceptance criteria: text extraction accuracy (no missing body) >= 95% for supported sources.
-
-## 3) AI Analysis (NLP)
-- Description: Run NLP pipelines to compute sentiment, topics, entities, and causal signals.
-- Flow:
-  1. NLP worker processes `normalized-articles` (or reads from MongoDB).
-  2. Pipeline stages: language detection -> tokenization -> NER -> sentiment -> topic modeling -> causal detector.
-  3. Persist results into `analysis_results` in MongoDB and publish `analysis-events` for important findings.
-- Mode: near-realtime and batch reprocessing supported.
-
-## 4) Price Collection & Charting Data
-- Description: Collect historical and realtime price data for charting and analysis.
-- Flow:
-  1. Price Collector subscribes to exchange API/WebSocket feeds.
-  2. Ingest ticks and publish to Kafka topic `price-ticks`; persist raw ticks into TimescaleDB/Postgres.
-  3. Optionally publish to Redis Pub/Sub for low-latency delivery to WebSocket server.
-- Acceptance criteria: ingestion throughput meets target and 1m candle generation latency < 2s after minute close.
-
-## 5) Aggregation (Candle Generation)
-- Description: Aggregate ticks into OHLCV candles for multiple intervals.
-- Flow:
-  1. Aggregator (consumer) reads `price-ticks` from Kafka or scans ticks DB.
-  2. Compute candles per configured interval.
-  3. Persist candles to Postgres/Timescale and update Redis cache for recent candles.
-  4. Notify WebSocket server or publish events so clients can refresh charts.
-
-## 6) UI Dashboard (Frontend)
-- Description: Dashboard for browsing news, viewing charts, and receiving alerts.
-- Flow:
-  1. User loads dashboard -> frontend fetches overview via REST `/api/overview`.
-  2. User opens a chart -> frontend requests historical candles via `/api/prices/historical` and subscribes to a WebSocket channel for realtime ticks.
-  3. User clicks an article -> frontend fetches article details and related symbol/time context.
-
-## 7) Administration & Monitoring
-- Description: Admin UI to manage sources, schedules, retries, and monitor metrics.
-- Flow:
-  1. Admin UI lists sources and allows enabling/disabling and schedule updates.
-  2. Admin actions update configuration in Postgres (or Config DB) and publish configuration events to Kafka.
-  3. Workers subscribe to configuration events and adjust behavior (stop source, change frequency).
-
-## 8) API & Export (Third-party Access)
-- Description: Provide authenticated API access for third parties with rate-limiting and export options (JSON/CSV).
-- Flow:
-  1. External client authenticates via OAuth/JWT and calls the API.
-  2. API Gateway enforces rate limits and forwards requests to backend services.
-  3. Backend queries Postgres/Mongo and returns results in JSON or CSV format.
+> **Note**: For administration and monitoring features, see [Operations.md](./Operations.md).
 
 ---
 
-## Detailed flows (Mermaid diagrams)
+## Table of Contents
 
-Each major feature has a corresponding Mermaid flow diagram in the original document; keep those diagrams in place to render in Markdown viewers that support Mermaid.
+1. [News Ingestion (Crawler)](#1-news-ingestion-crawler)
+2. [Normalization & Storage](#2-normalization--storage)
+3. [AI Analysis (NLP)](#3-ai-analysis-nlp)
+4. [Price Collection & Charting](#4-price-collection--charting)
+5. [Aggregation (Candle Generation)](#5-aggregation-candle-generation)
+6. [UI Dashboard (Frontend)](#6-ui-dashboard-frontend)
+7. [API Access](#7-api-access)
 
+---
 
-### News ingestion (Crawler)
+## 1) News Ingestion (Crawler)
+
+**Requirement**: Financial News Collection (from multiple sources) - Crawler
+
+### Description
+Automatically collect articles from multiple news sources and store raw HTML with metadata. The system learns each site's HTML structure and adapts to changes.
+
+### Functional Flow
+1. Scheduler triggers crawl jobs based on configured intervals
+2. Crawler fetches pages (HTTP client or headless Selenium for JS-rendered content)
+3. Extractor uses adaptive selectors/heuristics to extract:
+   - Title, body text, publish date
+   - Authors, tags, referenced symbols
+4. Store raw payload in database
+5. Publish event for downstream processing
+
+### Acceptance Criteria
+- [ ] Dedupe by URL/hash to avoid duplicates
+- [ ] Retry on failure with exponential backoff
+- [ ] Crawl success rate >= 90% per source
+- [ ] Handle HTML structure changes gracefully
+
+### Flow Diagram
 ```mermaid
 flowchart LR
   S[Scheduler] --> CR[Crawler]
   CR --> EX[Extractor]
-  EX -->|new| M[MongoDB: raw_articles]
-  EX -->|new| K[Kafka: raw-articles]
+  EX -->|new| M[Database: raw_articles]
   EX -->|dup| Skip[Skip / Update]
   CR --> Retry[Retry / Backoff]
-  M --> Metrics[Metrics & Logs]
 ```
 
-### Normalization & Storage
+---
+
+## 2) Normalization & Storage
+
+**Requirement**: Store data comprehensively and display selectively on GUI
+
+### Description
+Normalize article content into a common schema for consistent processing and display.
+
+### Functional Flow
+1. Normalizer reads raw articles
+2. Parse HTML and extract structured fields:
+   - Title, body, published_at
+   - Symbols mentioned, source metadata
+3. Normalize date formats and metadata
+4. Store normalized documents in database
+
+### Acceptance Criteria
+- [ ] Text extraction accuracy >= 95% for supported sources
+- [ ] No missing body content
+- [ ] Consistent date format (ISO 8601)
+- [ ] Symbol extraction from text
+
+### Flow Diagram
 ```mermaid
 flowchart LR
-  K1[Kafka: raw-articles] --> N[Normalizer]
+  K1[Raw Articles] --> N[Normalizer]
   N --> Parse[Parse & Normalize]
-  Parse --> MA[MongoDB: articles]
-  Parse --> PS[Postgres: article_symbols]
-  Parse --> K2[Kafka: normalized-articles]
+  Parse --> MA[Database: articles]
+  Parse --> PS[Database: article_symbols]
 ```
 
-### AI Analysis (NLP)
+---
+
+## 3) AI Analysis (NLP)
+
+**Requirement**: AI Models for News Analysis
+
+### Description
+Run NLP pipelines to compute sentiment, entities, topics, and causal signals for trend prediction.
+
+### Functional Flow
+1. NLP worker processes normalized articles
+2. Pipeline stages:
+   - Language detection
+   - Named Entity Recognition (NER)
+   - Sentiment analysis (bullish/bearish/neutral)
+   - Topic modeling
+   - Causal signal detection
+3. Persist results for querying
+4. Generate trend predictions with reasoning
+
+### Modes
+- **Near-realtime**: Process articles as they arrive
+- **Batch reprocessing**: Reanalyze historical articles with updated models
+
+### Acceptance Criteria
+- [ ] Sentiment baseline accuracy > 70%
+- [ ] Processing latency < 5s per article
+- [ ] Trend prediction with explanation text
+- [ ] Support model switching
+
+### Flow Diagram
 ```mermaid
 flowchart LR
-  K2[Kafka: normalized-articles] --> W[NLP Worker]
+  K2[Normalized Articles] --> W[NLP Worker]
   W --> LD[Language Detection]
   LD --> NER[NER]
   NER --> Sent[Sentiment]
   Sent --> Topic[Topic Modeling]
   Topic --> Causal[Causal Detector]
-  Causal --> AR[MongoDB: analysis_results]
-  Causal -->|alert| EV[Kafka: analysis-events]
+  Causal --> AR[Database: analysis_results]
 ```
 
-### Price collection
+---
+
+## 4) Price Collection & Charting
+
+**Requirement**: Price Chart Display (similar to TradingView), Binance Exchange
+
+### Description
+Collect historical and real-time price data for charting and analysis. Display similar to TradingView with WebSocket updates.
+
+### Functional Flow
+1. Price Collector subscribes to exchange API/WebSocket feeds
+2. Ingest ticks and store in time-series database
+3. Publish updates for real-time delivery to clients
+4. Support multiple currency pairs (BTCUSDT, ETHUSDT, etc.)
+
+### Acceptance Criteria
+- [ ] Support multiple timeframes (1m, 5m, 15m, 1h, 4h, 1d)
+- [ ] Real-time tick latency < 1s
+- [ ] Historical data retrieval < 200ms
+- [ ] Multiple currency pair support
+
+### Flow Diagram
 ```mermaid
 flowchart LR
   EX[Exchange API/WS] --> PC[Price Collector]
-  PC --> Kt[Kafka: price-ticks]
-  PC --> PG[Postgres/Timescale: price_ticks]
-  PC --> Rd[Redis Pub/Sub]
+  PC --> DB[Database: price_ticks]
+  PC --> Rd[Cache/Pub-Sub]
   Rd --> WS[WebSocket Server]
   WS --> Client[Frontend]
 ```
 
-### Aggregation (candles)
+---
+
+## 5) Aggregation (Candle Generation)
+
+**Requirement**: Support multiple timeframes
+
+### Description
+Aggregate ticks into OHLCV candles for multiple intervals.
+
+### Functional Flow
+1. Aggregator reads price ticks
+2. Compute candles per configured interval:
+   - Open, High, Low, Close, Volume
+3. Persist candles to database
+4. Update cache for recent candles
+5. Notify WebSocket server for client updates
+
+### Acceptance Criteria
+- [ ] Candle generation latency < 2s after interval close
+- [ ] Support intervals: 1m, 5m, 15m, 30m, 1h, 4h, 1d
+- [ ] Handle gap detection (missing ticks)
+
+### Flow Diagram
 ```mermaid
 flowchart LR
-  Kt[Kafka: price-ticks] --> AG[Aggregator]
+  Kt[Price Ticks] --> AG[Aggregator]
   AG --> Calc[Calculate Candles]
-  Calc --> PC[Postgres: price_candles]
-  Calc --> Rd[Redis: recent_candles]
+  Calc --> PC[Database: price_candles]
+  Calc --> Rd[Cache: recent_candles]
   Rd --> WS[WebSocket Server]
 ```
 
-### UI Dashboard
+---
+
+## 6) UI Dashboard (Frontend)
+
+**Requirement**: GUI for chart display and news browsing
+
+### Description
+Dashboard for browsing news, viewing interactive charts, and receiving real-time updates.
+
+### Functional Flow
+1. User loads dashboard → frontend fetches overview via REST API
+2. User opens a chart → frontend:
+   - Requests historical candles via `/api/prices/historical`
+   - Subscribes to WebSocket channel for real-time ticks
+3. User clicks an article → frontend displays details with symbol/time context
+4. Real-time updates push to connected clients
+
+### Pages
+| Page | Description |
+|------|-------------|
+| Dashboard | Overview with key metrics, recent news |
+| Chart | TradingView-style interactive chart |
+| News Feed | Article list with filters and search |
+| Article Detail | Full article with sentiment, related symbols |
+
+### Acceptance Criteria
+- [ ] Chart loads in < 2s
+- [ ] WebSocket reconnection on disconnect
+- [ ] Responsive design (desktop + mobile)
+- [ ] Article-chart context linking
+
+### Flow Diagram
 ```mermaid
 flowchart LR
-  U[User Browser] --> FE[Frontend React]
+  U[User Browser] --> FE[Frontend Next.js]
   FE -->|REST| API[Backend API]
   FE -->|WS| WS[WebSocket]
-  API --> PG[Postgres/Timescale]
-  API --> Mongo[MongoDB]
-  WS --> Redis[Redis pub/sub]
+  API --> DB[(Database)]
+  WS --> Cache[Cache/Pub-Sub]
 ```
 
-### Administration & Monitoring
+---
+
+## 7) API Access
+
+**Requirement**: Provide data access for analysis and export
+
+### Description
+RESTful API endpoints for data access with export options.
+
+### Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/articles` | GET | List articles with filters |
+| `/api/articles/{id}` | GET | Article details with analysis |
+| `/api/prices/historical` | GET | Historical candles |
+| `/api/prices/symbols` | GET | Available trading pairs |
+| `/api/analysis/{articleId}` | GET | NLP analysis results |
+| `/ws/prices` | WS | Real-time price updates |
+
+### Query Parameters
+- `symbol`: Filter by trading pair
+- `timeframe`: Candle interval
+- `from`, `to`: Date range
+- `limit`, `offset`: Pagination
+
+### Export Formats
+- JSON (default)
+- CSV (for data analysis)
+
+### Acceptance Criteria
+- [ ] API response time < 200ms (p95)
+- [ ] Pagination for large result sets
+- [ ] Consistent error response format
+
+### Flow Diagram
 ```mermaid
 flowchart LR
-  Admin[Admin UI] --> API2[Admin API]
-  API2 --> CFG[Postgres: config]
-  CFG --> Kcfg[Kafka: config-events]
-  Kcfg --> Workers[Workers]
-  Workers --> Metrics[Prometheus/Grafana]
+  C[Client] --> API[Backend API]
+  API --> DBs[(Databases)]
+  API --> Export[Export Service]
+  Export --> File[JSON/CSV]
 ```
 
-### API & Export
-```mermaid
-flowchart LR
-  C[External Client] --> GW[API Gateway]
-  GW --> Auth[Auth Service]
-  GW --> API3[Backend API]
-  API3 --> DBs[(Postgres & MongoDB)]
-  API3 --> Export[Exporter Service]
-```
+---
+
+## Feature-Architecture Phase Mapping
+
+| Feature | Phase 1 | Phase 2 | Phase 3 | Phase 4 | Phase 5 |
+|---------|---------|---------|---------|---------|---------|
+| Crawler | Basic | + MongoDB | + API Gateway | + Kafka | Full |
+| Normalizer | Inline | Inline | Module | Consumer | Service |
+| NLP | Basic | + Cache | + External API | Consumer | Service |
+| Price Collector | Basic | + Redis | + WebSocket | + Kafka | Service |
+| Aggregator | Inline | Inline | Module | Consumer | Service |
+| Frontend | Basic | + Charts | + Real-time | Full | Full |
+| API | REST | + Cache | + Gateway | Full | Full |
+
+---
+
+## References
+
+- [CoreRequirements.md](./CoreRequirements.md) - Business requirements
+- [Architecture.md](./Architecture.md) - Technical architecture
+- [ProjectPlan.md](./ProjectPlan.md) - Implementation timeline
+- [UseCaseDiagram.md](./UseCaseDiagram.md) - User interactions
 
