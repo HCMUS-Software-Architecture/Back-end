@@ -1,36 +1,169 @@
-HELP.md
+# ===========================
+# Build Outputs
+# ===========================
 target/
-.mvn/wrapper/maven-wrapper.jar
+build/
+out/
+dist/
+*.jar
+*.war
+*.ear
+*.class
+
+# Keep test outputs in source control for reference
 !**/src/main/**/target/
 !**/src/test/**/target/
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-### STS ###
+# ===========================
+# Maven
+# ===========================
+.mvn/wrapper/maven-wrapper.jar
+HELP.md
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.flattened-pom.xml
+
+# ===========================
+# Gradle (if used)
+# ===========================
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+.gradletasknamecache
+
+# ===========================
+# IDE - IntelliJ IDEA
+# ===========================
+.idea/
+*.iws
+*.iml
+*.ipr
+*.ids
+*.orig
+classes/
+atlassian-ide-plugin.xml
+com_crashlytics_export_strings.xml
+
+# ===========================
+# IDE - Eclipse / STS
+# ===========================
 .apt_generated
 .classpath
 .factorypath
 .project
-.settings
+.settings/
 .springBeans
 .sts4-cache
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-
-### NetBeans ###
+# ===========================
+# IDE - NetBeans
+# ===========================
 /nbproject/private/
 /nbbuild/
-/dist/
 /nbdist/
 /.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
 
-### VS Code ###
-.vscode/
+# ===========================
+# IDE - Visual Studio Code
+# ===========================
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
 
-# prompts
+# ===========================
+# OS Generated Files
+# ===========================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# ===========================
+# Logs and Temporary Files
+# ===========================
+logs/
+*.log
+*.log.*
+log.txt
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.tmp
+*.temp
+*.bak
+tmp/
+temp/
+
+# ===========================
+# Environment and Secrets
+# ===========================
+.env
+.env.local
+.env.*.local
+*.env
+*.pem
+*.key
+secrets/
+credentials/
+
+# ===========================
+# Docker (development)
+# ===========================
+docker-compose.override.yml
+.docker/
+
+# ===========================
+# Node.js (if frontend is included)
+# ===========================
+node_modules/
+npm-debug.log
+yarn-error.log
+.pnp
+.pnp.js
+
+# ===========================
+# Testing and Coverage
+# ===========================
+coverage/
+*.lcov
+.nyc_output/
+test-results/
+junit-reports/
+
+# ===========================
+# Monitoring and Profiling
+# ===========================
+*.hprof
+*.jfr
+*.prof
+hs_err_pid*
+
+# ===========================
+# Custom Ignores
+# ===========================
+.prompts/
+prompts/
 .prompts
+
+# ===========================
+# Local Configuration
+# ===========================
+application-local.properties
+application-local.yml
+local-config/
