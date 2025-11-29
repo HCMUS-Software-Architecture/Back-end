@@ -54,7 +54,31 @@ See [Architecture Overview](./doc/Architecture.md) for detailed design.
 
 ### Verify Installation
 
+**Bash (Linux/macOS):**
 ```bash
+# Check Java
+java -version
+# Expected: openjdk version "17.x.x" or higher
+
+# Check Maven
+mvn -version
+# Expected: Apache Maven 3.8.x or higher
+
+# Check Docker
+docker --version
+# Expected: Docker version 20.10.x or higher
+
+# Check Docker Compose
+docker compose version
+# Expected: Docker Compose version v2.x.x
+
+# Check Node.js
+node --version
+# Expected: v18.x.x or higher
+```
+
+**PowerShell (Windows 10/11):**
+```powershell
 # Check Java
 java -version
 # Expected: openjdk version "17.x.x" or higher
@@ -82,13 +106,21 @@ node --version
 
 ### 1. Clone the Repository
 
+**Bash (Linux/macOS):**
 ```bash
 git clone https://github.com/HCMUS-Software-Architecture/Back-end.git
 cd Back-end
 ```
 
+**PowerShell (Windows 10/11):**
+```powershell
+git clone https://github.com/HCMUS-Software-Architecture/Back-end.git
+Set-Location Back-end
+```
+
 ### 2. Start Development Environment
 
+**Bash (Linux/macOS):**
 ```bash
 # Start infrastructure services (PostgreSQL, etc.)
 docker compose up -d
@@ -100,11 +132,30 @@ docker compose up -d
 ./mvnw spring-boot:run
 ```
 
+**PowerShell (Windows 10/11):**
+```powershell
+# Start infrastructure services (PostgreSQL, etc.)
+docker compose up -d
+
+# Build the application
+.\mvnw.cmd clean install
+
+# Run the application
+.\mvnw.cmd spring-boot:run
+```
+
 ### 3. Verify the Application
 
+**Bash (Linux/macOS):**
 ```bash
 # Health check
 curl http://localhost:8080/actuator/health
+```
+
+**PowerShell (Windows 10/11):**
+```powershell
+# Health check
+Invoke-RestMethod -Uri http://localhost:8080/actuator/health
 ```
 
 ---
@@ -176,7 +227,9 @@ Back-end/
 
 Create a `.env` file in the project root (not committed to Git):
 
+**Bash (Linux/macOS) - Create .env file:**
 ```bash
+cat > .env << 'EOF'
 # Database
 DB_HOST=localhost
 DB_PORT=5432
@@ -191,10 +244,32 @@ BINANCE_API_SECRET=your_api_secret
 # Application
 SERVER_PORT=8080
 SPRING_PROFILES_ACTIVE=dev
+EOF
+```
+
+**PowerShell (Windows 10/11) - Create .env file:**
+```powershell
+@"
+# Database
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=trading
+DB_USER=postgres
+DB_PASSWORD=postgres
+
+# Exchange API (Phase 3+)
+BINANCE_API_KEY=your_api_key
+BINANCE_API_SECRET=your_api_secret
+
+# Application
+SERVER_PORT=8080
+SPRING_PROFILES_ACTIVE=dev
+"@ | Out-File -FilePath .env -Encoding utf8
 ```
 
 ### Database Setup
 
+**Bash (Linux/macOS):**
 ```bash
 # Start PostgreSQL with Docker
 docker run -d \
@@ -203,6 +278,21 @@ docker run -d \
   -e POSTGRES_USER=postgres \
   -e POSTGRES_PASSWORD=postgres \
   -p 5432:5432 \
+  postgres:15
+
+# Verify connection
+docker exec -it trading-db psql -U postgres -d trading
+```
+
+**PowerShell (Windows 10/11):**
+```powershell
+# Start PostgreSQL with Docker
+docker run -d `
+  --name trading-db `
+  -e POSTGRES_DB=trading `
+  -e POSTGRES_USER=postgres `
+  -e POSTGRES_PASSWORD=postgres `
+  -p 5432:5432 `
   postgres:15
 
 # Verify connection
@@ -235,6 +325,7 @@ docker exec -it trading-db psql -U postgres -d trading
 
 ### Development Mode
 
+**Bash (Linux/macOS):**
 ```bash
 # Using Maven wrapper
 ./mvnw spring-boot:run
@@ -246,8 +337,21 @@ docker exec -it trading-db psql -U postgres -d trading
 ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
 ```
 
+**PowerShell (Windows 10/11):**
+```powershell
+# Using Maven wrapper
+.\mvnw.cmd spring-boot:run
+
+# With specific profile
+.\mvnw.cmd spring-boot:run -D"spring-boot.run.profiles=dev"
+
+# With debug enabled
+.\mvnw.cmd spring-boot:run -D"spring-boot.run.jvmArguments=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+```
+
 ### Building for Production
 
+**Bash (Linux/macOS):**
 ```bash
 # Build JAR
 ./mvnw clean package -DskipTests
@@ -256,9 +360,28 @@ docker exec -it trading-db psql -U postgres -d trading
 java -jar target/back-end-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
 ```
 
+**PowerShell (Windows 10/11):**
+```powershell
+# Build JAR
+.\mvnw.cmd clean package -DskipTests
+
+# Run JAR
+java -jar target\back-end-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
+```
+
 ### Docker (Phase 2+)
 
+**Bash (Linux/macOS):**
 ```bash
+# Build Docker image
+docker build -t trading-platform/api:latest .
+
+# Run with Docker Compose
+docker compose up -d
+```
+
+**PowerShell (Windows 10/11):**
+```powershell
 # Build Docker image
 docker build -t trading-platform/api:latest .
 
