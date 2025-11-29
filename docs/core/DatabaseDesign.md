@@ -302,6 +302,8 @@ CREATE TABLE trading.price_candles (
     trade_count     INT,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     
+    -- Note: Database supports 30m and 1w intervals beyond UI default options (1m, 5m, 15m, 1h, 4h, 1d)
+    -- This allows flexibility for future UI expansion and API consumers
     CONSTRAINT chk_interval CHECK (interval IN ('1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w')),
     CONSTRAINT unique_candle UNIQUE (symbol_id, interval, open_time)
 );
@@ -440,6 +442,7 @@ SELECT add_continuous_aggregate_policy('trading.candles_1h_view',
 db.news_sources.createIndex({ "name": 1 }, { unique: true })
 db.news_sources.createIndex({ "is_active": 1 })
 db.news_sources.createIndex({ "last_crawled_at": 1 })
+db.news_sources.createIndex({ "is_active": 1, "last_crawled_at": 1 })  // Compound index for active sources by crawl time
 ```
 
 #### Collection: raw_articles

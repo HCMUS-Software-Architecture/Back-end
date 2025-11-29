@@ -322,7 +322,7 @@ All color combinations meet WCAG 2.1 AA contrast requirements:
 ### Type Scale
 
 ```css
-/* Type scale following 1.25 ratio (Major Third) */
+/* Type scale using TailwindCSS default values for consistency */
 .text-xs    { font-size: 0.75rem;  line-height: 1rem; }     /* 12px */
 .text-sm    { font-size: 0.875rem; line-height: 1.25rem; }  /* 14px */
 .text-base  { font-size: 1rem;     line-height: 1.5rem; }   /* 16px */
