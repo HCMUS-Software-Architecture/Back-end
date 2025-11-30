@@ -911,25 +911,38 @@ export function LiveNewsFeed() {
     const ws = new WebSocket('ws://localhost:8080/ws/articles');
 
     ws.onmessage = (event) => {
-      const newArticle = JSON.parse(event.data);
-      
-      setArticles((prev) => {
-        // Prepend new article and keep last 50
-        const updated = [newArticle, ...prev].slice(0, 50);
-        return updated;
-      });
-
-      // Mark as new for animation
-      setNewArticleIds((prev) => new Set([...prev, newArticle.id]));
-      
-      // Remove new marker after animation
-      setTimeout(() => {
-        setNewArticleIds((prev) => {
-          const updated = new Set(prev);
-          updated.delete(newArticle.id);
+      try {
+        const newArticle = JSON.parse(event.data);
+        
+        if (!newArticle || !newArticle.id) {
+          console.warn('Invalid article data received');
+          return;
+        }
+        
+        setArticles((prev) => {
+          // Prepend new article and keep last 50
+          const updated = [newArticle, ...prev].slice(0, 50);
           return updated;
         });
-      }, 3000);
+
+        // Mark as new for animation
+        setNewArticleIds((prev) => new Set([...prev, newArticle.id]));
+        
+        // Remove new marker after animation
+        setTimeout(() => {
+          setNewArticleIds((prev) => {
+            const updated = new Set(prev);
+            updated.delete(newArticle.id);
+            return updated;
+          });
+        }, 3000);
+      } catch (error) {
+        console.error('Failed to parse article data:', error);
+      }
+    };
+
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
     };
 
     return () => ws.close();
@@ -1053,13 +1066,13 @@ export function StreamingPriceChart({ symbol, interval }: StreamingPriceChartPro
 
     chartRef.current = chart;
 
-    // Add candlestick series
+    // Add candlestick series with fallback colors
     const series = chart.addCandlestickSeries({
-      upColor: 'hsl(var(--chart-bullish))',
-      downColor: 'hsl(var(--chart-bearish))',
+      upColor: 'hsl(var(--chart-bullish, 142.1 70.6% 45.3%))',
+      downColor: 'hsl(var(--chart-bearish, 0 84.2% 60.2%))',
       borderVisible: false,
-      wickUpColor: 'hsl(var(--chart-bullish))',
-      wickDownColor: 'hsl(var(--chart-bearish))',
+      wickUpColor: 'hsl(var(--chart-bullish, 142.1 70.6% 45.3%))',
+      wickDownColor: 'hsl(var(--chart-bearish, 0 84.2% 60.2%))',
     });
 
     seriesRef.current = series;
@@ -1072,14 +1085,27 @@ export function StreamingPriceChart({ symbol, interval }: StreamingPriceChartPro
     ws.onerror = () => setConnectionStatus('disconnected');
 
     ws.onmessage = (event) => {
-      const candle = JSON.parse(event.data);
-      series.update({
-        time: candle.time,
-        open: candle.open,
-        high: candle.high,
-        low: candle.low,
-        close: candle.close,
-      });
+      try {
+        const candle = JSON.parse(event.data);
+        
+        // Validate candle data before updating chart
+        if (!candle || typeof candle.time !== 'number' || 
+            typeof candle.open !== 'number' || typeof candle.high !== 'number' ||
+            typeof candle.low !== 'number' || typeof candle.close !== 'number') {
+          console.warn('Invalid candle data received');
+          return;
+        }
+        
+        series.update({
+          time: candle.time,
+          open: candle.open,
+          high: candle.high,
+          low: candle.low,
+          close: candle.close,
+        });
+      } catch (error) {
+        console.error('Failed to parse candle data:', error);
+      }
     };
 
     // Handle resize

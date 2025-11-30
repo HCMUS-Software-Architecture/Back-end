@@ -563,10 +563,11 @@ SELECT add_retention_policy('trading.price_candles_new', INTERVAL '30 days', if_
 -- Compression Policy (for older chunks)
 -- =============================================================================
 
--- Enable compression on hypertable
+-- Enable compression on hypertable with optimal ordering
 ALTER TABLE trading.price_candles_new SET (
     timescaledb.compress,
-    timescaledb.compress_segmentby = 'symbol_id,interval'
+    timescaledb.compress_segmentby = 'symbol_id,interval',
+    timescaledb.compress_orderby = 'open_time DESC'
 );
 
 -- Add compression policy: compress chunks older than 7 days
@@ -1015,8 +1016,9 @@ const config: Config = {
   theme: {
     extend: {
       screens: {
-        'xs': '475px',
-        // Default breakpoints: sm: 640px, md: 768px, lg: 1024px, xl: 1280px
+        // Using standard Tailwind breakpoints (sm: 640px, md: 768px, lg: 1024px, xl: 1280px)
+        // Custom container breakpoint for small devices if needed
+        'container-sm': '480px',
       },
       spacing: {
         'safe-top': 'env(safe-area-inset-top)',
@@ -1028,6 +1030,8 @@ const config: Config = {
 
 export default config;
 ```
+
+**Note**: Prefer using standard Tailwind breakpoints (sm, md, lg, xl) for consistency. Use custom breakpoints sparingly and only when necessary for specific layout requirements.
 
 ### Step 5: Final Production Checklist
 

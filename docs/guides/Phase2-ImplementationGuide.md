@@ -1147,17 +1147,25 @@ export function PriceDisplay({ symbol, className }: PriceDisplayProps) {
     };
 
     ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.symbol?.toUpperCase() === symbol.toUpperCase()) {
-        setPreviousPrice(price);
-        setPrice(parseFloat(data.price));
-        
-        // Trigger flash animation
-        if (previousPrice !== null) {
-          setFlash(data.price > previousPrice ? 'up' : 'down');
-          setTimeout(() => setFlash(null), 300);
+      try {
+        const data = JSON.parse(event.data);
+        if (data.symbol?.toUpperCase() === symbol.toUpperCase()) {
+          setPreviousPrice(price);
+          setPrice(parseFloat(data.price));
+          
+          // Trigger flash animation
+          if (previousPrice !== null) {
+            setFlash(data.price > previousPrice ? 'up' : 'down');
+            setTimeout(() => setFlash(null), 300);
+          }
         }
+      } catch (error) {
+        console.error('Failed to parse price data:', error);
       }
+    };
+
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
     };
 
     return () => ws.close();
