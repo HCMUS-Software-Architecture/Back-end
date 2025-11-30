@@ -10,14 +10,17 @@
 
 1. [Overview](#overview)
 2. [Prerequisites](#prerequisites)
-3. [Project Setup](#project-setup)
-4. [Core Components Implementation](#core-components-implementation)
-5. [Database Schema](#database-schema)
-6. [API Development](#api-development)
-7. [Frontend Scaffold](#frontend-scaffold)
-8. [Deployment](#deployment)
-9. [Common Pitfalls & Troubleshooting](#common-pitfalls--troubleshooting)
-10. [References](#references)
+3. [Environment Setup](#environment-setup)
+4. [Project Setup](#project-setup)
+5. [Database Setup](#database-setup)
+6. [Core Components Implementation](#core-components-implementation)
+7. [Database Schema](#database-schema)
+8. [API Development](#api-development)
+9. [Frontend Scaffold](#frontend-scaffold)
+10. [UI/UX Implementation](#uiux-implementation)
+11. [Deployment](#deployment)
+12. [Common Pitfalls & Troubleshooting](#common-pitfalls--troubleshooting)
+13. [References](#references)
 
 ---
 
@@ -29,8 +32,16 @@
 - Implement basic REST API skeleton
 - Create PostgreSQL database with JSONB support for flexible schemas
 - Implement basic Crawler module for 2 news sources
-- Set up Next.js frontend scaffold
+- Set up Next.js frontend scaffold with TailwindCSS and shadcn/ui
 - Enable scheduled crawling
+
+### Core Requirements Reference
+
+This phase implements foundational requirements from [CoreRequirements.md](core/CoreRequirements.md):
+
+1. **Financial News Collection** - Basic crawler for 2 news sources
+2. **Price Chart Display** - Data models for price storage
+3. **Account Management** - User entity foundation
 
 ### Architecture Diagram
 
@@ -47,7 +58,7 @@
                       │
               ┌───────┴───────┐
               │  PostgreSQL   │
-              │  (All data)   │
+              │  (Dockerized) │
               └───────────────┘
 ```
 
@@ -60,7 +71,7 @@
 | E1.3 | REST API Skeleton | High |
 | E1.4 | Basic Crawler Module | High |
 | E1.5 | Scheduled Crawling | Medium |
-| E1.6 | Frontend Scaffold | Medium |
+| E1.6 | Frontend Scaffold with UI/UX Foundation | Medium |
 
 ---
 
@@ -98,6 +109,55 @@ docker --version
 docker compose version
 node --version
 npm --version
+```
+
+---
+
+## Environment Setup
+
+### Step 1: Set Up Development Environment
+
+This phase uses a **Dockerized PostgreSQL database** to ensure consistent development environments across all team members. No local database installation is required—only Docker Desktop.
+
+### Step 2: Create Environment Variables
+
+Create a `.env` file in the project root (add to `.gitignore`):
+
+```bash
+# Database Configuration
+POSTGRES_DB=trading
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_PORT=5432
+
+# Application Configuration
+SPRING_PROFILES_ACTIVE=dev
+SERVER_PORT=8080
+
+# Crawler Configuration
+CRAWLER_ENABLED=true
+CRAWLER_INITIAL_DELAY=60000
+CRAWLER_FIXED_DELAY=300000
+```
+
+### Step 3: Docker Network Setup
+
+**Bash (Linux/macOS):**
+```bash
+# Create Docker network for trading platform services
+docker network create trading-network
+
+# Verify network
+docker network ls | grep trading
+```
+
+**PowerShell (Windows 10/11):**
+```powershell
+# Create Docker network for trading platform services
+docker network create trading-network
+
+# Verify network
+docker network ls | Select-String "trading"
 ```
 
 ---
@@ -305,7 +365,214 @@ Set-Location ..
 
 ---
 
-## Core Components Implementation
+## Database Setup
+
+This section provides comprehensive database setup following the [DatabaseDesign.md](core/DatabaseDesign.md) specifications.
+
+### Database Strategy for Phase 1
+
+In Phase 1, we use a **single PostgreSQL database** with JSONB support for flexible schemas:
+
+```
+┌─────────────────────────────────────────────────────┐
+│                    PostgreSQL                        │
+│  ┌─────────────┐ ┌─────────────┐ ┌───────────────┐  │
+│  │   articles  │ │price_candles│ │    users      │  │
+│  │   (JSONB)   │ │             │ │               │  │
+│  └─────────────┘ └─────────────┘ └───────────────┘  │
+└─────────────────────────────────────────────────────┘
+```
+
+### Step 1: Initialize Database Schema
+
+Update `docker/init-db.sql` with the comprehensive schema:
+
+```sql
+-- Enable required extensions
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- =============================================================================
+-- SCHEMA: auth (User Management)
+-- Reference: DatabaseDesign.md - Users & Authentication
+-- =============================================================================
+CREATE SCHEMA IF NOT EXISTS auth;
+
+-- Users table
+CREATE TABLE auth.users (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email           VARCHAR(255) NOT NULL UNIQUE,
+    password_hash   VARCHAR(255) NOT NULL,
+    display_name    VARCHAR(100),
+    role            VARCHAR(20) NOT NULL DEFAULT 'TRADER',
+    email_verified  BOOLEAN DEFAULT FALSE,
+    is_active       BOOLEAN DEFAULT TRUE,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_login_at   TIMESTAMPTZ,
+    
+    CONSTRAINT chk_role CHECK (role IN ('TRADER', 'ANALYST', 'ADMIN'))
+);
+
+-- User preferences
+CREATE TABLE auth.user_preferences (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id         UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    theme           VARCHAR(20) DEFAULT 'dark',
+    default_symbol  VARCHAR(20) DEFAULT 'BTCUSDT',
+    default_interval VARCHAR(10) DEFAULT '1h',
+    timezone        VARCHAR(50) DEFAULT 'UTC',
+    notifications   JSONB DEFAULT '{}',
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    
+    CONSTRAINT unique_user_prefs UNIQUE (user_id)
+);
+
+-- Indexes for auth schema
+CREATE INDEX idx_users_email ON auth.users(email);
+CREATE INDEX idx_users_role ON auth.users(role);
+
+-- =============================================================================
+-- SCHEMA: trading (Price Data)
+-- Reference: DatabaseDesign.md - Trading Symbols & Price Data
+-- =============================================================================
+CREATE SCHEMA IF NOT EXISTS trading;
+
+-- Symbols table
+CREATE TABLE trading.symbols (
+    id              VARCHAR(20) PRIMARY KEY,  -- e.g., 'BTCUSDT'
+    base_asset      VARCHAR(10) NOT NULL,     -- e.g., 'BTC'
+    quote_asset     VARCHAR(10) NOT NULL,     -- e.g., 'USDT'
+    exchange        VARCHAR(50) NOT NULL DEFAULT 'binance',
+    precision_price INT NOT NULL DEFAULT 2,
+    precision_qty   INT NOT NULL DEFAULT 8,
+    min_qty         DECIMAL(20, 8) DEFAULT 0,
+    is_active       BOOLEAN DEFAULT TRUE,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Price candles table (optimized for time-series queries)
+CREATE TABLE trading.price_candles (
+    id              BIGSERIAL PRIMARY KEY,
+    symbol_id       VARCHAR(20) NOT NULL REFERENCES trading.symbols(id),
+    interval        VARCHAR(10) NOT NULL,
+    open_time       TIMESTAMPTZ NOT NULL,
+    close_time      TIMESTAMPTZ NOT NULL,
+    open            DECIMAL(20, 8) NOT NULL,
+    high            DECIMAL(20, 8) NOT NULL,
+    low             DECIMAL(20, 8) NOT NULL,
+    close           DECIMAL(20, 8) NOT NULL,
+    volume          DECIMAL(30, 8) NOT NULL,
+    quote_volume    DECIMAL(30, 8),
+    trade_count     INT,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    
+    CONSTRAINT chk_interval CHECK (interval IN ('1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w')),
+    CONSTRAINT unique_candle UNIQUE (symbol_id, interval, open_time)
+);
+
+-- Indexes for trading schema
+CREATE INDEX idx_symbols_exchange ON trading.symbols(exchange);
+CREATE INDEX idx_symbols_active ON trading.symbols(is_active);
+CREATE INDEX idx_candles_symbol_interval_time ON trading.price_candles(symbol_id, interval, open_time DESC);
+CREATE INDEX idx_candles_time ON trading.price_candles(open_time DESC);
+
+-- =============================================================================
+-- SCHEMA: content (Articles - Phase 1 with JSONB)
+-- Reference: DatabaseDesign.md - Articles (Phase 1 with JSONB)
+-- =============================================================================
+CREATE SCHEMA IF NOT EXISTS content;
+
+CREATE TABLE content.articles (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    url             TEXT NOT NULL UNIQUE,
+    url_hash        VARCHAR(64) NOT NULL UNIQUE,  -- SHA-256 for dedup
+    title           TEXT NOT NULL,
+    body            TEXT,
+    source_name     VARCHAR(100) NOT NULL,
+    published_at    TIMESTAMPTZ,
+    crawled_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    raw_data        JSONB,  -- Raw HTML, metadata
+    symbols         VARCHAR(20)[] DEFAULT '{}',
+    status          VARCHAR(20) DEFAULT 'RAW',
+    
+    CONSTRAINT chk_status CHECK (status IN ('RAW', 'NORMALIZED', 'ANALYZED', 'FAILED'))
+);
+
+-- Indexes for content schema
+CREATE INDEX idx_articles_url_hash ON content.articles(url_hash);
+CREATE INDEX idx_articles_source ON content.articles(source_name);
+CREATE INDEX idx_articles_published ON content.articles(published_at DESC);
+CREATE INDEX idx_articles_symbols ON content.articles USING GIN(symbols);
+CREATE INDEX idx_articles_status ON content.articles(status);
+
+-- =============================================================================
+-- Initial Data: Default Symbols
+-- =============================================================================
+INSERT INTO trading.symbols (id, base_asset, quote_asset, exchange) VALUES
+    ('BTCUSDT', 'BTC', 'USDT', 'binance'),
+    ('ETHUSDT', 'ETH', 'USDT', 'binance'),
+    ('BNBUSDT', 'BNB', 'USDT', 'binance')
+ON CONFLICT (id) DO NOTHING;
+```
+
+### Step 2: Verify Database Setup
+
+**Bash (Linux/macOS):**
+```bash
+# Connect to PostgreSQL and verify schemas
+docker exec -it trading-postgres psql -U postgres -d trading -c "\dn"
+
+# List tables in each schema
+docker exec -it trading-postgres psql -U postgres -d trading -c "\dt auth.*"
+docker exec -it trading-postgres psql -U postgres -d trading -c "\dt trading.*"
+docker exec -it trading-postgres psql -U postgres -d trading -c "\dt content.*"
+
+# Verify initial data
+docker exec -it trading-postgres psql -U postgres -d trading -c "SELECT * FROM trading.symbols"
+```
+
+**PowerShell (Windows 10/11):**
+```powershell
+# Connect to PostgreSQL and verify schemas
+docker exec -it trading-postgres psql -U postgres -d trading -c "\dn"
+
+# List tables in each schema
+docker exec -it trading-postgres psql -U postgres -d trading -c "\dt auth.*"
+docker exec -it trading-postgres psql -U postgres -d trading -c "\dt trading.*"
+docker exec -it trading-postgres psql -U postgres -d trading -c "\dt content.*"
+
+# Verify initial data
+docker exec -it trading-postgres psql -U postgres -d trading -c "SELECT * FROM trading.symbols"
+```
+
+### Step 3: Database Administration (Optional)
+
+For database administration, you can use these Docker-based tools instead of installing local database management software:
+
+**Option A: pgAdmin (Web-based)**
+```yaml
+# Add to docker/docker-compose.yml
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: trading-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@trading.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+```
+
+Access pgAdmin at: http://localhost:5050
+
+**Option B: Command-line with psql**
+```bash
+# Interactive PostgreSQL shell
+docker exec -it trading-postgres psql -U postgres -d trading
+```
 
 ### Step 1: Application Configuration
 
@@ -862,6 +1129,399 @@ npm run dev
 
 ---
 
+## UI/UX Implementation
+
+This section implements the foundational UI/UX following [UIUXGuidelines.md](core/UIUXGuidelines.md).
+
+### Design System Setup
+
+Phase 1 establishes the design foundation for the trading platform:
+
+| Component | Technology | Purpose |
+|-----------|------------|---------|
+| **Framework** | Next.js 14+ | App Router with TypeScript |
+| **Styling** | TailwindCSS | Utility-first CSS |
+| **Components** | shadcn/ui | Pre-built accessible components |
+| **Icons** | Lucide Icons | Consistent iconography |
+| **Charts** | lightweight-charts | TradingView-style charts (Phase 2+) |
+
+### Step 1: Install UI Dependencies
+
+**Bash (Linux/macOS):**
+```bash
+cd frontend
+
+# Initialize shadcn/ui
+npx shadcn-ui@latest init
+
+# When prompted, use these settings:
+# - Style: Default
+# - Base color: Slate
+# - CSS variables: Yes
+
+# Install core components
+npx shadcn-ui@latest add button card table tabs badge skeleton
+npx shadcn-ui@latest add dialog dropdown-menu select input
+
+# Install icons
+npm install lucide-react
+
+# Install fonts (optional - uses CDN in example)
+npm install @fontsource/inter @fontsource/jetbrains-mono
+```
+
+**PowerShell (Windows 10/11):**
+```powershell
+Set-Location frontend
+
+# Initialize shadcn/ui
+npx shadcn-ui@latest init
+
+# Install core components
+npx shadcn-ui@latest add button card table tabs badge skeleton
+npx shadcn-ui@latest add dialog dropdown-menu select input
+
+# Install icons
+npm install lucide-react
+
+# Install fonts
+npm install @fontsource/inter @fontsource/jetbrains-mono
+```
+
+### Step 2: Configure Theme (Dark Mode Default)
+
+Create/update `frontend/src/app/globals.css`:
+
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light Theme */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 72.2% 50.6%;
+    --destructive-foreground: 210 40% 98%;
+    --success: 142.1 76.2% 36.3%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Dark Theme (Default for Trading) */
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 217.2 32.6% 7.5%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --success: 142.1 70.6% 45.3%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    
+    /* Chart Colors */
+    --chart-bullish: 142.1 70.6% 45.3%;
+    --chart-bearish: 0 84.2% 60.2%;
+    --chart-grid: 215 20% 20%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Monospace for prices */
+.font-mono {
+  font-feature-settings: "tnum" 1;
+}
+```
+
+### Step 3: Create Basic Layout Component
+
+Create `frontend/src/components/layout/MainLayout.tsx`:
+
+```tsx
+import React from 'react';
+import Link from 'next/link';
+import { BarChart3, Newspaper, Settings, Home } from 'lucide-react';
+
+interface MainLayoutProps {
+  children: React.ReactNode;
+}
+
+export function MainLayout({ children }: MainLayoutProps) {
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-50 h-14 border-b border-border bg-background/95 backdrop-blur">
+        <div className="container flex h-full items-center px-4">
+          <div className="flex items-center gap-2">
+            <span className="text-xl font-bold text-primary">Trading Platform</span>
+          </div>
+          <nav className="ml-8 hidden md:flex items-center gap-6">
+            <Link href="/" className="text-sm font-medium hover:text-primary">
+              Dashboard
+            </Link>
+            <Link href="/news" className="text-sm font-medium hover:text-primary">
+              News
+            </Link>
+            <Link href="/charts" className="text-sm font-medium hover:text-primary">
+              Charts
+            </Link>
+          </nav>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container px-4 py-6">
+        {children}
+      </main>
+    </div>
+  );
+}
+```
+
+### Step 4: Create News Article Card Component
+
+Create `frontend/src/components/news/ArticleCard.tsx`:
+
+```tsx
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ExternalLink, Clock } from 'lucide-react';
+
+interface ArticleCardProps {
+  title: string;
+  source: string;
+  publishedAt?: string;
+  url: string;
+}
+
+export function ArticleCard({ title, source, publishedAt, url }: ArticleCardProps) {
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return 'Unknown date';
+    return new Date(dateStr).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  return (
+    <Card className="hover:bg-accent/50 transition-colors">
+      <CardHeader className="pb-2">
+        <div className="flex items-start justify-between">
+          <Badge variant="secondary" className="text-xs">
+            {source}
+          </Badge>
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-muted-foreground hover:text-primary"
+          >
+            <ExternalLink className="h-4 w-4" />
+          </a>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <CardTitle className="text-base font-medium leading-snug mb-2">
+          {title}
+        </CardTitle>
+        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+          <Clock className="h-3 w-3" />
+          <span>{formatDate(publishedAt)}</span>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+### Step 5: Create Dashboard Page
+
+Update `frontend/src/app/page.tsx`:
+
+```tsx
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { MainLayout } from '@/components/layout/MainLayout';
+import { ArticleCard } from '@/components/news/ArticleCard';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Newspaper, RefreshCcw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+interface Article {
+  id: string;
+  title: string;
+  source: string;
+  publishedAt?: string;
+  url: string;
+}
+
+export default function Dashboard() {
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchArticles = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:8080/api/articles?page=0&size=10');
+      const data = await response.json();
+      setArticles(data.content || []);
+    } catch (error) {
+      console.error('Failed to fetch articles:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchArticles();
+  }, []);
+
+  return (
+    <MainLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+            <p className="text-muted-foreground">
+              Latest cryptocurrency news and market updates
+            </p>
+          </div>
+          <Button variant="outline" onClick={fetchArticles} disabled={loading}>
+            <RefreshCcw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Total Articles
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">{articles.length}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Sources
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">
+                {new Set(articles.map(a => a.source)).size}
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Last Updated
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">Just now</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* News Feed */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Newspaper className="h-5 w-5" />
+              Latest News
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[...Array(6)].map((_, i) => (
+                  <Card key={i}>
+                    <CardContent className="pt-6">
+                      <Skeleton className="h-4 w-20 mb-4" />
+                      <Skeleton className="h-4 w-full mb-2" />
+                      <Skeleton className="h-4 w-3/4" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : articles.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <Newspaper className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No articles yet. Start the crawler to fetch news.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {articles.map((article) => (
+                  <ArticleCard key={article.id} {...article} />
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </MainLayout>
+  );
+}
+```
+
+### Accessibility Considerations
+
+Following WCAG 2.1 AA standards from [UIUXGuidelines.md](core/UIUXGuidelines.md):
+
+- **Color Contrast**: All text meets minimum 4.5:1 contrast ratio
+- **Focus Indicators**: Visible focus rings on interactive elements
+- **Keyboard Navigation**: Full keyboard accessibility with Tab navigation
+- **Screen Reader Support**: Semantic HTML and ARIA labels where needed
+
+---
+
 ## Deployment
 
 ### Build and Run
@@ -972,17 +1632,21 @@ chmod +x mvnw
 
 - [Spring Boot Reference](https://docs.spring.io/spring-boot/docs/current/reference/html/)
 - [Spring Data JPA](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/)
+- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 - [jsoup Documentation](https://jsoup.org/)
 - [Next.js Documentation](https://nextjs.org/docs)
+- [TailwindCSS Documentation](https://tailwindcss.com/docs)
+- [shadcn/ui Components](https://ui.shadcn.com/)
 
 ### Related Project Documents
 
-- [Architecture.md](../Architecture.md) - System architecture overview
-- [CoreRequirements.md](../CoreRequirements.md) - Business requirements
-- [Features.md](../Features.md) - Feature specifications
-- [Phase1-TestingGuide.md](./Phase1-TestingGuide.md) - Testing strategies for Phase 1
+- [CoreRequirements.md](core/CoreRequirements.md) - Business requirements
+- [DatabaseDesign.md](core/DatabaseDesign.md) - Comprehensive database architecture
+- [UIUXGuidelines.md](core/UIUXGuidelines.md) - UI/UX design guidelines
+- [Phase2-ImplementationGuide.md](guides/Phase2-ImplementationGuide.md) - Next phase
 
 ### GitHub Resources
 
 - [Spring Boot Examples](https://github.com/spring-projects/spring-boot/tree/main/spring-boot-tests)
 - [jsoup Examples](https://github.com/jhy/jsoup/tree/master/src/test/java/org/jsoup/examples)
+- [TradingView Lightweight Charts](https://github.com/nicktomlin/trading-view-examples) - Chart examples

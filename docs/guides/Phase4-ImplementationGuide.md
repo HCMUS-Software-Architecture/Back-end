@@ -9,15 +9,18 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Kafka Setup](#kafka-setup)
-3. [Event-Driven Architecture](#event-driven-architecture)
-4. [Producer Implementation](#producer-implementation)
-5. [Consumer Implementation](#consumer-implementation)
-6. [Redis Pub/Sub for WebSocket](#redis-pubsub-for-websocket)
-7. [Load Testing](#load-testing)
-8. [Deployment](#deployment)
-9. [Common Pitfalls & Troubleshooting](#common-pitfalls--troubleshooting)
-10. [References](#references)
+2. [Prerequisites](#prerequisites)
+3. [Environment Setup](#environment-setup)
+4. [Kafka Setup](#kafka-setup)
+5. [Event-Driven Architecture](#event-driven-architecture)
+6. [Producer Implementation](#producer-implementation)
+7. [Consumer Implementation](#consumer-implementation)
+8. [Redis Pub/Sub for WebSocket](#redis-pubsub-for-websocket)
+9. [UI/UX Real-time Updates](#uiux-real-time-updates)
+10. [Load Testing](#load-testing)
+11. [Deployment](#deployment)
+12. [Common Pitfalls & Troubleshooting](#common-pitfalls--troubleshooting)
+13. [References](#references)
 
 ---
 
@@ -31,6 +34,25 @@
 - Implement price aggregation via Kafka
 - Use Redis Pub/Sub for WebSocket scaling
 - Load test for 1000+ concurrent connections
+- Implement real-time UI updates for streaming data
+
+### Core Requirements Reference
+
+This phase implements requirements from [CoreRequirements.md](../core/CoreRequirements.md):
+
+1. **Scalable Architecture** - Event-driven processing for high throughput
+2. **Real-time Display** - WebSocket with Redis Pub/Sub for multi-user scaling
+3. **Multiple Data Sources** - Concurrent crawling with Kafka message queues
+
+### Database Strategy Reference
+
+From [DatabaseDesign.md](../core/DatabaseDesign.md) - Phase 4 enhancements:
+
+| Component | Purpose | Phase 4 Usage |
+|-----------|---------|---------------|
+| **Kafka** | Event streaming | Crawler → NLP pipeline |
+| **Redis Pub/Sub** | Real-time broadcast | Price updates to WebSocket |
+| **Redis Streams** | Event logging | Price tick stream |
 
 ### Architecture Diagram
 
@@ -73,6 +95,57 @@
 | E4.4 | Price Aggregator Consumer | High |
 | E4.5 | Redis Pub/Sub for WebSocket | Medium |
 | E4.6 | Load Testing Infrastructure | Medium |
+| E4.7 | Real-time UI Updates | Medium |
+
+---
+
+## Prerequisites
+
+### Software Requirements
+
+Ensure all Phase 1-3 prerequisites are installed, plus:
+
+| Software | Version | Purpose |
+|----------|---------|---------|
+| Apache Kafka | 3.x | Event streaming |
+| k6 | Latest | Load testing |
+
+---
+
+## Environment Setup
+
+### Step 1: Update Environment Variables
+
+Add to `.env` file:
+
+```bash
+# Kafka Configuration
+KAFKA_BOOTSTRAP_SERVERS=localhost:9092
+KAFKA_GROUP_ID=trading-platform
+
+# Kafka Topics
+KAFKA_TOPIC_RAW_ARTICLES=raw-articles
+KAFKA_TOPIC_NORMALIZED_ARTICLES=normalized-articles
+KAFKA_TOPIC_PRICE_TICKS=price-ticks
+
+# Consumer Configuration
+KAFKA_CONSUMER_CONCURRENCY=3
+KAFKA_CONSUMER_BATCH_SIZE=100
+
+# Load Testing
+LOAD_TEST_TARGET_USERS=1000
+LOAD_TEST_RAMP_DURATION=300
+```
+
+### Step 2: Verify Kafka Event Schemas
+
+Event schemas should align with [DatabaseDesign.md](../core/DatabaseDesign.md):
+
+| Topic | Event Type | Schema Reference |
+|-------|------------|------------------|
+| `raw-articles` | ArticleCrawledEvent | raw_articles collection |
+| `normalized-articles` | ArticleNormalizedEvent | articles collection |
+| `price-ticks` | PriceTickEvent | price_ticks table |
 
 ---
 
@@ -800,6 +873,327 @@ public class RedisSubscriberConfig {
 
 ---
 
+## UI/UX Real-time Updates
+
+This section implements real-time UI patterns following [UIUXGuidelines.md](../core/UIUXGuidelines.md).
+
+### Step 1: Real-time News Feed Component
+
+Create `frontend/src/components/news/LiveNewsFeed.tsx`:
+
+```tsx
+'use client';
+
+import React, { useEffect, useState, useCallback } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Newspaper, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+interface Article {
+  id: string;
+  title: string;
+  source: string;
+  publishedAt: string;
+  sentiment?: {
+    label: 'bullish' | 'bearish' | 'neutral';
+    score: number;
+  };
+  symbols?: string[];
+}
+
+export function LiveNewsFeed() {
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [newArticleIds, setNewArticleIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    // Connect to WebSocket for new articles
+    const ws = new WebSocket('ws://localhost:8080/ws/articles');
+
+    ws.onmessage = (event) => {
+      const newArticle = JSON.parse(event.data);
+      
+      setArticles((prev) => {
+        // Prepend new article and keep last 50
+        const updated = [newArticle, ...prev].slice(0, 50);
+        return updated;
+      });
+
+      // Mark as new for animation
+      setNewArticleIds((prev) => new Set([...prev, newArticle.id]));
+      
+      // Remove new marker after animation
+      setTimeout(() => {
+        setNewArticleIds((prev) => {
+          const updated = new Set(prev);
+          updated.delete(newArticle.id);
+          return updated;
+        });
+      }, 3000);
+    };
+
+    return () => ws.close();
+  }, []);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Newspaper className="h-5 w-5" />
+          Live News Feed
+          <span className="ml-2 h-2 w-2 rounded-full bg-success animate-pulse" />
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {articles.map((article) => (
+          <ArticleItem
+            key={article.id}
+            article={article}
+            isNew={newArticleIds.has(article.id)}
+          />
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
+function ArticleItem({ article, isNew }: { article: Article; isNew: boolean }) {
+  const sentimentConfig = {
+    bullish: { icon: TrendingUp, color: 'text-success', bg: 'bg-success/10' },
+    bearish: { icon: TrendingDown, color: 'text-destructive', bg: 'bg-destructive/10' },
+    neutral: { icon: Minus, color: 'text-muted-foreground', bg: 'bg-muted' },
+  };
+
+  const sentiment = article.sentiment?.label || 'neutral';
+  const config = sentimentConfig[sentiment];
+  const Icon = config.icon;
+
+  return (
+    <div
+      className={cn(
+        "p-3 rounded-lg border transition-all duration-500",
+        isNew && "animate-in slide-in-from-top-2 bg-primary/5 border-primary/20"
+      )}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex-1 min-w-0">
+          <p className="font-medium text-sm line-clamp-2">{article.title}</p>
+          <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+            <span>{article.source}</span>
+            <span>•</span>
+            <span>{new Date(article.publishedAt).toLocaleTimeString()}</span>
+          </div>
+        </div>
+        <Badge variant="outline" className={cn("shrink-0", config.color, config.bg)}>
+          <Icon className="h-3 w-3 mr-1" />
+          {sentiment}
+        </Badge>
+      </div>
+      {article.symbols && article.symbols.length > 0 && (
+        <div className="flex gap-1 mt-2">
+          {article.symbols.map((symbol) => (
+            <Badge key={symbol} variant="secondary" className="text-xs">
+              {symbol}
+            </Badge>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### Step 2: Streaming Price Chart Component
+
+Create `frontend/src/components/chart/StreamingPriceChart.tsx`:
+
+```tsx
+'use client';
+
+import React, { useEffect, useRef, useCallback } from 'react';
+import { createChart, IChartApi, ISeriesApi } from 'lightweight-charts';
+import { ConnectionStatus } from '@/components/price/ConnectionStatus';
+
+interface StreamingPriceChartProps {
+  symbol: string;
+  interval: string;
+}
+
+export function StreamingPriceChart({ symbol, interval }: StreamingPriceChartProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const chartRef = useRef<IChartApi | null>(null);
+  const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
+  const [connectionStatus, setConnectionStatus] = React.useState<
+    'connected' | 'connecting' | 'disconnected'
+  >('connecting');
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    // Create chart with dark theme (as per UI guidelines)
+    const chart = createChart(containerRef.current, {
+      layout: {
+        background: { color: 'transparent' },
+        textColor: 'hsl(var(--foreground))',
+      },
+      grid: {
+        vertLines: { color: 'hsl(var(--chart-grid))' },
+        horzLines: { color: 'hsl(var(--chart-grid))' },
+      },
+      rightPriceScale: {
+        borderColor: 'hsl(var(--border))',
+      },
+      timeScale: {
+        borderColor: 'hsl(var(--border))',
+        timeVisible: true,
+      },
+      width: containerRef.current.clientWidth,
+      height: 400,
+    });
+
+    chartRef.current = chart;
+
+    // Add candlestick series
+    const series = chart.addCandlestickSeries({
+      upColor: 'hsl(var(--chart-bullish))',
+      downColor: 'hsl(var(--chart-bearish))',
+      borderVisible: false,
+      wickUpColor: 'hsl(var(--chart-bullish))',
+      wickDownColor: 'hsl(var(--chart-bearish))',
+    });
+
+    seriesRef.current = series;
+
+    // Connect to WebSocket for streaming data
+    const ws = new WebSocket(`ws://localhost:8080/ws/candles/${symbol}/${interval}`);
+
+    ws.onopen = () => setConnectionStatus('connected');
+    ws.onclose = () => setConnectionStatus('disconnected');
+    ws.onerror = () => setConnectionStatus('disconnected');
+
+    ws.onmessage = (event) => {
+      const candle = JSON.parse(event.data);
+      series.update({
+        time: candle.time,
+        open: candle.open,
+        high: candle.high,
+        low: candle.low,
+        close: candle.close,
+      });
+    };
+
+    // Handle resize
+    const handleResize = () => {
+      if (containerRef.current) {
+        chart.applyOptions({ width: containerRef.current.clientWidth });
+      }
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      ws.close();
+      chart.remove();
+    };
+  }, [symbol, interval]);
+
+  return (
+    <div className="relative">
+      <div className="absolute top-2 right-2 z-10">
+        <ConnectionStatus status={connectionStatus} />
+      </div>
+      <div ref={containerRef} className="w-full" />
+    </div>
+  );
+}
+```
+
+### Step 3: Real-time Sentiment Overview
+
+Create `frontend/src/components/analysis/SentimentOverview.tsx`:
+
+```tsx
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+
+interface SentimentData {
+  bullish: number;
+  bearish: number;
+  neutral: number;
+  lastUpdated: string;
+}
+
+export function SentimentOverview({ symbol }: { symbol: string }) {
+  const [sentiment, setSentiment] = useState<SentimentData>({
+    bullish: 0,
+    bearish: 0,
+    neutral: 100,
+    lastUpdated: new Date().toISOString(),
+  });
+
+  useEffect(() => {
+    const ws = new WebSocket(`ws://localhost:8080/ws/sentiment/${symbol}`);
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      setSentiment({
+        bullish: data.bullish || 0,
+        bearish: data.bearish || 0,
+        neutral: data.neutral || 0,
+        lastUpdated: new Date().toISOString(),
+      });
+    };
+
+    return () => ws.close();
+  }, [symbol]);
+
+  const total = sentiment.bullish + sentiment.bearish + sentiment.neutral;
+  const bullishPercent = total > 0 ? (sentiment.bullish / total) * 100 : 0;
+  const bearishPercent = total > 0 ? (sentiment.bearish / total) * 100 : 0;
+
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium">Sentiment Overview</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-success" />
+              <span className="text-sm">Bullish</span>
+            </div>
+            <span className="font-mono text-sm">{bullishPercent.toFixed(1)}%</span>
+          </div>
+          <Progress value={bullishPercent} className="h-2 bg-muted" />
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <TrendingDown className="h-4 w-4 text-destructive" />
+              <span className="text-sm">Bearish</span>
+            </div>
+            <span className="font-mono text-sm">{bearishPercent.toFixed(1)}%</span>
+          </div>
+          <Progress value={bearishPercent} className="h-2 bg-muted" />
+        </div>
+
+        <p className="text-xs text-muted-foreground">
+          Based on {total} articles analyzed
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+---
+
 ## Load Testing
 
 ### k6 Load Test Script
@@ -1026,9 +1420,12 @@ docker exec trading-kafka kafka-consumer-groups \
 - [Apache Kafka Documentation](https://kafka.apache.org/documentation/)
 - [Spring Kafka Reference](https://docs.spring.io/spring-kafka/docs/current/reference/html/)
 - [k6 Load Testing](https://k6.io/docs/)
+- [Redis Pub/Sub](https://redis.io/docs/manual/pubsub/)
 
 ### Related Project Documents
 
-- [Architecture.md](../Architecture.md) - System architecture
+- [CoreRequirements.md](../core/CoreRequirements.md) - Business requirements
+- [DatabaseDesign.md](../core/DatabaseDesign.md) - Database architecture (Redis Pub/Sub)
+- [UIUXGuidelines.md](../core/UIUXGuidelines.md) - Real-time UI patterns
 - [Phase3-ImplementationGuide.md](./Phase3-ImplementationGuide.md) - Previous phase
-- [Phase4-TestingGuide.md](./Phase4-TestingGuide.md) - Testing strategies
+- [Phase5-ImplementationGuide.md](./Phase5-ImplementationGuide.md) - Next phase

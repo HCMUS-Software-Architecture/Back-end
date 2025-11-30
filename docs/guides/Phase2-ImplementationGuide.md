@@ -10,14 +10,16 @@
 
 1. [Overview](#overview)
 2. [Prerequisites](#prerequisites)
-3. [MongoDB Integration](#mongodb-integration)
-4. [Redis Caching](#redis-caching)
-5. [Price Collector Implementation](#price-collector-implementation)
-6. [WebSocket for Real-time Updates](#websocket-for-real-time-updates)
-7. [Candle Aggregation](#candle-aggregation)
-8. [Deployment](#deployment)
-9. [Common Pitfalls & Troubleshooting](#common-pitfalls--troubleshooting)
-10. [References](#references)
+3. [Environment Setup](#environment-setup)
+4. [MongoDB Integration](#mongodb-integration)
+5. [Redis Caching](#redis-caching)
+6. [Price Collector Implementation](#price-collector-implementation)
+7. [WebSocket for Real-time Updates](#websocket-for-real-time-updates)
+8. [Candle Aggregation](#candle-aggregation)
+9. [UI/UX Enhancements](#uiux-enhancements)
+10. [Deployment](#deployment)
+11. [Common Pitfalls & Troubleshooting](#common-pitfalls--troubleshooting)
+12. [References](#references)
 
 ---
 
@@ -30,6 +32,25 @@
 - Implement Price Collector with Binance API integration
 - Add WebSocket support for real-time price updates
 - Implement candle aggregation (1m, 5m, 15m, 1h, 1d)
+- Enhance frontend with real-time price display components
+
+### Core Requirements Reference
+
+This phase implements requirements from [CoreRequirements.md](../core/CoreRequirements.md):
+
+1. **Price Chart Display** - Real-time prices using WebSocket from Binance
+2. **Multiple Timeframes** - Support for 1m, 5m, 15m, 1h, 4h, 1d candles
+3. **Scalable Architecture** - Polyglot persistence for optimized data access
+
+### Database Strategy Reference
+
+From [DatabaseDesign.md](../core/DatabaseDesign.md) - Phase 2 introduces:
+
+| Database | Purpose | Phase 2 Usage |
+|----------|---------|---------------|
+| **PostgreSQL** | Structured data | Users, price candles |
+| **MongoDB** | Semi-structured data | Articles, NLP results |
+| **Redis** | Caching & Pub/Sub | Sessions, real-time prices |
 
 ### Architecture Diagram
 
@@ -155,6 +176,168 @@ docker compose up -d
 # Verify all services are running
 docker compose ps
 docker compose logs -f
+```
+
+---
+
+## Environment Setup
+
+### Step 1: Update Environment Variables
+
+Update the `.env` file with Phase 2 configuration:
+
+```bash
+# Database Configuration (Phase 1)
+POSTGRES_DB=trading
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_PORT=5432
+
+# MongoDB Configuration (Phase 2)
+MONGO_INITDB_ROOT_USERNAME=admin
+MONGO_INITDB_ROOT_PASSWORD=admin
+MONGO_PORT=27017
+
+# Redis Configuration (Phase 2)
+REDIS_PORT=6379
+
+# Application Configuration
+SPRING_PROFILES_ACTIVE=dev
+SERVER_PORT=8080
+
+# Binance API Configuration
+BINANCE_WS_URL=wss://stream.binance.com:9443/ws
+PRICE_SYMBOLS=btcusdt,ethusdt,bnbusdt
+```
+
+### Step 2: Redis on Render (Cloud Alternative)
+
+For production or cloud development, you can use **Render's Redis** instead of local Docker:
+
+1. Go to [Render Dashboard](https://dashboard.render.com/)
+2. Create a new Redis instance
+3. Copy the connection URL
+4. Update `application-prod.properties`:
+
+```properties
+# Render Redis (production)
+spring.data.redis.url=${REDIS_URL}
+spring.data.redis.ssl.enabled=true
+```
+
+### Step 3: MongoDB Atlas (Cloud Alternative)
+
+For production or cloud development, you can use **MongoDB Atlas** instead of local Docker:
+
+1. Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+2. Create a free M0 cluster
+3. Get the connection string
+4. Update `application-prod.properties`:
+
+```properties
+# MongoDB Atlas (production)
+spring.data.mongodb.uri=${MONGODB_URI}
+```
+
+### Step 4: Initialize MongoDB Collections
+
+Create `docker/mongo-init.js`:
+
+```javascript
+// Initialize MongoDB collections with indexes
+// Reference: DatabaseDesign.md - MongoDB Collections
+
+db = db.getSiblingDB('trading');
+
+// Create news_sources collection with indexes
+db.createCollection('news_sources');
+db.news_sources.createIndex({ "name": 1 }, { unique: true });
+db.news_sources.createIndex({ "is_active": 1 });
+db.news_sources.createIndex({ "last_crawled_at": 1 });
+
+// Create raw_articles collection with indexes and TTL
+db.createCollection('raw_articles');
+db.raw_articles.createIndex({ "url_hash": 1 }, { unique: true });
+db.raw_articles.createIndex({ "processing_status": 1, "crawled_at": 1 });
+db.raw_articles.createIndex({ "source_id": 1 });
+db.raw_articles.createIndex({ "crawled_at": 1 }, { expireAfterSeconds: 7776000 }); // 90 days TTL
+
+// Create articles collection with indexes
+db.createCollection('articles');
+db.articles.createIndex({ "url_hash": 1 }, { unique: true });
+db.articles.createIndex({ "published_at": -1 });
+db.articles.createIndex({ "source.name": 1, "published_at": -1 });
+db.articles.createIndex({ "symbols": 1, "published_at": -1 });
+db.articles.createIndex({ "tags": 1 });
+db.articles.createIndex({ "analysis_status": 1 });
+db.articles.createIndex({ "title": "text", "body": "text" }); // Text search
+
+// Insert default news sources
+db.news_sources.insertMany([
+    {
+        name: "CoinDesk",
+        base_url: "https://www.coindesk.com",
+        feed_url: "https://www.coindesk.com/arc/outboundfeeds/rss/",
+        type: "RSS",
+        is_active: true,
+        crawl_interval_minutes: 15,
+        selectors: {
+            article_list: "article.article-card",
+            title: "h1.article-title",
+            body: "div.article-content",
+            published_date: "time.article-date"
+        },
+        rate_limit: {
+            requests_per_minute: 10,
+            delay_ms: 1000
+        },
+        created_at: new Date(),
+        updated_at: new Date()
+    },
+    {
+        name: "CoinTelegraph",
+        base_url: "https://cointelegraph.com",
+        feed_url: "https://cointelegraph.com/rss",
+        type: "RSS",
+        is_active: true,
+        crawl_interval_minutes: 15,
+        selectors: {
+            article_list: "article.post-card",
+            title: ".post-card__title",
+            body: ".post-content"
+        },
+        rate_limit: {
+            requests_per_minute: 10,
+            delay_ms: 1000
+        },
+        created_at: new Date(),
+        updated_at: new Date()
+    }
+]);
+
+print("MongoDB initialization complete!");
+```
+
+Update `docker/docker-compose.yml` to include the init script:
+
+```yaml
+  mongodb:
+    image: mongo:6.0
+    container_name: trading-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+      MONGO_INITDB_DATABASE: trading
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 ```
 
 ---
@@ -907,6 +1090,265 @@ public class PriceCandleService {
 
 ---
 
+## UI/UX Enhancements
+
+This section implements real-time price display following [UIUXGuidelines.md](../core/UIUXGuidelines.md).
+
+### Step 1: Install Chart Dependencies
+
+**Bash (Linux/macOS):**
+```bash
+cd frontend
+
+# Install TradingView Lightweight Charts
+npm install lightweight-charts
+
+# Install WebSocket client
+npm install socket.io-client
+```
+
+**PowerShell (Windows 10/11):**
+```powershell
+Set-Location frontend
+
+# Install TradingView Lightweight Charts
+npm install lightweight-charts
+
+# Install WebSocket client
+npm install socket.io-client
+```
+
+### Step 2: Real-time Price Display Component
+
+Create `frontend/src/components/price/PriceDisplay.tsx`:
+
+```tsx
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { TrendingUp, TrendingDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+interface PriceDisplayProps {
+  symbol: string;
+  className?: string;
+}
+
+export function PriceDisplay({ symbol, className }: PriceDisplayProps) {
+  const [price, setPrice] = useState<number | null>(null);
+  const [previousPrice, setPreviousPrice] = useState<number | null>(null);
+  const [flash, setFlash] = useState<'up' | 'down' | null>(null);
+
+  useEffect(() => {
+    const ws = new WebSocket(`ws://localhost:8080/ws/prices`);
+    
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ type: 'subscribe', symbol: symbol.toLowerCase() }));
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.symbol?.toUpperCase() === symbol.toUpperCase()) {
+        setPreviousPrice(price);
+        setPrice(parseFloat(data.price));
+        
+        // Trigger flash animation
+        if (previousPrice !== null) {
+          setFlash(data.price > previousPrice ? 'up' : 'down');
+          setTimeout(() => setFlash(null), 300);
+        }
+      }
+    };
+
+    return () => ws.close();
+  }, [symbol]);
+
+  const priceChange = previousPrice && price ? price - previousPrice : 0;
+  const isPositive = priceChange >= 0;
+
+  return (
+    <div className={cn("flex items-center gap-2", className)}>
+      <span 
+        className={cn(
+          "font-mono text-2xl font-semibold tabular-nums transition-colors duration-300",
+          flash === 'up' && "text-success bg-success/10",
+          flash === 'down' && "text-destructive bg-destructive/10",
+        )}
+      >
+        ${price?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '---'}
+      </span>
+      {previousPrice && (
+        <span className={cn(
+          "flex items-center text-sm",
+          isPositive ? "text-success" : "text-destructive"
+        )}>
+          {isPositive ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+        </span>
+      )}
+    </div>
+  );
+}
+```
+
+### Step 3: Connection Status Indicator
+
+Create `frontend/src/components/price/ConnectionStatus.tsx`:
+
+```tsx
+'use client';
+
+import React from 'react';
+import { cn } from '@/lib/utils';
+
+interface ConnectionStatusProps {
+  status: 'connected' | 'connecting' | 'disconnected';
+}
+
+export function ConnectionStatus({ status }: ConnectionStatusProps) {
+  const statusConfig = {
+    connected: { color: 'bg-success', text: 'Live', pulse: true },
+    connecting: { color: 'bg-warning', text: 'Connecting...', pulse: true },
+    disconnected: { color: 'bg-destructive', text: 'Disconnected', pulse: false },
+  };
+
+  const { color, text, pulse } = statusConfig[status];
+
+  return (
+    <div className="flex items-center gap-2">
+      <span className={cn(
+        "h-2 w-2 rounded-full",
+        color,
+        pulse && "animate-pulse"
+      )} />
+      <span className="text-xs text-muted-foreground">{text}</span>
+    </div>
+  );
+}
+```
+
+### Step 4: Price Card Component
+
+Create `frontend/src/components/price/PriceCard.tsx`:
+
+```tsx
+'use client';
+
+import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { PriceDisplay } from './PriceDisplay';
+import { cn } from '@/lib/utils';
+
+interface PriceCardProps {
+  symbol: string;
+  exchange?: string;
+  changePercent?: number;
+  onClick?: () => void;
+}
+
+export function PriceCard({ symbol, exchange = 'Binance', changePercent, onClick }: PriceCardProps) {
+  const isPositive = (changePercent ?? 0) >= 0;
+
+  return (
+    <Card 
+      className="hover:bg-accent/50 transition-colors cursor-pointer"
+      onClick={onClick}
+    >
+      <CardContent className="p-4">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="font-semibold text-lg">{symbol}</h3>
+            <p className="text-muted-foreground text-sm">{exchange}</p>
+          </div>
+          <div className="text-right">
+            <PriceDisplay symbol={symbol} />
+            {changePercent !== undefined && (
+              <p className={cn(
+                "font-mono text-sm tabular-nums",
+                isPositive ? "text-success" : "text-destructive"
+              )}>
+                {isPositive ? '+' : ''}{changePercent.toFixed(2)}%
+              </p>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+### Step 5: Timeframe Selector
+
+Create `frontend/src/components/chart/TimeframeSelector.tsx`:
+
+```tsx
+'use client';
+
+import React from 'react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+interface TimeframeSelectorProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+const TIMEFRAMES = [
+  { value: '1m', label: '1m' },
+  { value: '5m', label: '5m' },
+  { value: '15m', label: '15m' },
+  { value: '1h', label: '1H' },
+  { value: '4h', label: '4H' },
+  { value: '1d', label: '1D' },
+];
+
+export function TimeframeSelector({ value, onChange }: TimeframeSelectorProps) {
+  return (
+    <Tabs value={value} onValueChange={onChange}>
+      <TabsList className="grid grid-cols-6 w-full max-w-md">
+        {TIMEFRAMES.map((tf) => (
+          <TabsTrigger key={tf.value} value={tf.value}>
+            {tf.label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </Tabs>
+  );
+}
+```
+
+### Step 6: Loading and Error States
+
+Following the UI/UX guidelines for loading patterns:
+
+Create `frontend/src/components/price/PriceCardSkeleton.tsx`:
+
+```tsx
+import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+
+export function PriceCardSkeleton() {
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <div className="flex justify-between items-start">
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-20" />
+            <Skeleton className="h-4 w-16" />
+          </div>
+          <div className="text-right space-y-2">
+            <Skeleton className="h-6 w-28" />
+            <Skeleton className="h-4 w-16 ml-auto" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+---
+
 ## Deployment
 
 ### Build and Run with All Services
@@ -1034,9 +1476,12 @@ docker exec -it trading-redis redis-cli ping
 - [Spring Data Redis](https://docs.spring.io/spring-data/redis/docs/current/reference/html/)
 - [Spring WebSocket](https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#websocket)
 - [Binance WebSocket API](https://binance-docs.github.io/apidocs/spot/en/#websocket-market-streams)
+- [TradingView Lightweight Charts](https://tradingview.github.io/lightweight-charts/)
 
 ### Related Project Documents
 
-- [Architecture.md](../Architecture.md) - System architecture
-- [Phase1-ImplementationGuide.md](./Phase1-ImplementationGuide.md) - Previous phase
-- [Phase2-TestingGuide.md](./Phase2-TestingGuide.md) - Testing strategies
+- [CoreRequirements.md](../core/CoreRequirements.md) - Business requirements
+- [DatabaseDesign.md](../core/DatabaseDesign.md) - Database architecture
+- [UIUXGuidelines.md](../core/UIUXGuidelines.md) - UI/UX design guidelines
+- [Phase1-ImplementationGuide.md](../Phase1-ImplementationGuide.md) - Previous phase
+- [Phase3-ImplementationGuide.md](./Phase3-ImplementationGuide.md) - Next phase
