@@ -9,14 +9,17 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [API Gateway Setup](#api-gateway-setup)
-3. [Module Boundaries](#module-boundaries)
-4. [NLP Module Implementation](#nlp-module-implementation)
-5. [TradingView Integration](#tradingview-integration)
-6. [Frontend Enhancement](#frontend-enhancement)
-7. [Deployment](#deployment)
-8. [Common Pitfalls & Troubleshooting](#common-pitfalls--troubleshooting)
-9. [References](#references)
+2. [Prerequisites](#prerequisites)
+3. [Environment Setup](#environment-setup)
+4. [API Gateway Setup](#api-gateway-setup)
+5. [Module Boundaries](#module-boundaries)
+6. [NLP Module Implementation](#nlp-module-implementation)
+7. [NLP Database Schema](#nlp-database-schema)
+8. [TradingView Integration](#tradingview-integration)
+9. [Frontend Enhancement](#frontend-enhancement)
+10. [Deployment](#deployment)
+11. [Common Pitfalls & Troubleshooting](#common-pitfalls--troubleshooting)
+12. [References](#references)
 
 ---
 
@@ -29,6 +32,24 @@
 - Implement NLP module with sentiment analysis
 - Integrate TradingView charting library
 - Link articles to price context
+- Implement sentiment-based UI indicators
+
+### Core Requirements Reference
+
+This phase implements requirements from [CoreRequirements.md](../core/CoreRequirements.md):
+
+1. **AI Models for News Analysis** - Sentiment analysis and entity extraction
+2. **Causal Analysis** - Trend prediction with reasoning (foundation)
+3. **Multiple Currency Pairs** - Symbol-based article filtering
+
+### Database Strategy Reference
+
+From [DatabaseDesign.md](../core/DatabaseDesign.md) - Phase 3 additions:
+
+| Collection | Purpose | New in Phase 3 |
+|------------|---------|----------------|
+| `analysis_results` | NLP sentiment, entities, topics | ✅ |
+| `trend_predictions` | AI-generated predictions | ✅ |
 
 ### Architecture Diagram
 
@@ -62,6 +83,73 @@
 | E3.4 | TradingView Integration | High |
 | E3.5 | Article-Price Context Linking | Medium |
 | E3.6 | Frontend News Feed Enhancement | Medium |
+
+---
+
+## Prerequisites
+
+### Software Requirements
+
+Ensure all Phase 1 and Phase 2 prerequisites are installed, plus:
+
+| Software | Version | Purpose |
+|----------|---------|---------|
+| Spring Cloud | 2023.0.0+ | Gateway and service discovery |
+| Resilience4j | 2.x | Circuit breaker pattern |
+
+---
+
+## Environment Setup
+
+### Step 1: Update Environment Variables
+
+Add to `.env` file:
+
+```bash
+# Gateway Configuration
+GATEWAY_PORT=8080
+API_SERVICE_PORT=8081
+CRAWLER_SERVICE_PORT=8082
+NLP_SERVICE_PORT=8083
+
+# NLP Configuration
+NLP_MODEL_TYPE=keyword  # Options: keyword, huggingface, openai
+NLP_BATCH_SIZE=10
+NLP_ASYNC_ENABLED=true
+
+# Rate Limiting
+RATE_LIMIT_REQUESTS_PER_MINUTE=100
+```
+
+### Step 2: Verify Infrastructure
+
+Ensure all Phase 2 services are running:
+
+**Bash (Linux/macOS):**
+```bash
+cd docker
+docker compose up -d
+
+# Verify all services
+docker compose ps
+
+# Check service health
+curl http://localhost:5432 2>/dev/null || echo "PostgreSQL: OK (connection refused is expected)"
+curl http://localhost:27017 2>/dev/null || echo "MongoDB: OK"
+docker exec trading-redis redis-cli ping
+```
+
+**PowerShell (Windows 10/11):**
+```powershell
+Set-Location docker
+docker compose up -d
+
+# Verify all services
+docker compose ps
+
+# Check Redis
+docker exec trading-redis redis-cli ping
+```
 
 ---
 
@@ -586,6 +674,257 @@ public class AnalysisController {
 
 ---
 
+## NLP Database Schema
+
+This section implements the NLP-related database schema from [DatabaseDesign.md](../core/DatabaseDesign.md).
+
+### MongoDB Collection: analysis_results
+
+Create the MongoDB schema for NLP results:
+
+```javascript
+// MongoDB collection for NLP analysis results
+// Reference: DatabaseDesign.md - Collection: analysis_results
+
+db.createCollection('analysis_results');
+
+// Create indexes
+db.analysis_results.createIndex({ "article_id": 1 }, { unique: true });
+db.analysis_results.createIndex({ "sentiment.label": 1, "analyzed_at": -1 });
+db.analysis_results.createIndex({ "entities.symbol": 1 });
+db.analysis_results.createIndex({ "trend_prediction.direction": 1 });
+db.analysis_results.createIndex({ "analyzed_at": -1 });
+```
+
+### Analysis Result Document Structure
+
+```java
+package com.example.backend.model;
+
+import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Document(collection = "analysis_results")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class AnalysisResult {
+    
+    @Id
+    private String id;
+    
+    @Indexed(unique = true)
+    private String articleId;
+    
+    private String modelVersion;
+    private LocalDateTime analyzedAt;
+    private Long processingTimeMs;
+    
+    // Sentiment analysis
+    private SentimentData sentiment;
+    
+    // Entity extraction
+    private List<Entity> entities;
+    
+    // Topic classification
+    private List<Topic> topics;
+    
+    // Key phrases
+    private List<String> keyPhrases;
+    
+    // Causal signals (for advanced analysis)
+    private List<CausalSignal> causalSignals;
+    
+    // Trend prediction
+    private TrendPrediction trendPrediction;
+    
+    // Quality metrics
+    private QualityMetrics qualityMetrics;
+    
+    @Data
+    @Builder
+    public static class SentimentData {
+        private String label;        // BULLISH, BEARISH, NEUTRAL
+        private double score;
+        private double confidence;
+        private Distribution distribution;
+        
+        @Data
+        @Builder
+        public static class Distribution {
+            private double bullish;
+            private double bearish;
+            private double neutral;
+        }
+    }
+    
+    @Data
+    @Builder
+    public static class Entity {
+        private String text;
+        private String type;         // CRYPTOCURRENCY, ORGANIZATION, PERSON
+        private String symbol;       // e.g., BTCUSDT
+        private int count;
+        private double relevance;
+    }
+    
+    @Data
+    @Builder
+    public static class Topic {
+        private String name;
+        private double score;
+        private List<String> keywords;
+    }
+    
+    @Data
+    @Builder
+    public static class CausalSignal {
+        private String cause;
+        private String effect;
+        private double confidence;
+        private String timeHorizon;
+    }
+    
+    @Data
+    @Builder
+    public static class TrendPrediction {
+        private String direction;    // UP, DOWN, NEUTRAL
+        private double confidence;
+        private String timeHorizon;  // 1h, 24h, 7d
+        private String reasoning;
+    }
+    
+    @Data
+    @Builder
+    public static class QualityMetrics {
+        private double textQuality;
+        private double informationDensity;
+        private double actionability;
+    }
+}
+```
+
+### MongoDB Collection: trend_predictions
+
+```java
+package com.example.backend.model;
+
+import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Document(collection = "trend_predictions")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class TrendPrediction {
+    
+    @Id
+    private String id;
+    
+    @Indexed
+    private String symbol;
+    
+    @Indexed
+    private LocalDateTime predictionTime;
+    
+    private String timeHorizon;     // 1h, 24h, 7d
+    
+    private PredictionData prediction;
+    
+    private List<ContributingArticle> contributingArticles;
+    
+    private SentimentSummary sentimentSummary;
+    
+    private String reasoning;
+    
+    private ModelMetadata modelMetadata;
+    
+    // Filled after time_horizon passes
+    private String actualOutcome;
+    private Double accuracyScore;
+    
+    private LocalDateTime createdAt;
+    
+    @Data
+    @Builder
+    public static class PredictionData {
+        private String direction;    // UP, DOWN, NEUTRAL
+        private double confidence;
+        private PriceTarget priceTarget;
+        
+        @Data
+        @Builder
+        public static class PriceTarget {
+            private double low;
+            private double mid;
+            private double high;
+        }
+    }
+    
+    @Data
+    @Builder
+    public static class ContributingArticle {
+        private String articleId;
+        private String title;
+        private double weight;
+    }
+    
+    @Data
+    @Builder
+    public static class SentimentSummary {
+        private int bullishCount;
+        private int bearishCount;
+        private int neutralCount;
+        private double averageScore;
+    }
+    
+    @Data
+    @Builder
+    public static class ModelMetadata {
+        private String version;
+        private List<String> featuresUsed;
+    }
+}
+```
+
+### Create MongoDB Indexes
+
+Add to `docker/mongo-init.js`:
+
+```javascript
+// Phase 3: NLP Analysis collections
+
+// Create analysis_results collection with indexes
+db.createCollection('analysis_results');
+db.analysis_results.createIndex({ "article_id": 1 }, { unique: true });
+db.analysis_results.createIndex({ "sentiment.label": 1, "analyzed_at": -1 });
+db.analysis_results.createIndex({ "entities.symbol": 1 });
+db.analysis_results.createIndex({ "trend_prediction.direction": 1 });
+db.analysis_results.createIndex({ "analyzed_at": -1 });
+
+// Create trend_predictions collection with indexes
+db.createCollection('trend_predictions');
+db.trend_predictions.createIndex({ "symbol": 1, "prediction_time": -1 });
+db.trend_predictions.createIndex({ "prediction_time": -1 });
+db.trend_predictions.createIndex({ "prediction.direction": 1, "prediction.confidence": -1 });
+
+print("Phase 3 NLP collections initialized!");
+```
+
+---
+
 ## TradingView Integration
 
 ### Step 1: TradingView Library Setup
@@ -962,10 +1301,12 @@ spring:
 - [Spring Cloud Gateway](https://docs.spring.io/spring-cloud-gateway/docs/current/reference/html/)
 - [Resilience4j](https://resilience4j.readme.io/docs)
 - [TradingView Lightweight Charts](https://tradingview.github.io/lightweight-charts/)
+- [Stanford CoreNLP](https://stanfordnlp.github.io/CoreNLP/)
 
 ### Related Project Documents
 
-- [Architecture.md](../Architecture.md) - System architecture
+- [CoreRequirements.md](../core/CoreRequirements.md) - Business requirements
+- [DatabaseDesign.md](../core/DatabaseDesign.md) - Database architecture (NLP collections)
+- [UIUXGuidelines.md](../core/UIUXGuidelines.md) - UI/UX design guidelines
 - [Phase2-ImplementationGuide.md](./Phase2-ImplementationGuide.md) - Previous phase
-- [Phase3-TestingGuide.md](./Phase3-TestingGuide.md) - Testing strategies
-- [Frontend-ResearchGuide.md](./Frontend-ResearchGuide.md) - Frontend libraries and resources
+- [Phase4-ImplementationGuide.md](./Phase4-ImplementationGuide.md) - Next phase
