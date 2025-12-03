@@ -28,11 +28,18 @@ public class CrawlerService {
                     "div.row-span-1, div.row-span-2",
                     "a",
                     ".article-body, .content"
+            ),
+            "cafef", new SourceConfig(
+                    "https://cafef.vn/",
+                    "div.tlitem",
+                    "h3",
+                    "p.sapo"
             )
+
     );
 
     @Scheduled(fixedDelayString = "${crawler.fixed-delay:300000}",
-            initialDelayString = "${crawler.initial-delay:60000}")
+            initialDelayString = "${crawler.initial-delay:6000}")
     public void scheduledCrawl() {
         log.info("Starting scheduled crawl at {}", LocalDateTime.now());
         SOURCES.forEach((name, config) -> {
@@ -81,12 +88,17 @@ public class CrawlerService {
         Element titleElement = element.selectFirst(config.titleSelector());
         String title = titleElement != null ? titleElement.text() : "";
 
+        // Extract body
+        Element bodyElement = element.selectFirst(config.bodySelector());
+        String body = bodyElement != null ? bodyElement.text() : "";
+
         // Build article
         Article article = Article.builder()
                 .url(url)
                 .title(title)
                 .source(source)
                 .rawHtml(element.outerHtml())
+                .body(body)
                 .metadata(new HashMap<>(Map.of(
                         "crawledBy", "basic-crawler",
                         "extractedAt", LocalDateTime.now().toString()
