@@ -5,10 +5,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 @Repository
 public interface PriceCandleRepository extends JpaRepository<PriceCandle, UUID> {
     List<PriceCandle> findBySymbolAndIntervalOrderByOpenTimeDesc(String symbol, String interval, Pageable pageable);
+    List<PriceCandle> findBySymbolAndIntervalAndOpenTimeBetween(
+            String symbol,
+            String interval,
+            Instant startTime,
+            Instant endTime
+    );
 }

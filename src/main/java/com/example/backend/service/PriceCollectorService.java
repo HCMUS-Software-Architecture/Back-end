@@ -4,7 +4,6 @@ import com.example.backend.entity.PriceTick;
 import com.example.backend.repository.PriceTickRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +14,6 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.net.URI;
@@ -29,8 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PriceCollectorService {
     private final ObjectMapper objectMapper;
     private final SimpMessagingTemplate simpMessagingTemplate;
-    private final PriceTickRepository priceTickRepository;
-    private final PriceStickSaver priceStickSaver;
+    private final TickBufferService tickBufferService;
 
     @Value("${binance.ws.url:wss://stream.binance.com:9443/ws}")
     private String binanceWsUrl;
@@ -106,7 +103,7 @@ public class PriceCollectorService {
                     .exchange("binance")
                     .build();
 
-            priceStickSaver.save(tick);
+            tickBufferService.addTick(tick);
 
             // Update latest price
             latestPrices.put(symbol.toUpperCase(), price);
