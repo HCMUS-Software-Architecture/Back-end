@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class PriceStickSaver {
+public class PriceTickSaver {
     @Autowired
     private PriceTickRepository priceTickRepository;
     @Transactional
