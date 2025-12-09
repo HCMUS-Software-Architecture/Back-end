@@ -1,0 +1,11 @@
+name: trading-application
+
+services:
+  # Backend server
+  trading-backend:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: trading-backend-service
+    ports:
+      - "8081:8081"
