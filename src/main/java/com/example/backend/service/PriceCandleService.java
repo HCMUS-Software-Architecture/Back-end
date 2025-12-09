@@ -102,7 +102,7 @@ public class PriceCandleService {
     }
 
     // 3. JOB TẠO NẾN 1H (Rollup từ nến 1m hoặc 5m) - Thay thế aggregate1hCandles cũ
-    @Scheduled(fixedRate = 3601000) // 1 hour 10s from app starting
+    @Scheduled(fixedRate = 3600000) // 1 hour 10s from app starting
     public void aggregate1hCandles() {
         rollupCandles("1h", 60);
     }
