@@ -70,7 +70,13 @@ node --version
 
 ---
 
-## Quick Start
+## Docker Compose Setup
+Use this when actively working on the application:
+```bash
+docker compose up -d
+```
+
+## Quick Start Local
 
 ### 1. Clone the Repository
 
