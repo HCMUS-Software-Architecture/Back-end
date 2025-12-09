@@ -19,7 +19,7 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.time.Instant;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +28,7 @@ public class PriceCollectorService {
     private final ObjectMapper objectMapper;
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final TickBufferService tickBufferService;
+    private final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1);
 
     @Value("${binance.ws.url:wss://stream.binance.com:9443/ws}")
     private String binanceWsUrl;
@@ -47,6 +48,7 @@ public class PriceCollectorService {
     @PreDestroy
     public void cleanup() {
         connections.values().forEach(WebSocketClient::close);
+        executorService.shutdown();
     }
 
     public void connectToSymbol(String symbol) {
@@ -120,15 +122,11 @@ public class PriceCollectorService {
     }
 
     private void scheduleReconnect(String symbol) {
+
         // Simple reconnect logic - in production use exponential backoff
-        new Thread(() -> {
-            try {
-                Thread.sleep(5000);
-                connectToSymbol(symbol);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }).start();
+        executorService.schedule(() -> {
+            connectToSymbol(symbol);
+        }, 5, TimeUnit.SECONDS);
     }
 
     public BigDecimal getLatestPrice(String symbol) {

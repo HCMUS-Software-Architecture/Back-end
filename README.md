@@ -81,6 +81,10 @@ git clone https://github.com/HCMUS-Software-Architecture/Back-end.git
 cd Back-end
 ```
 
+### 2. Set .env (If you are using Intellij as the main IDE)
+
+Refer to this doc: https://stackoverflow.com/questions/71450194/how-do-i-add-environment-variables-in-intellij-spring-boot-project
+
 **PowerShell (Windows 10/11):**
 
 ```powershell
@@ -88,41 +92,7 @@ git clone https://github.com/HCMUS-Software-Architecture/Back-end.git
 Set-Location Back-end
 ```
 
-### 2. Configure Application Settings
-
-**Copy the example configuration file:**
-
-```powershell
-# PowerShell (Windows)
-Copy-Item src\main\resources\application.yml.example src\main\resources\application.yml
-
-# Bash (Linux/macOS)
-cp src/main/resources/application.yml.example src/main/resources/application.yml
-```
-
-**Set environment variables with your remote PostgreSQL credentials:**
-
-```powershell
-# PowerShell (Windows) - Set for current session
-$env:PG_URI="jdbc:postgresql://your-host:port/database-name?serverTimezone=UTC"
-$env:PG_USERNAME="your_username"
-$env:PG_PASSWORD="your_password"
-$env:SERVER_PORT="8081"
-$env:SHOW_SQL="true"
-$env:DDL_AUTO="update"
-
-# Bash (Linux/macOS) - Set for current session
-export PG_URI="jdbc:postgresql://your-host:port/database-name?serverTimezone=UTC"
-export PG_USERNAME="your_username"
-export PG_PASSWORD="your_password"
-export SERVER_PORT="8081"
-export SHOW_SQL="true"
-export DDL_AUTO="update"
-```
-
-### 3. Build and Run the Application
-
-**Important:** Always include the `-Duser.timezone=UTC` JVM argument to avoid timezone issues with PostgreSQL.
+### 3. Start Development Environment
 
 **Bash (Linux/macOS):**
 
