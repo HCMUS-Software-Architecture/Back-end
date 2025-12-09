@@ -112,13 +112,16 @@ git clone https://github.com/HCMUS-Software-Architecture/Back-end.git
 cd Back-end
 ```
 
+### 2. Set .env (If you are using Intellij as the main IDE)
+Refer to this doc: https://stackoverflow.com/questions/71450194/how-do-i-add-environment-variables-in-intellij-spring-boot-project
+
 **PowerShell (Windows 10/11):**
 ```powershell
 git clone https://github.com/HCMUS-Software-Architecture/Back-end.git
 Set-Location Back-end
 ```
 
-### 2. Start Development Environment
+### 3. Start Development Environment
 
 **Bash (Linux/macOS):**
 ```bash
@@ -144,7 +147,7 @@ docker compose up -d
 .\mvnw.cmd spring-boot:run
 ```
 
-### 3. Verify the Application
+### 4. Verify the Application
 
 **Bash (Linux/macOS):**
 ```bash
