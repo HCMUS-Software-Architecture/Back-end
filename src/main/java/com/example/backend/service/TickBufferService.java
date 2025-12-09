@@ -17,7 +17,7 @@ public class TickBufferService {
         tickBuffer.computeIfAbsent(tick.getSymbol(), k -> new ArrayList<>()).add(tick);
     }
 
-    // Get all ticks from buffer
+    // Get all ticks from buffer and buffer becomes empty 
     public Map<String, List<PriceTick>> drainBuffer() {
         Map<String, List<PriceTick>> snapshot = new ConcurrentHashMap<>();
 

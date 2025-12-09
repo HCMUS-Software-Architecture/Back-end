@@ -25,6 +25,6 @@ public interface ArticleRepository extends JpaRepository<Article, UUID> {
             Pageable pageable
     );
 
-    @Query("SELECT a FROM Article a WHERE a.title LIKE %:keyword% OR a.body LIKE %:keyword%")
+    @Query("SELECT a FROM Article a WHERE a.title LIKE CONCAT('%', :keyword, '%') OR a.body LIKE CONCAT('%', :keyword, '%')")
     Page<Article> searchByKeyword(String keyword, Pageable pageable);
 }

@@ -113,10 +113,15 @@ temp/
 # ===========================
 # Environment and Secrets
 # ===========================
+# Ignore actual application config with sensitive data
+application.yml
+application-*.yml
+!application.yml.example
+
+# Legacy .env files (no longer used)
 .env
 .env.local
 .env.*.local
-*.env
 *.pem
 *.key
 secrets/

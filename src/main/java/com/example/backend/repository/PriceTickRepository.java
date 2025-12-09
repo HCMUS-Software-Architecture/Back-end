@@ -17,5 +17,5 @@ public interface PriceTickRepository extends JpaRepository<PriceTick, UUID> {
 
     @Modifying
     @Query("DELETE from PriceTick p where p.timestamp < :cutoff")
-    void deleteByTimestampLessThan(@Param("cutoff") Instant cutoff);
+    void deleteByTimestampLessThan(Instant cutoff);
 }

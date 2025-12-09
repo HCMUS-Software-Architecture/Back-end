@@ -2,6 +2,7 @@ package com.example.backend.service;
 
 import com.example.backend.entity.Article;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -17,9 +18,9 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CrawlerService {
     private final ArticleService articleService;
-    private final Logger log = LoggerFactory.getLogger(CrawlerService.class);
 
     // Source configurations (can be externalized)
     private static final Map<String, SourceConfig> SOURCES = Map.of(
@@ -29,6 +30,32 @@ public class CrawlerService {
                     "a",
                     ".article-body, .content"
             ),
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             "cafef", new SourceConfig(
                     "https://cafef.vn/",
                     "div.tlitem",

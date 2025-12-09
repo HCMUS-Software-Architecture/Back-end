@@ -21,6 +21,7 @@ A full-stack trading platform with financial news aggregation, real-time price c
 ## Overview
 
 This platform provides:
+
 - **Financial News Crawler**: Multi-source article collection with adaptive HTML parsing
 - **Real-time Price Charts**: WebSocket-based TradingView-style charts
 - **AI/NLP Analysis**: Sentiment analysis and trend prediction
@@ -34,50 +35,25 @@ See [Architecture Overview](./doc/Architecture.md) for detailed design.
 
 ### Required Software
 
-| Software | Version | Purpose |
-|----------|---------|---------|
-| Java | 17+ | Backend runtime |
-| Maven | 3.8+ | Build tool |
-| Docker | 20.10+ | Container runtime |
-| Docker Compose | 2.0+ | Multi-container orchestration |
-| Node.js | 18+ | Frontend runtime (for Next.js) |
-| Git | 2.30+ | Version control |
+| Software | Version | Purpose                        |
+| -------- | ------- | ------------------------------ |
+| Java     | 17+     | Backend runtime                |
+| Maven    | 3.8+    | Build tool                     |
+| Node.js  | 18+     | Frontend runtime (for Next.js) |
+| Git      | 2.30+   | Version control                |
 
 ### Recommended Tools
 
-| Tool | Purpose |
-|------|---------|
-| IntelliJ IDEA / VS Code | IDE |
-| Docker Desktop | Container management UI |
-| Postman / Insomnia | API testing |
-| DBeaver | Database management |
+| Tool                    | Purpose             |
+| ----------------------- | ------------------- |
+| IntelliJ IDEA / VS Code | IDE                 |
+| Postman / Insomnia      | API testing         |
+| DBeaver                 | Database management |
 
 ### Verify Installation
 
-**Bash (Linux/macOS):**
-```bash
-# Check Java
-java -version
-# Expected: openjdk version "17.x.x" or higher
+These can run on both Windows and Linux-based OS
 
-# Check Maven
-mvn -version
-# Expected: Apache Maven 3.8.x or higher
-
-# Check Docker
-docker --version
-# Expected: Docker version 20.10.x or higher
-
-# Check Docker Compose
-docker compose version
-# Expected: Docker Compose version v2.x.x
-
-# Check Node.js
-node --version
-# Expected: v18.x.x or higher
-```
-
-**PowerShell (Windows 10/11):**
 ```powershell
 # Check Java
 java -version
@@ -87,15 +63,7 @@ java -version
 mvn -version
 # Expected: Apache Maven 3.8.x or higher
 
-# Check Docker
-docker --version
-# Expected: Docker version 20.10.x or higher
-
-# Check Docker Compose
-docker compose version
-# Expected: Docker Compose version v2.x.x
-
-# Check Node.js
+# Check Node.js (optional, for frontend)
 node --version
 # Expected: v18.x.x or higher
 ```
@@ -107,56 +75,86 @@ node --version
 ### 1. Clone the Repository
 
 **Bash (Linux/macOS):**
+
 ```bash
 git clone https://github.com/HCMUS-Software-Architecture/Back-end.git
 cd Back-end
 ```
 
 **PowerShell (Windows 10/11):**
+
 ```powershell
 git clone https://github.com/HCMUS-Software-Architecture/Back-end.git
 Set-Location Back-end
 ```
 
-### 2. Start Development Environment
+### 2. Configure Application Settings
+
+**Copy the example configuration file:**
+
+```powershell
+# PowerShell (Windows)
+Copy-Item src\main\resources\application.yml.example src\main\resources\application.yml
+
+# Bash (Linux/macOS)
+cp src/main/resources/application.yml.example src/main/resources/application.yml
+```
+
+**Set environment variables with your remote PostgreSQL credentials:**
+
+```powershell
+# PowerShell (Windows) - Set for current session
+$env:PG_URI="jdbc:postgresql://your-host:port/database-name?serverTimezone=UTC"
+$env:PG_USERNAME="your_username"
+$env:PG_PASSWORD="your_password"
+$env:SERVER_PORT="8081"
+$env:SHOW_SQL="true"
+$env:DDL_AUTO="update"
+
+# Bash (Linux/macOS) - Set for current session
+export PG_URI="jdbc:postgresql://your-host:port/database-name?serverTimezone=UTC"
+export PG_USERNAME="your_username"
+export PG_PASSWORD="your_password"
+export SERVER_PORT="8081"
+export SHOW_SQL="true"
+export DDL_AUTO="update"
+```
+
+### 3. Build and Run the Application
+
+**Important:** Always include the `-Duser.timezone=UTC` JVM argument to avoid timezone issues with PostgreSQL.
 
 **Bash (Linux/macOS):**
+
 ```bash
-# Start infrastructure services (PostgreSQL, etc.)
-docker compose up -d
-
-# Build the application
-./mvnw clean install
-
-# Run the application
-./mvnw spring-boot:run
+# Run the application with UTC timezone
+./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-Duser.timezone=UTC"
 ```
 
 **PowerShell (Windows 10/11):**
+
 ```powershell
-# Start infrastructure services (PostgreSQL, etc.)
-docker compose up -d
-
-# Build the application
-.\mvnw.cmd clean install
-
-# Run the application
-.\mvnw.cmd spring-boot:run
+# Run the application with UTC timezone
+.\mvnw.cmd spring-boot:run -D"spring-boot.run.jvmArguments=-Duser.timezone=UTC"
 ```
 
-### 3. Verify the Application
+### 4. Verify the Application
 
 **Bash (Linux/macOS):**
+
 ```bash
 # Health check
-curl http://localhost:8080/actuator/health
+curl http://localhost:8081/actuator/health
 ```
 
 **PowerShell (Windows 10/11):**
+
 ```powershell
 # Health check
-Invoke-RestMethod -Uri http://localhost:8080/actuator/health
+Invoke-RestMethod -Uri http://localhost:8081/actuator/health
 ```
+
+> **Expected response:** `{"status":"UP"}`
 
 ---
 
@@ -184,9 +182,8 @@ Back-end/
 │   │   │   ├── dto/                       # Data transfer objects
 │   │   │   └── crawler/                   # News crawler module
 │   │   └── resources/
-│   │       ├── application.properties     # Application configuration
-│   │       ├── application-dev.properties # Development profile
-│   │       └── application-prod.properties# Production profile
+│   │       ├── application.yml            # Application configuration (git-ignored)
+│   │       └── application.yml.example    # Configuration template (committed)
 │   └── test/
 │       └── java/com/example/backend/      # Test classes
 │
@@ -203,204 +200,16 @@ Back-end/
 
 ---
 
-## Development Setup
-
-### IDE Configuration
-
-#### IntelliJ IDEA
-
-1. Open the project: `File > Open > Select project root`
-2. Import as Maven project when prompted
-3. Enable annotation processing: `Settings > Build > Compiler > Annotation Processors > Enable`
-4. Set JDK: `Project Structure > Project > SDK > Java 17+`
-
-#### Visual Studio Code
-
-1. Install extensions:
-   - Extension Pack for Java
-   - Spring Boot Extension Pack
-   - Docker
-2. Open the project folder
-3. VS Code will automatically detect Maven project
-
-### Environment Variables
-
-Create a `.env` file in the project root (not committed to Git):
-
-**Bash (Linux/macOS) - Create .env file:**
-```bash
-cat > .env << 'EOF'
-# Database
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=trading
-DB_USER=postgres
-DB_PASSWORD=postgres
-
-# Exchange API (Phase 3+)
-BINANCE_API_KEY=your_api_key
-BINANCE_API_SECRET=your_api_secret
-
-# Application
-SERVER_PORT=8080
-SPRING_PROFILES_ACTIVE=dev
-EOF
-```
-
-**PowerShell (Windows 10/11) - Create .env file:**
-```powershell
-@"
-# Database
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=trading
-DB_USER=postgres
-DB_PASSWORD=postgres
-
-# Exchange API (Phase 3+)
-BINANCE_API_KEY=your_api_key
-BINANCE_API_SECRET=your_api_secret
-
-# Application
-SERVER_PORT=8080
-SPRING_PROFILES_ACTIVE=dev
-"@ | Out-File -FilePath .env -Encoding utf8
-```
-
-### Database Setup
-
-**Bash (Linux/macOS):**
-```bash
-# Start PostgreSQL with Docker
-docker run -d \
-  --name trading-db \
-  -e POSTGRES_DB=trading \
-  -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=postgres \
-  -p 5432:5432 \
-  postgres:15
-
-# Verify connection
-docker exec -it trading-db psql -U postgres -d trading
-```
-
-**PowerShell (Windows 10/11):**
-```powershell
-# Start PostgreSQL with Docker
-docker run -d `
-  --name trading-db `
-  -e POSTGRES_DB=trading `
-  -e POSTGRES_USER=postgres `
-  -e POSTGRES_PASSWORD=postgres `
-  -p 5432:5432 `
-  postgres:15
-
-# Verify connection
-docker exec -it trading-db psql -U postgres -d trading
-```
-
----
-
-## Configuration
-
-### Application Profiles
-
-| Profile | Purpose | Activation |
-|---------|---------|------------|
-| `default` | Local development with H2 | Default |
-| `dev` | Development with PostgreSQL | `-Dspring.profiles.active=dev` |
-| `prod` | Production settings | `-Dspring.profiles.active=prod` |
-
-### Configuration Files
-
-| File | Purpose |
-|------|---------|
-| `application.properties` | Base configuration |
-| `application-dev.properties` | Development overrides |
-| `application-prod.properties` | Production overrides |
-
----
-
-## Running the Application
-
-### Development Mode
-
-**Bash (Linux/macOS):**
-```bash
-# Using Maven wrapper
-./mvnw spring-boot:run
-
-# With specific profile
-./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
-
-# With debug enabled
-./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
-```
-
-**PowerShell (Windows 10/11):**
-```powershell
-# Using Maven wrapper
-.\mvnw.cmd spring-boot:run
-
-# With specific profile
-.\mvnw.cmd spring-boot:run -D"spring-boot.run.profiles=dev"
-
-# With debug enabled
-.\mvnw.cmd spring-boot:run -D"spring-boot.run.jvmArguments=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
-```
-
-### Building for Production
-
-**Bash (Linux/macOS):**
-```bash
-# Build JAR
-./mvnw clean package -DskipTests
-
-# Run JAR
-java -jar target/back-end-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
-```
-
-**PowerShell (Windows 10/11):**
-```powershell
-# Build JAR
-.\mvnw.cmd clean package -DskipTests
-
-# Run JAR
-java -jar target\back-end-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
-```
-
-### Docker (Phase 2+)
-
-**Bash (Linux/macOS):**
-```bash
-# Build Docker image
-docker build -t trading-platform/api:latest .
-
-# Run with Docker Compose
-docker compose up -d
-```
-
-**PowerShell (Windows 10/11):**
-```powershell
-# Build Docker image
-docker build -t trading-platform/api:latest .
-
-# Run with Docker Compose
-docker compose up -d
-```
-
----
-
 ## Documentation
 
-| Document | Description |
-|----------|-------------|
-| [Architecture.md](./doc/Architecture.md) | Evolutionary architecture with phases and rationale |
-| [CoreRequirements.md](./doc/CoreRequirements.md) | Business requirements |
-| [Features.md](./doc/Features.md) | Feature specifications and flows |
-| [ProjectPlan.md](./doc/ProjectPlan.md) | 9-week implementation plan |
-| [UseCaseDiagram.md](./doc/UseCaseDiagram.md) | User interactions and flows |
-| [Operations.md](./doc/Operations.md) | Monitoring, CI/CD, Kubernetes |
+| Document                                         | Description                                         |
+| ------------------------------------------------ | --------------------------------------------------- |
+| [Architecture.md](./doc/Architecture.md)         | Evolutionary architecture with phases and rationale |
+| [CoreRequirements.md](./doc/CoreRequirements.md) | Business requirements                               |
+| [Features.md](./doc/Features.md)                 | Feature specifications and flows                    |
+| [ProjectPlan.md](./doc/ProjectPlan.md)           | 9-week implementation plan                          |
+| [UseCaseDiagram.md](./doc/UseCaseDiagram.md)     | User interactions and flows                         |
+| [Operations.md](./doc/Operations.md)             | Monitoring, CI/CD, Kubernetes                       |
 
 ---
 
@@ -408,54 +217,30 @@ docker compose up -d
 
 ### Backend
 
-| Technology | Purpose |
-|------------|---------|
-| Java 17+ | Runtime |
-| Spring Boot 3.x | Application framework |
-| Spring Data JPA | Database access |
+| Technology       | Purpose                 |
+| ---------------- | ----------------------- |
+| Java 17+         | Runtime                 |
+| Spring Boot 3.x  | Application framework   |
+| Spring Data JPA  | Database access         |
 | Spring WebSocket | Real-time communication |
-| Lombok | Boilerplate reduction |
+| Lombok           | Boilerplate reduction   |
 
 ### Databases (per phase)
 
-| Phase | Databases |
-|-------|-----------|
-| 1 | PostgreSQL (JSONB) |
-| 2+ | PostgreSQL + MongoDB + Redis |
-| 4+ | + Apache Kafka |
-| 5+ | + TimescaleDB |
+| Phase | Databases                    |
+| ----- | ---------------------------- |
+| 1     | PostgreSQL (JSONB)           |
+| 2+    | PostgreSQL + MongoDB + Redis |
+| 4+    | + Apache Kafka               |
+| 5+    | + TimescaleDB                |
 
 ### Frontend
 
-| Technology | Purpose |
-|------------|---------|
-| Next.js | React framework |
+| Technology         | Purpose             |
+| ------------------ | ------------------- |
+| Next.js            | React framework     |
 | TradingView Charts | Price visualization |
-| WebSocket | Real-time updates |
-
----
-
-## API Reference
-
-### Health Check
-
-```http
-GET /actuator/health
-```
-
-### Articles (Phase 2+)
-
-```http
-GET /api/articles
-GET /api/articles/{id}
-```
-
-### Prices (Phase 3+)
-
-```http
-GET /api/prices/historical?symbol=BTCUSDT&timeframe=1h
-WS  /ws/prices
-```
+| WebSocket          | Real-time updates   |
 
 ---
 
@@ -470,13 +255,6 @@ WS  /ws/prices
 
 ## License
 
-This project is for educational purposes at HCMUS.
+This project is for educational purposes.
 
 ---
-
-## References
-
-- [Spring Boot Documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/)
-- [TradingView Charting Library](https://www.tradingview.com/chart/)
-- [Apache Kafka Documentation](https://kafka.apache.org/documentation/)
-
