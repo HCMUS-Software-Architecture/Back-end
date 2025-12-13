@@ -1,6 +1,7 @@
 package com.example.backend.service;
 
-import com.example.backend.entity.Article;
+import com.example.backend.model.Article;
+import com.example.backend.repository.ArticleDocumentRepository;
 import com.example.backend.repository.ArticleRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -16,14 +17,14 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class ArticleService {
-    private final ArticleRepository articleRepository;
     private final Logger log =  LoggerFactory.getLogger(this.getClass());
+    private final ArticleDocumentRepository articleRepository;
 
     public Page<Article> getAllArticles(Pageable pageable) {
         return articleRepository.findAll(pageable);
     }
 
-    public Optional<Article> getArticleById(UUID id) {
+    public Optional<Article> getArticleById(String id) {
         return articleRepository.findById(id);
     }
 
