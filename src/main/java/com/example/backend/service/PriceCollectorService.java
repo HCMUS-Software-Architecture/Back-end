@@ -132,4 +132,7 @@ public class PriceCollectorService {
     public BigDecimal getLatestPrice(String symbol) {
         return latestPrices.get(symbol.toUpperCase());
     }
+    public List<String> getAllSymbols() {
+        return List.of(symbolsConfig.split(","));
+    }
 }

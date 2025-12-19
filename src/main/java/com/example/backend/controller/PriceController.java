@@ -43,7 +43,7 @@ public class PriceController {
 
     @GetMapping("/symbols")
     public ResponseEntity<List<String>> getAvailableSymbols() {
-        return ResponseEntity.ok(List.of("BTCUSDT", "ETHUSDT", "BNBUSDT"));
+        return ResponseEntity.ok(priceCollectorService.getAllSymbols());
     }
 }
 

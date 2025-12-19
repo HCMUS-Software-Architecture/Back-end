@@ -6,15 +6,14 @@ import com.example.backend.repository.PriceCandleRepository;
 import com.example.backend.repository.PriceTickRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,6 +24,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PriceCandleService {
     private final TickBufferService tickBufferService;
     private final PriceCandleRepository candleRepository;
+
+    @Value("${price.symbols}")
+    private String currencySymbols;
 
 
     private final Map<String, PriceCandle> currentCandles = new ConcurrentHashMap<>();
@@ -109,7 +111,7 @@ public class PriceCandleService {
 
     // Hàm chung để gộp nến nhỏ thành nến lớn
     private void rollupCandles(String targetInterval, int minutes) {
-        List<String> symbols = List.of("BTCUSDT", "ETHUSDT"); // Nên lấy từ config
+        List<String> symbols = List.of(currencySymbols.split(",")); // Nên lấy từ config
         Instant endTime = Instant.now().truncatedTo(ChronoUnit.MINUTES);
         Instant startTime = endTime.minus(minutes, ChronoUnit.MINUTES);
 
