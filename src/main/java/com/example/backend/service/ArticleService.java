@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,11 +41,13 @@ public class ArticleService {
         return articleRepository.save(article);
     }
 
-    public Page<Article> getArticlesBySource(String source, Pageable pageable) {
-        return articleRepository.findBySource(source, pageable);
+    public PagedModel<Article> getArticlesBySource(String source, Pageable pageable) {
+        Page<Article> articles = articleRepository.findBySource(source, pageable);
+        return new PagedModel<>(articles);
     }
 
-    public Page<Article> searchArticles(String keyword, Pageable pageable) {
-        return articleRepository.searchByKeyword(keyword, pageable);
+    public PagedModel<Article> searchArticles(String keyword, Pageable pageable) {
+        Page<Article> articles = articleRepository.searchByKeyword(keyword, pageable);
+        return new  PagedModel<>(articles);
     }
 }
