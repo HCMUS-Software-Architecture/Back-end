@@ -4,6 +4,7 @@ import com.example.backend.dto.LoginRequest;
 import com.example.backend.dto.RegisterRequest;
 import com.example.backend.exception.UserAlreadyExistsException;
 import com.example.backend.service.AuthService;
+import com.example.backend.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 public class AuthController {
     private final AuthService authService;
+    private final JwtService jwtService;
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request) {
@@ -31,14 +33,21 @@ public class AuthController {
         Map<String, String> token = authService.login(request.getEmail(), request.getPassword());
         return ResponseEntity.status(HttpStatus.OK).body(token);
     }
-
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(@RequestBody Map<String, String> request) {
+        String refreshToken = request.get("refreshToken");
+        String newAccessToken = jwtService.getAccessTokenFromRefreshToken(refreshToken);
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("accessToken", newAccessToken));
+    }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<?> handleLoginFail() {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+    public ResponseEntity<?> handleLoginFail(BadCredentialsException ex) {
+        log.error(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
     }
     @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<?> handleRegisterFail() {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body("User already exists");
+    public ResponseEntity<?> handleRegisterFail(UserAlreadyExistsException ex) {
+        log.error(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 }

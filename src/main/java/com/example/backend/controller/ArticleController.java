@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,7 +38,7 @@ public class ArticleController {
     }
 
     @GetMapping("/source/{source}")
-    public ResponseEntity<Page<Article>> getArticlesBySource(
+    public ResponseEntity<PagedModel<Article>> getArticlesBySource(
             @PathVariable String source,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
@@ -47,7 +48,7 @@ public class ArticleController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<Article>> searchArticles(
+    public ResponseEntity<PagedModel<Article>> searchArticles(
             @RequestParam String q,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
