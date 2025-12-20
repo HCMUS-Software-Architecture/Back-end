@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -13,8 +14,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class JwtService {
-    @Value("${secret-key}")
+    @Value("${token.secret}")
     private String jwtSecretKey;
 
     private final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 30;  // 1 hour
@@ -24,10 +26,15 @@ public class JwtService {
         return Keys.hmacShaKeyFor(jwtSecretKey.getBytes());
     }
 
-    public String generateAccessToken(String username, Long user_id) {
+    public String generateAccessToken(String user_id) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("user_id",  user_id);
-        return createToken(claims, username, ACCESS_TOKEN_EXPIRATION);
+        return createToken(claims, user_id, ACCESS_TOKEN_EXPIRATION);
+    }
+    public String generateRefreshToken(String user_id) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("user_id",  user_id);
+        return createToken(claims, null, REFRESH_TOKEN_EXPIRATION);
     }
 
     private String createToken(Map<String, Object> claims, String userId, long expiration) {
@@ -42,9 +49,8 @@ public class JwtService {
 
     public String getAccessTokenFromRefreshToken(String refreshToken) {
         String user_name = extractUsername(refreshToken);
-        Long id = extractUserId(refreshToken);
-        String newAccessToken = generateAccessToken(user_name, id);
-        return newAccessToken;
+        String id = extractUserId(refreshToken);
+        return generateAccessToken(id);
     }
 
 
@@ -52,10 +58,9 @@ public class JwtService {
         return parseToken(token).getSubject();
     }
 
-    public Long extractUserId(String token) {
+    public String extractUserId(String token) {
         Object id = parseToken(token).get("user_id");
-        if (id instanceof Integer i) return i.longValue();
-        if (id instanceof Long l) return l;
+        if (id instanceof String i) return id.toString();
         return null;
     }
 
@@ -79,7 +84,5 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody();
     }
-
-
 
 }

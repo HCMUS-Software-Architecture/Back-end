@@ -1,6 +1,8 @@
 package com.example.backend.config;
 
 import com.example.backend.filter.JwtAuthFilter;
+import com.example.backend.service.JwtService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,16 +15,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
-
+    private final JwtAuthFilter jwtAuthFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("api/login", "/api/sign-up").permitAll()
-                                .anyRequest().authenticated())
-                .addFilterBefore(new JwtAuthFilter(), UsernamePasswordAuthenticationFilter.class)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                        .anyRequest().authenticated())
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
 
     }
@@ -30,10 +33,5 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public JwtAuthFilter jwtAuthFilter() {
-        return new JwtAuthFilter();
     }
 }
