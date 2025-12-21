@@ -1,5 +1,7 @@
 # TRADING PLATFORM - API SPECIFICATION
 
+All routes except login, register and refresh need to add 'Authorization: Bearer' to header
+
 ## Health Check Service
 
 ### GET `/api/health/health`
@@ -22,6 +24,129 @@ Get system version information
 {
   "version": "1.0.0-SNAPSHOT",
   "phase": "1"
+}
+```
+
+## Authentication Service
+
+### POST `/api/auth/register`
+Register a new user
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "password123",
+  "userName": "John Doe"
+}
+```
+
+**Response (201):**
+```json
+{
+  "message": "User has been registered successfully"
+}
+```
+
+**Error Response (400):**
+```json
+{
+  "error": "Bad Request",
+  "message": "Email already exists"
+}
+```
+
+### POST `/api/auth/login`
+Authenticate user and get tokens
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+```
+
+**Response (200):**
+```json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+**Error Response (401):**
+```json
+{
+  "error": "Unauthorized",
+  "message": "Invalid email or password"
+}
+```
+
+### POST `/api/auth/refresh`
+Refresh access token using refresh token
+
+**Request Body:**
+```json
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+**Response (200):**
+```json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+**Error Response (401):**
+```json
+{
+  "error": "Unauthorized",
+  "message": "Invalid refresh token"
+}
+```
+
+### GET `/api/auth/logout`
+Logout user by revoking refresh token
+
+
+**Response (200):**
+```json
+{
+  "message": "User has been logged out"
+}
+```
+
+### GET `/api/me`
+Get current authenticated user information
+
+**Headers:**
+- `Authorization: Bearer <accessToken>`
+
+**Response (200):**
+```json
+{
+  "id": "uuid",
+  "fullName": "John Doe"
+}
+```
+
+**Error Response (401):**
+```json
+{
+  "error": "Unauthorized",
+  "message": "Invalid or missing token"
+}
+```
+
+**Error Response (404):**
+```json
+{
+  "error": "Not Found",
+  "message": "User not found"
 }
 ```
 

@@ -1,5 +1,8 @@
 package com.example.backend.service;
 
+import com.example.backend.entity.RefreshToken;
+import com.example.backend.exception.RefreshTokenRevokeException;
+import com.example.backend.repository.RefreshTokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -8,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.security.auth.RefreshFailedException;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
@@ -22,6 +26,8 @@ public class JwtService {
     private final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 30;  // 1 hour
     private final long REFRESH_TOKEN_EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7 ngày
 
+    private final RefreshTokenRepository refreshTokenRepository;
+
     private Key getSignKey() {
         return Keys.hmacShaKeyFor(jwtSecretKey.getBytes());
     }
@@ -34,7 +40,16 @@ public class JwtService {
     public String generateRefreshToken(String user_id) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("user_id",  user_id);
-        return createToken(claims, null, REFRESH_TOKEN_EXPIRATION);
+        String refreshToken = createToken(claims, user_id, REFRESH_TOKEN_EXPIRATION);
+
+        refreshTokenRepository.save(RefreshToken.builder()
+                        .expires_at(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
+                        .is_revoke(false)
+                        .userId(user_id)
+                        .token(refreshToken)
+                        .build());
+
+        return refreshToken;
     }
 
     private String createToken(Map<String, Object> claims, String userId, long expiration) {
@@ -47,10 +62,22 @@ public class JwtService {
                 .compact();
     }
 
-    public String getAccessTokenFromRefreshToken(String refreshToken) {
-        String user_name = extractUsername(refreshToken);
-        String id = extractUserId(refreshToken);
-        return generateAccessToken(id);
+    public Map<String, String> getAccessTokenFromRefreshToken(String refreshToken) throws RefreshTokenRevokeException {
+        String userId = extractUserId(refreshToken);
+
+        RefreshToken token = refreshTokenRepository.findByToken(refreshToken);
+        if(!token.getIs_revoke()) {
+            final String newAccessToken = generateAccessToken(userId);
+            final String newRefreshToken = generateRefreshToken(userId);
+
+            token.setIs_revoke(true);
+            refreshTokenRepository.save(token);
+
+            return Map.of("accessToken", newAccessToken, "refreshToken", newRefreshToken);
+        }
+        else {
+            throw new RefreshTokenRevokeException("refresh token is revoke");
+        }
     }
 
 
