@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
 
-@Data
 @Entity
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

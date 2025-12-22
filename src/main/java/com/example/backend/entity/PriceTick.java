@@ -11,7 +11,6 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "price_ticks")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
