@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
             RefreshTokenNotExist.class,
             RefreshTokenRevokeException.class
     })
-    public ResponseEntity<ErrorResponseDto> handleException(Exception e) {
+    public ResponseEntity<?> handleException(Exception e) {
         return buildResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
     }
 
@@ -31,7 +31,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<?> handleUsernameNotFoundException(UsernameNotFoundException ex) {
+    public ResponseEntity<ErrorResponseDto> handleUsernameNotFoundException(UsernameNotFoundException ex) {
         log.error(ex.getMessage());
         return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
     }

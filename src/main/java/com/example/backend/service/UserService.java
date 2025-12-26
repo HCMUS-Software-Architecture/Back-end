@@ -23,6 +23,7 @@ public class UserService {
     public UserDto getUserById() throws UsernameNotFoundException {
         User user = userRepository.findById(getUserId()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
         UserDto userDto = new UserDto();
+        userDto.setId(user.getId());
         userDto.setEmail(user.getAuthUser().getEmail());
         userDto.setFullName(user.getFullName());
         return userDto;

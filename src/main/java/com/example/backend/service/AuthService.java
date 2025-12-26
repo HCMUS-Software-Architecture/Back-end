@@ -1,5 +1,7 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.TokenResponse;
+import com.example.backend.dto.UserDto;
 import com.example.backend.entity.AuthUser;
 import com.example.backend.entity.RefreshToken;
 import com.example.backend.entity.User;
@@ -34,7 +36,7 @@ public class AuthService {
         this.refreshTokenRepository = refreshTokenRepository;
     }
 
-    public void registerUser(String email, String password, String fullName) throws UserAlreadyExistsException {
+    public UserDto registerUser(String email, String password, String fullName) throws UserAlreadyExistsException {
         Optional<AuthUser> authUserExists = authUserRepository.findByEmail(email);
         if (authUserExists.isPresent()) {
             throw new UserAlreadyExistsException("Email already exists");
@@ -48,9 +50,15 @@ public class AuthService {
                 .user(newUser)
                 .build();
         authUserRepository.save(authUser);
+
+        UserDto userDto = new UserDto();
+        userDto.setEmail(email);
+        userDto.setFullName(fullName);
+        userDto.setId(authUser.getUser().getId());
+        return userDto;
     }
 
-    public Map<String, String> login(String email, String password) throws BadCredentialsException {
+    public TokenResponse login(String email, String password) throws BadCredentialsException {
         Optional<AuthUser> authUserExists = authUserRepository.findByEmail(email);
         if (authUserExists.isEmpty()) {
             throw new BadCredentialsException("Invalid email or password");
@@ -64,11 +72,11 @@ public class AuthService {
         String accessToken = jwtService.generateAccessToken(authUser.getUser().getId().toString());
         String refreshToken = jwtService.generateRefreshToken(authUser.getUser().getId().toString());
 
-        Map<String, String> map = new HashMap<>();
-        map.put("accessToken", accessToken);
-        map.put("refreshToken", refreshToken);
+        TokenResponse tokenResponse = new TokenResponse();
+        tokenResponse.setAccessToken(accessToken);
+        tokenResponse.setRefreshToken(refreshToken);
 
-        return map;
+        return tokenResponse;
     }
 
     public void logout() throws RefreshTokenNotExist {
