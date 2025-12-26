@@ -92,19 +92,19 @@ public class PriceCandleService {
     }
 
     // 2. JOB TẠO NẾN 5M (Rollup từ nến 1m) - Thay thế aggregate5mCandles cũ
-    @Scheduled(fixedRate = 300000, initialDelay = 300000) // 5m
+    @Scheduled(cron = "0 */5 * * * *") // 5m
     public void aggregate5mCandles() {
         rollupCandles("5m", 5);
     }
 
     // 3. Candle 10m
-    @Scheduled(fixedRate = 600000, initialDelay = 600000)
+    @Scheduled(cron = "0 */10 * * * *")
     public void aggregate10mCandles() {
         rollupCandles("10m", 10);
     }
 
     // 3. JOB TẠO NẾN 1H (Rollup từ nến 1m hoặc 5m) - Thay thế aggregate1hCandles cũ
-    @Scheduled(fixedRate = 3600000) // 1 hour 10s from app starting
+    @Scheduled(cron = "0 0 * * * *") // 1 hour 10s from app starting
     public void aggregate1hCandles() {
         rollupCandles("1h", 60);
     }
