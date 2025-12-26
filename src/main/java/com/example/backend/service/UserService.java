@@ -1,28 +1,31 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.UserDto;
 import com.example.backend.entity.User;
 import com.example.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
 
-    public User getUserById() throws UsernameNotFoundException {
-        String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<User> userOptional = userRepository.findUserById(UUID.fromString(userId));
-        if(userOptional.isPresent()) {
-            return userOptional.get();
-        }
-        else {
-            throw new UsernameNotFoundException("User not found");
-        }
+    private UUID getUserId() {
+        String userIdFromContext = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return UUID.fromString(userIdFromContext);
     }
+    public UserDto getUserById() throws UsernameNotFoundException {
+        User user = userRepository.findById(getUserId()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        UserDto userDto = new UserDto();
+        userDto.setEmail(user.getAuthUser().getEmail());
+        userDto.setFullName(user.getFullName());
+        return userDto;
+    }
+
 }
