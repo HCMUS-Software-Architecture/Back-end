@@ -50,21 +50,23 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "Refresh Token is invalid or revoked",
                     content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
     })
-    public ResponseEntity<?> refresh(@RequestBody Map<String, String> request) {
-        String refreshToken = request.get("refreshToken");
-        Map<String, String> newCoupleToken = jwtService.getAccessTokenFromRefreshToken(refreshToken);
+    public ResponseEntity<TokenResponse> refresh(@RequestBody RefreshTokenRequest request) {
+        String refreshToken = request.getRefreshToken();
+        TokenResponse newCoupleToken = jwtService.getAccessTokenFromRefreshToken(refreshToken);
         return ResponseEntity.status(HttpStatus.OK).body(newCoupleToken);
     }
 
-    @GetMapping("/logout")
+    @PostMapping("/logout")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Logout sucessfully",
+            @ApiResponse(responseCode = "200", description = "Logout successfully",
                     content = @Content(schema = @Schema(implementation = MessageResponse.class))),
             @ApiResponse(responseCode = "401", description = "Token not found or user hasn't login",
                     content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
     })
-    public ResponseEntity<?> logout() {
-        authService.logout();
+    public ResponseEntity<?> logout(@RequestBody RefreshTokenRequest request) {
+        String refreshToken = request.getRefreshToken();
+        authService.logout(refreshToken);
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "User has been logged out"));
     }
+
 }

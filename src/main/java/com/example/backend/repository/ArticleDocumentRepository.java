@@ -3,6 +3,7 @@ package com.example.backend.repository;
 import com.example.backend.model.Article;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.web.PagedModel;
@@ -33,4 +34,6 @@ public interface ArticleDocumentRepository extends MongoRepository<Article, Stri
 
     @Query("{ 'sentiment.label': ?0 }")
     Page<Article> findBySentiment(String sentiment, Pageable pageable);
+
+    void deleteByCreatedAtBefore(LocalDateTime createdAt);
 }

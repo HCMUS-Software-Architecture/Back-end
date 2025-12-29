@@ -10,9 +10,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +67,7 @@ public class PriceCandleService {
                     .close(tick.getPrice())
                     .volume(tick.getQuantity())
                     .trades(1)
+                    .createdAt(LocalDateTime.now())
                     .build();
         } else {
             // Trường hợp 2: Tick vẫn nằm trong phút hiện tại -> Update High/Low/Close/Volume
@@ -104,7 +107,7 @@ public class PriceCandleService {
     }
 
     // 3. JOB TẠO NẾN 1H (Rollup từ nến 1m hoặc 5m) - Thay thế aggregate1hCandles cũ
-    @Scheduled(cron = "0 0 * * * *") // 1 hour 10s from app starting
+    @Scheduled(cron = "0 0 * * * *")
     public void aggregate1hCandles() {
         rollupCandles("1h", 60);
     }
@@ -142,6 +145,7 @@ public class PriceCandleService {
                     .low(low)
                     .volume(volume)
                     .trades(trades)
+                    .createdAt(LocalDateTime.now())
                     .build();
 
             candleRepository.save(bigCandle);
@@ -155,5 +159,12 @@ public class PriceCandleService {
                 interval,
                 PageRequest.of(0, limit)
         );
+    }
+
+    @Scheduled(cron = "0 0 * * * *")
+    @Transactional
+    public void deletePriceCandlePeriodic(){
+        LocalDateTime now = LocalDateTime.now().minusWeeks(1);
+        candleRepository.deleteByCreatedAtBeforeOrCreatedAtIsNull(now);
     }
 }

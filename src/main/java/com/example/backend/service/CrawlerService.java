@@ -28,32 +28,6 @@ public class CrawlerService {
                     "a",
                     ".article-body, .content"
             ),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             "cafef", new SourceConfig(
                     "https://cafef.vn/",
                     "div.tlitem",

@@ -10,11 +10,13 @@ import com.example.backend.exception.UserAlreadyExistsException;
 import com.example.backend.repository.AuthUserRepository;
 import com.example.backend.repository.RefreshTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -79,9 +81,8 @@ public class AuthService {
         return tokenResponse;
     }
 
-    public void logout() throws RefreshTokenNotExist {
-        String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<RefreshToken> token = refreshTokenRepository.findByUserId(userId);
+    public void logout(String oldRefreshToken) throws RefreshTokenNotExist {
+        Optional<RefreshToken> token = refreshTokenRepository.findByTokenRevoked(oldRefreshToken);
 
         if(token.isPresent()) {
             RefreshToken refreshToken = token.get();
@@ -91,5 +92,11 @@ public class AuthService {
         else {
             throw new RefreshTokenNotExist("Refresh token not exist");
         }
+    }
+
+    @Scheduled(cron = "0 0 * * * *")
+    @Transactional
+    public void deleteTokenPeriodic() throws Exception {
+        refreshTokenRepository.removeByIsRevoke();
     }
 }

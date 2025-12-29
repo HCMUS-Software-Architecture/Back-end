@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.TokenResponse;
 import com.example.backend.entity.RefreshToken;
 import com.example.backend.exception.RefreshTokenRevokeException;
 import com.example.backend.repository.RefreshTokenRepository;
@@ -62,7 +63,7 @@ public class JwtService {
                 .compact();
     }
 
-    public Map<String, String> getAccessTokenFromRefreshToken(String refreshToken) throws RefreshTokenRevokeException {
+    public TokenResponse getAccessTokenFromRefreshToken(String refreshToken) throws RefreshTokenRevokeException {
         String userId = extractUserId(refreshToken);
 
         RefreshToken token = refreshTokenRepository.findByToken(refreshToken);
@@ -73,7 +74,11 @@ public class JwtService {
             token.setIs_revoke(true);
             refreshTokenRepository.save(token);
 
-            return Map.of("accessToken", newAccessToken, "refreshToken", newRefreshToken);
+            TokenResponse tokenResponse = new TokenResponse();
+            tokenResponse.setAccessToken(newAccessToken);
+            tokenResponse.setRefreshToken(newRefreshToken);
+
+            return tokenResponse;
         }
         else {
             throw new RefreshTokenRevokeException("refresh token is revoke");
