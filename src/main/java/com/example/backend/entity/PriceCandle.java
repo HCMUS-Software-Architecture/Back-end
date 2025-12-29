@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -48,4 +49,6 @@ public class PriceCandle {
     private BigDecimal volume;
 
     private Integer trades;
+
+    private LocalDateTime createdAt;
 }

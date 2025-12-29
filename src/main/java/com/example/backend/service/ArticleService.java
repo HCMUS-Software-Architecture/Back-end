@@ -8,9 +8,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -49,5 +51,12 @@ public class ArticleService {
     public PagedModel<Article> searchArticles(String keyword, Pageable pageable) {
         Page<Article> articles = articleRepository.searchByKeyword(keyword, pageable);
         return new  PagedModel<>(articles);
+    }
+
+    @Transactional
+    @Scheduled(cron = "0 0 * * * *")
+    public void deleteArticlePeriodic() {
+        LocalDateTime now = LocalDateTime.now().minusDays(3);
+        articleRepository.deleteByCreatedAtBefore(now);
     }
 }
