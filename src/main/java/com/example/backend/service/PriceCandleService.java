@@ -1,13 +1,15 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.CandleDto;
 import com.example.backend.entity.PriceCandle;
 import com.example.backend.entity.PriceTick;
 import com.example.backend.repository.PriceCandleRepository;
-import com.example.backend.repository.PriceTickRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,126 +32,95 @@ public class PriceCandleService {
     @Value("${price.symbols}")
     private String currencySymbols;
 
-
+    private final SimpMessagingTemplate simpMessagingTemplate;
+    private final int[] supportedTime = {1, 5, 10, 15, 60, 240}; // 1m, 5m, 15m, 1h, 4h
     private final Map<String, PriceCandle> currentCandles = new ConcurrentHashMap<>();
+
+    private void broadcastCurrentCandle(String symbol, String timeCode) {
+        String key = symbol + "_" + timeCode;
+        PriceCandle priceCandle = currentCandles.get(key);
+
+        if(priceCandle == null) {
+            return;
+        }
+
+        CandleDto candleDto = new CandleDto();
+        candleDto.setSymbol(symbol);
+        candleDto.setOpen(priceCandle.getOpen());
+        candleDto.setHigh(priceCandle.getHigh());
+        candleDto.setLow(priceCandle.getLow());
+        candleDto.setClose(priceCandle.getClose());
+        candleDto.setVolume(priceCandle.getVolume());
+        candleDto.setOpenTime(priceCandle.getOpenTime().toEpochMilli());
+
+        //log.info(">>> ĐANG BẮN SOCKET {} cho {}: Giá = {}",
+          //      timeCode, symbol, candleDto.getClose());
+
+        simpMessagingTemplate.convertAndSend("/topic/candles/" + timeCode + "/" + symbol.toLowerCase(), candleDto);
+    }
 
     @Scheduled(fixedRate = 500)
     public void processBuffer() {
         Map<String, List<PriceTick>> batch = tickBufferService.drainBuffer();
 
         batch.forEach((symbol, ticks) -> {
-            ticks.forEach(tick -> updateCurrentCandle1m(symbol, tick));
+            for(int time: supportedTime){
+                String timeCode = time + "m";
+                ticks.forEach(tick -> updateCurrentCandleState(symbol, time, tick));
+                broadcastCurrentCandle(symbol, timeCode);
+            }
         });
     }
 
-    private void updateCurrentCandle1m(String symbol, PriceTick tick) {
-        Instant tickTime = tick.getTimestamp();
-        Instant candleOpenTime = tickTime.truncatedTo(ChronoUnit.MINUTES);
+    private void updateCurrentCandleState(String symbol, int timeMinute, PriceTick tick) {
+        long tickMillis = tick.getTimestamp().toEpochMilli();
+        long intervalMillis = timeMinute * 60 * 1000L;
+        long openTimeMillis = (tickMillis / intervalMillis) * intervalMillis;
+        Instant openTime = Instant.ofEpochMilli(openTimeMillis);
+        String key = symbol + "_" + timeMinute + "m";
 
-        PriceCandle candle = currentCandles.get(symbol);
+        //PriceCandle candle = currentCandles.get(symbol);
 
-        // Trường hợp 1: Chưa có nến hoặc tick đã sang phút mới -> Lưu nến cũ, tạo nến mới
-        if (candle == null || candle.getOpenTime().isBefore(candleOpenTime)) {
-            if (candle != null) {
-                // Đóng nến cũ hoàn toàn và lưu DB lần cuối
-                saveCandle(candle);
+        currentCandles.compute(key, (k, candle) -> {
+            if (candle == null || !candle.getOpenTime().equals(openTime)) {
+                if (candle != null) {
+                    // Đóng nến cũ hoàn toàn và lưu DB lần cuối
+                    saveCandle(candle);
+                }
+                // Tạo nến mới
+                candle = PriceCandle.builder()
+                        .symbol(symbol)
+                        .interval(timeMinute+"m")
+                        .openTime(openTime)
+                        .closeTime(openTime.plus(timeMinute, ChronoUnit.MINUTES))
+                        .open(tick.getPrice())
+                        .high(tick.getPrice())
+                        .low(tick.getPrice())
+                        .close(tick.getPrice())
+                        .volume(tick.getQuantity())
+                        .trades(1)
+                        .createdAt(LocalDateTime.now())
+                        .build();
+            } else {
+                // Trường hợp 2: Tick vẫn nằm trong phút hiện tại -> Update High/Low/Close/Volume
+                candle.setClose(tick.getPrice());
+                if (tick.getPrice().compareTo(candle.getHigh()) > 0) candle.setHigh(tick.getPrice());
+                if (tick.getPrice().compareTo(candle.getLow()) < 0) candle.setLow(tick.getPrice());
+                candle.setVolume(candle.getVolume().add(tick.getQuantity()));
+                candle.setTrades(candle.getTrades() + 1);
             }
-            // Tạo nến mới
-            candle = PriceCandle.builder()
-                    .symbol(symbol)
-                    .interval("1m")
-                    .openTime(candleOpenTime)
-                    // Close time của nến 1m là open + 1 phút
-                    .closeTime(candleOpenTime.plus(1, ChronoUnit.MINUTES))
-                    .open(tick.getPrice())
-                    .high(tick.getPrice())
-                    .low(tick.getPrice())
-                    .close(tick.getPrice())
-                    .volume(tick.getQuantity())
-                    .trades(1)
-                    .createdAt(LocalDateTime.now())
-                    .build();
-        } else {
-            // Trường hợp 2: Tick vẫn nằm trong phút hiện tại -> Update High/Low/Close/Volume
-            candle.setClose(tick.getPrice());
-            if (tick.getPrice().compareTo(candle.getHigh()) > 0) candle.setHigh(tick.getPrice());
-            if (tick.getPrice().compareTo(candle.getLow()) < 0) candle.setLow(tick.getPrice());
-            candle.setVolume(candle.getVolume().add(tick.getQuantity()));
-            candle.setTrades(candle.getTrades() + 1);
-        }
-
-        currentCandles.put(symbol, candle);
-
-        // Tùy chọn: Có thể save() liên tục mỗi 1s nếu muốn DB update realtime (hơi tốn resource)
-        // Hoặc chỉ save khi đóng nến (như code trên dòng 48).
-        // Để an toàn, mình khuyên save mỗi lần update (upsert) nếu lượng user ít.
+            return candle;
+        });
 
     }
 
-    private void saveCandle(PriceCandle candle) {
+    @Async
+    public void saveCandle(PriceCandle candle) {
         try {
+            log.info("Saving candle {} to DB - Interval: {}", candle.getSymbol(), candle.getInterval());
             candleRepository.save(candle);
         } catch (Exception e) {
             log.error("Error saving candle: {}", e.getMessage());
-        }
-    }
-
-    // 2. JOB TẠO NẾN 5M (Rollup từ nến 1m) - Thay thế aggregate5mCandles cũ
-    @Scheduled(cron = "0 */5 * * * *") // 5m
-    public void aggregate5mCandles() {
-        rollupCandles("5m", 5);
-    }
-
-    // 3. Candle 10m
-    @Scheduled(cron = "0 */10 * * * *")
-    public void aggregate10mCandles() {
-        rollupCandles("10m", 10);
-    }
-
-    // 3. JOB TẠO NẾN 1H (Rollup từ nến 1m hoặc 5m) - Thay thế aggregate1hCandles cũ
-    @Scheduled(cron = "0 0 * * * *")
-    public void aggregate1hCandles() {
-        rollupCandles("1h", 60);
-    }
-
-    // Hàm chung để gộp nến nhỏ thành nến lớn
-    private void rollupCandles(String targetInterval, int minutes) {
-        List<String> symbols = List.of(currencySymbols.split(",")); // Nên lấy từ config
-        Instant endTime = Instant.now().truncatedTo(ChronoUnit.MINUTES);
-        Instant startTime = endTime.minus(minutes, ChronoUnit.MINUTES);
-
-        for (String symbol : symbols) {
-            // Lấy các nến 1m trong khoảng thời gian này
-            List<PriceCandle> sourceCandles = candleRepository.findBySymbolAndIntervalAndOpenTimeBetween(
-                    symbol, "1m", startTime, endTime.minusSeconds(1) // Trừ 1s để không lấy nến của phút hiện tại
-            );
-
-            if (sourceCandles.isEmpty()) continue;
-
-            // Tính toán gộp
-            BigDecimal open = sourceCandles.get(0).getOpen();
-            BigDecimal close = sourceCandles.get(sourceCandles.size() - 1).getClose();
-            BigDecimal high = sourceCandles.stream().map(PriceCandle::getHigh).max(BigDecimal::compareTo).orElse(BigDecimal.ZERO);
-            BigDecimal low = sourceCandles.stream().map(PriceCandle::getLow).min(BigDecimal::compareTo).orElse(BigDecimal.ZERO);
-            BigDecimal volume = sourceCandles.stream().map(PriceCandle::getVolume).reduce(BigDecimal.ZERO, BigDecimal::add);
-            int trades = sourceCandles.stream().mapToInt(PriceCandle::getTrades).sum();
-
-            PriceCandle bigCandle = PriceCandle.builder()
-                    .symbol(symbol)
-                    .interval(targetInterval)
-                    .openTime(startTime)
-                    .closeTime(endTime)
-                    .open(open)
-                    .close(close)
-                    .high(high)
-                    .low(low)
-                    .volume(volume)
-                    .trades(trades)
-                    .createdAt(LocalDateTime.now())
-                    .build();
-
-            candleRepository.save(bigCandle);
-            log.info("Generated {} candle for {}", targetInterval, symbol);
         }
     }
 
