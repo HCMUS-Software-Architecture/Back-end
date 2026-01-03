@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>WS Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+<button onclick="send()">Send</button>
+<div id="test">
+
+</div>
+
+<script>
+    const socket = new SockJS("http://localhost:8081/ws/prices", null, {
+        withCredentials: true
+    });
+    const stompClient = Stomp.over(socket);
+    stompClient.debug = console.log;
+    const test = document.getElementById("test")
+
+    stompClient.connect({}, function () {
+        console.log("Connected");
+
+        stompClient.subscribe("/topic/candles/5m/btcusdt", function (msg) {
+            console.log("Received:", msg.body);
+            const child = document.createElement("p")
+            child.innerHTML = msg.body;
+            test.appendChild(child)
+        });
+    });
+
+    function send() {
+        stompClient.send(
+            "/app/price",
+            {},
+            JSON.stringify({ symbol: "BTC", price: 50000 })
+        );
+    }
+</script>
+</body>
+</html>
