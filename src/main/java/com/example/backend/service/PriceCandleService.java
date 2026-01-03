@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -61,15 +62,20 @@ public class PriceCandleService {
 
     @Scheduled(fixedRate = 500)
     public void processBuffer() {
-        Map<String, List<PriceTick>> batch = tickBufferService.drainBuffer();
+        try {
+            Map<String, List<PriceTick>> batch = tickBufferService.drainBuffer();
 
-        batch.forEach((symbol, ticks) -> {
-            for(int time: supportedTime){
-                String timeCode = time + "m";
-                ticks.forEach(tick -> updateCurrentCandleState(symbol, time, tick));
-                broadcastCurrentCandle(symbol, timeCode);
-            }
-        });
+            batch.forEach((symbol, ticks) -> {
+                for(int time: supportedTime){
+                    String timeCode = time + "m";
+                    ticks.forEach(tick -> updateCurrentCandleState(symbol, time, tick));
+                    broadcastCurrentCandle(symbol, timeCode);
+                }
+            });
+        }
+        catch (Exception e) {
+            log.error(e.getMessage());
+        }
     }
 
     private void updateCurrentCandleState(String symbol, int timeMinute, PriceTick tick) {
@@ -78,8 +84,6 @@ public class PriceCandleService {
         long openTimeMillis = (tickMillis / intervalMillis) * intervalMillis;
         Instant openTime = Instant.ofEpochMilli(openTimeMillis);
         String key = symbol + "_" + timeMinute + "m";
-
-        //PriceCandle candle = currentCandles.get(symbol);
 
         currentCandles.compute(key, (k, candle) -> {
             if (candle == null || !candle.getOpenTime().equals(openTime)) {
@@ -114,7 +118,6 @@ public class PriceCandleService {
 
     }
 
-    @Async
     public void saveCandle(PriceCandle candle) {
         try {
             log.info("Saving candle {} to DB - Interval: {}", candle.getSymbol(), candle.getInterval());

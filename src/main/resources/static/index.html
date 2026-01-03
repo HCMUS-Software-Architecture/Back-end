@@ -8,6 +8,9 @@
 </head>
 <body>
 <button onclick="send()">Send</button>
+<div id="test">
+
+</div>
 
 <script>
     const socket = new SockJS("http://localhost:8081/ws/prices", null, {
@@ -15,12 +18,16 @@
     });
     const stompClient = Stomp.over(socket);
     stompClient.debug = console.log;
+    const test = document.getElementById("test")
 
     stompClient.connect({}, function () {
         console.log("Connected");
 
-        stompClient.subscribe("/topic/candles/10m/btcusdt", function (msg) {
+        stompClient.subscribe("/topic/candles/5m/btcusdt", function (msg) {
             console.log("Received:", msg.body);
+            const child = document.createElement("p")
+            child.innerHTML = msg.body;
+            test.appendChild(child)
         });
     });
 
