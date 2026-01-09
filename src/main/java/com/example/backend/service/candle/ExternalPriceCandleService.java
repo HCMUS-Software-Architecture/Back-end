@@ -61,7 +61,7 @@ public class ExternalPriceCandleService implements ICandleService {
 
     @Override
     public List<PriceCandle> getCandles(String symbol, String interval, int limit) {
-        List<List<Object>> binanceResponse = binanceApiClient.getAllCandles(symbol, interval, limit);
+        List<List<Object>> binanceResponse = binanceApiClient.getAllCandles(symbol.toUpperCase(), interval, limit);
         List<PriceCandle> priceCandles = new ArrayList<>();
 
         for (List<Object> rawData : binanceResponse) {
