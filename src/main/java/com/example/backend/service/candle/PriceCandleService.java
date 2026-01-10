@@ -1,9 +1,10 @@
-package com.example.backend.service;
+package com.example.backend.service.candle;
 
 import com.example.backend.dto.CandleDto;
 import com.example.backend.entity.PriceCandle;
 import com.example.backend.entity.PriceTick;
 import com.example.backend.repository.PriceCandleRepository;
+import com.example.backend.service.TickBufferService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,13 +12,10 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -42,7 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PriceCandleService {
+public class PriceCandleService implements ICandleService {
     private final TickBufferService tickBufferService;
     private final PriceCandleRepository candleRepository;
 
@@ -153,6 +151,7 @@ public class PriceCandleService {
         }
     }
 
+    @Override
     /**
      * Get historical candles with caching
      * 

@@ -1,7 +1,8 @@
 package com.example.backend.controller;
 
 import com.example.backend.entity.PriceCandle;
-import com.example.backend.service.PriceCandleService;
+import com.example.backend.service.candle.ICandleService;
+import com.example.backend.service.candle.PriceCandleService;
 import com.example.backend.service.PriceCollectorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,10 +14,14 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/prices")
-@RequiredArgsConstructor
 public class PriceController {
     private final PriceCollectorService priceCollectorService;
-    private final PriceCandleService candleService;
+    private final ICandleService candleService;
+
+    public PriceController(PriceCollectorService priceCollectorService, ICandleService candleService) {
+        this.priceCollectorService = priceCollectorService;
+        this.candleService = candleService;
+    }
 
     @GetMapping("/current/{symbol}")
     public ResponseEntity<Map<String, Object>> getCurrentPrice(@PathVariable String symbol) {

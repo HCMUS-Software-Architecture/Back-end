@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
 public interface ArticleDocumentRepository extends MongoRepository<Article, String> {
     Optional<Article> findByUrl(String url);
 

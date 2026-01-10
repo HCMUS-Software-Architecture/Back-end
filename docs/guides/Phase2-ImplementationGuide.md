@@ -933,7 +933,7 @@ Create `src/main/java/com/example/backend/controller/PriceController.java`:
 package com.example.backend.controller;
 
 import com.example.backend.model.PriceCandle;
-import com.example.backend.service.PriceCandleService;
+import com.example.backend.service.candle.PriceCandleService;
 import com.example.backend.service.PriceCollectorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -947,10 +947,10 @@ import java.util.Map;
 @RequestMapping("/api/prices")
 @RequiredArgsConstructor
 public class PriceController {
-    
+
     private final PriceCollectorService priceCollectorService;
     private final PriceCandleService candleService;
-    
+
     @GetMapping("/current/{symbol}")
     public ResponseEntity<Map<String, Object>> getCurrentPrice(@PathVariable String symbol) {
         BigDecimal price = priceCollectorService.getLatestPrice(symbol.toUpperCase());
@@ -958,12 +958,12 @@ public class PriceController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(Map.of(
-            "symbol", symbol.toUpperCase(),
-            "price", price,
-            "timestamp", System.currentTimeMillis()
+                "symbol", symbol.toUpperCase(),
+                "price", price,
+                "timestamp", System.currentTimeMillis()
         ));
     }
-    
+
     @GetMapping("/historical")
     public ResponseEntity<List<PriceCandle>> getHistoricalCandles(
             @RequestParam String symbol,
@@ -973,7 +973,7 @@ public class PriceController {
         List<PriceCandle> candles = candleService.getCandles(symbol, interval, limit);
         return ResponseEntity.ok(candles);
     }
-    
+
     @GetMapping("/symbols")
     public ResponseEntity<List<String>> getAvailableSymbols() {
         return ResponseEntity.ok(List.of("BTCUSDT", "ETHUSDT", "BNBUSDT"));
