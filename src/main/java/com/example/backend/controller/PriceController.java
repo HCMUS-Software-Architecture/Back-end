@@ -23,18 +23,18 @@ public class PriceController {
         this.candleService = candleService;
     }
 
-    @GetMapping("/current/{symbol}")
-    public ResponseEntity<Map<String, Object>> getCurrentPrice(@PathVariable String symbol) {
-        BigDecimal price = priceCollectorService.getLatestPrice(symbol.toUpperCase());
-        if (price == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(Map.of(
-                "symbol", symbol.toUpperCase(),
-                "price", price,
-                "timestamp", System.currentTimeMillis()
-        ));
-    }
+//    @GetMapping("/current/{symbol}")
+//    public ResponseEntity<Map<String, Object>> getCurrentPrice(@PathVariable String symbol) {
+//        BigDecimal price = priceCollectorService.getLatestPrice(symbol.toUpperCase());
+//        if (price == null) {
+//            return ResponseEntity.notFound().build();
+//        }
+//        return ResponseEntity.ok(Map.of(
+//                "symbol", symbol.toUpperCase(),
+//                "price", price,
+//                "timestamp", System.currentTimeMillis()
+//        ));
+//    }
 
     @GetMapping("/historical")
     public ResponseEntity<List<PriceCandle>> getHistoricalCandles(

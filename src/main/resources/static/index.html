@@ -23,7 +23,7 @@
     stompClient.connect({}, function () {
         console.log("Connected");
 
-        stompClient.subscribe("/topic/candles/5m/btcusdt", function (msg) {
+        stompClient.subscribe("/topic/candles/3m/ethusdt", function (msg) {
             console.log("Received:", msg.body);
             const child = document.createElement("p")
             child.innerHTML = msg.body;

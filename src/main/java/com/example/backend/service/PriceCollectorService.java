@@ -1,6 +1,10 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.CandleDto;
+import com.example.backend.dto.binance.BinanceKlineEvent;
+import com.example.backend.entity.PriceCandle;
 import com.example.backend.entity.PriceTick;
+import com.example.backend.repository.PriceCandleRepository;
 import com.example.backend.repository.PriceTickRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,6 +22,8 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -27,111 +33,161 @@ import java.util.concurrent.*;
 public class PriceCollectorService {
     private final ObjectMapper objectMapper;
     private final SimpMessagingTemplate simpMessagingTemplate;
-    private final TickBufferService tickBufferService;
+    private final PriceCandleRepository priceCandleRepository;
     private final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1);
+    private final String[] supportedInterval = {"1m", "3m", "5m", "15m", "30m", "1h"};
 
-    @Value("${binance.ws.url:wss://stream.binance.com:9443/ws}")
-    private String binanceWsUrl;
+    // Dùng Combined Stream URL
+    @Value("${binance.ws.url:wss://stream.binance.com:9443/stream?streams=}")
+    private String binanceBaseUrl;
 
     @Value("${price.symbols:btcusdt,ethusdt}")
     private String symbolsConfig;
 
-    private final ConcurrentHashMap<String, WebSocketClient> connections = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, BigDecimal> latestPrices = new ConcurrentHashMap<>();
+    private WebSocketClient webSocketClient;
 
     @EventListener(ApplicationReadyEvent.class)
     public void init() {
         List<String> symbols = List.of(symbolsConfig.split(","));
-        symbols.forEach(this::connectToSymbol);
+        symbols.forEach(this::connectToBinanceStream);
     }
 
     @PreDestroy
     public void cleanup() {
-        connections.values().forEach(WebSocketClient::close);
+        if (webSocketClient != null) {
+            webSocketClient.close();
+        }
         executorService.shutdown();
     }
 
-    public void connectToSymbol(String symbol) {
-        String wsUrl = binanceWsUrl + "/" + symbol.toLowerCase() + "@trade";
+    public void connectToBinanceStream(String symbol) {
+        // 1. Build URL cho Combined Stream
+        // Format: <base>?streams=<symbol1>@kline_1m/<symbol2>@kline_1m
+//        String[] symbols = symbolsConfig.split(",");
+//        List<String> streamParams = new ArrayList<>();
+//
+//        // Ở đây tôi ví dụ chỉ subscribe nến 1m.
+//        // Nếu bạn muốn cả 5m, 1h, bạn phải thêm logic loop vào đây.
+//        String targetInterval = "1m";
+//
+//        for (String s : symbols) {
+//            streamParams.add(s.toLowerCase() + "@kline_" + targetInterval);
+//        }
+//        String fullUrl = binanceBaseUrl + String.join("/", streamParams);
+
+        List<String> streamParams = new ArrayList<>();
+
+        for(String interval : supportedInterval) {
+            streamParams.add(symbol.toLowerCase() + "@kline_" + interval);
+        }
+
+        String fullUrl = binanceBaseUrl + String.join("/", streamParams);
+        log.info("connect binance websocket for full url: {}", fullUrl);
 
         try {
-            WebSocketClient client = new WebSocketClient(new URI(wsUrl)) {
+            webSocketClient = new WebSocketClient(new URI(fullUrl)) {
                 @Override
                 public void onOpen(ServerHandshake handshake) {
-                    log.info("Connected to Binance WebSocket for {}", symbol);
+                    log.info("Connected to Binance Combined Stream: {}", fullUrl);
                 }
 
                 @Override
                 public void onMessage(String message) {
-                    handleTradeMessage(symbol, message);
+                    // Binance trả về dạng: {"stream":"btcusdt@kline_1m", "data": {...}}
+                    handleKlineMessage(message);
                 }
 
                 @Override
                 public void onClose(int code, String reason, boolean remote) {
-                    log.warn("Disconnected from Binance WebSocket for {}: {}", symbol, reason);
-                    // Reconnect after delay
+                    log.warn("Disconnected from Binance: {}", reason);
                     scheduleReconnect(symbol);
                 }
 
                 @Override
                 public void onError(Exception ex) {
-                    log.error("WebSocket error for {}: {}", symbol, ex.getMessage());
+                    log.error("WebSocket error: {}", ex.getMessage());
                 }
             };
 
-            client.connect();
-            connections.put(symbol, client);
+            webSocketClient.connect();
 
         } catch (Exception e) {
-            log.error("Failed to connect to Binance for {}: {}", symbol, e.getMessage());
+            log.error("Failed to init WebSocket: {}", e.getMessage());
         }
     }
 
-
-    protected void handleTradeMessage(String symbol, String message) {
+    private void handleKlineMessage(String message) {
         try {
-            JsonNode node = objectMapper.readTree(message);
+            // Combined stream trả về JSON có field "data". Ta chỉ cần parse phần "data"
+            // Hoặc parse cả cục nếu dùng DTO wrapper.
+            // Cách nhanh nhất là lấy node "data":
+            String dataStr = objectMapper.readTree(message).get("data").toString();
+            BinanceKlineEvent event = objectMapper.readValue(dataStr, BinanceKlineEvent.class);
 
-            BigDecimal price = new BigDecimal(node.get("p").asText());
-            BigDecimal quantity = new BigDecimal(node.get("q").asText());
-            long timestamp = node.get("T").asLong();
-
-            // Store tick
-            PriceTick tick = PriceTick.builder()
-                    .symbol(symbol.toUpperCase())
-                    .price(price)
-                    .quantity(quantity)
-                    .timestamp(Instant.ofEpochMilli(timestamp))
-                    .exchange("binance")
-                    .build();
-
-            tickBufferService.addTick(tick);
-
-            // Update latest price
-            latestPrices.put(symbol.toUpperCase(), price);
-
-            // Broadcast to WebSocket clients
-            simpMessagingTemplate.convertAndSend(
-                    "/topic/prices/" + symbol.toLowerCase(),
-                    tick
-            );
+            if ("kline".equals(event.getEventType())) {
+                processKline(event);
+            }
 
         } catch (Exception e) {
-            log.error("Failed to process trade message: {}", e.getMessage());
+            log.error("Error processing message: {}", e.getMessage());
+        }
+    }
+
+    private void processKline(BinanceKlineEvent event) {
+        BinanceKlineEvent.BinanceKlineData kline = event.getKline();
+        String symbol = event.getSymbol();
+        String interval = kline.getInterval();
+
+        // 1. Map sang CandleDto để bắn socket cho FE (Real-time update)
+        CandleDto candleDto = new CandleDto();
+        candleDto.setSymbol(symbol);
+        candleDto.setOpen(new BigDecimal(kline.getOpen()));
+        candleDto.setHigh(new BigDecimal(kline.getHigh()));
+        candleDto.setLow(new BigDecimal(kline.getLow()));
+        candleDto.setClose(new BigDecimal(kline.getClose())); // Giá realtime là Close
+        candleDto.setVolume(new BigDecimal(kline.getVolume()));
+        candleDto.setOpenTime(kline.getOpenTime());
+
+        // Topic: /topic/candles/1m/btcusdt
+        String destination = "/topic/candles/" + interval + "/" + symbol.toLowerCase();
+        simpMessagingTemplate.convertAndSend(destination, candleDto);
+
+        // 2. Nếu nến đã đóng (isClosed = true) -> Lưu vào DB
+        if (kline.isClosed()) {
+            saveClosedCandle(kline, symbol);
+        }
+    }
+
+    private void saveClosedCandle(BinanceKlineEvent.BinanceKlineData kline, String symbol) {
+        try {
+            PriceCandle entity = PriceCandle.builder()
+                    .symbol(symbol.toUpperCase())
+                    .interval(kline.getInterval())
+                    .openTime(Instant.ofEpochMilli(kline.getOpenTime()))
+                    .closeTime(Instant.ofEpochMilli(kline.getCloseTime()))
+                    .open(new BigDecimal(kline.getOpen()))
+                    .high(new BigDecimal(kline.getHigh()))
+                    .low(new BigDecimal(kline.getLow()))
+                    .close(new BigDecimal(kline.getClose()))
+                    .volume(new BigDecimal(kline.getVolume()))
+                    .trades(kline.getTrades())
+                    .createdAt(LocalDateTime.now())
+                    .build();
+
+            priceCandleRepository.save(entity);
+            log.info("Saved closed candle: {} {}", symbol, kline.getInterval());
+        } catch (Exception e) {
+            log.error("Failed to save candle: {}", e.getMessage());
         }
     }
 
     private void scheduleReconnect(String symbol) {
-
-        // Simple reconnect logic - in production use exponential backoff
         executorService.schedule(() -> {
-            connectToSymbol(symbol);
+            connectToBinanceStream(symbol);
         }, 5, TimeUnit.SECONDS);
     }
 
-    public BigDecimal getLatestPrice(String symbol) {
-        return latestPrices.get(symbol.toUpperCase());
-    }
+
     public List<String> getAllSymbols() {
         return List.of(symbolsConfig.split(","));
     }
