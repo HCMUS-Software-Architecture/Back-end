@@ -50,5 +50,10 @@ public class PriceController {
     public ResponseEntity<List<String>> getAvailableSymbols() {
         return ResponseEntity.ok(priceCollectorService.getAllSymbols());
     }
+
+    @GetMapping("/intervals")
+    public ResponseEntity<List<String>> getAvailableIntervals() {
+        return ResponseEntity.ok(priceCollectorService.getAllSupportedIntervals());
+    }
 }
 

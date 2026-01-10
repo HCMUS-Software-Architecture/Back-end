@@ -61,19 +61,6 @@ public class PriceCollectorService {
     }
 
     public void connectToBinanceStream(String symbol) {
-        // 1. Build URL cho Combined Stream
-        // Format: <base>?streams=<symbol1>@kline_1m/<symbol2>@kline_1m
-//        String[] symbols = symbolsConfig.split(",");
-//        List<String> streamParams = new ArrayList<>();
-//
-//        // Ở đây tôi ví dụ chỉ subscribe nến 1m.
-//        // Nếu bạn muốn cả 5m, 1h, bạn phải thêm logic loop vào đây.
-//        String targetInterval = "1m";
-//
-//        for (String s : symbols) {
-//            streamParams.add(s.toLowerCase() + "@kline_" + targetInterval);
-//        }
-//        String fullUrl = binanceBaseUrl + String.join("/", streamParams);
 
         List<String> streamParams = new ArrayList<>();
 
@@ -190,5 +177,8 @@ public class PriceCollectorService {
 
     public List<String> getAllSymbols() {
         return List.of(symbolsConfig.split(","));
+    }
+    public List<String> getAllSupportedIntervals() {
+        return List.of(supportedInterval);
     }
 }
