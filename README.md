@@ -70,8 +70,55 @@ node --version
 
 ---
 
+## Prerequisites - Services Setup
+
+### Remote Services Configuration
+
+This project connects to the following remote services:
+
+| Service    | Provider | Purpose          | Connection Type |
+| ---------- | -------- | ---------------- | --------------- |
+| PostgreSQL | Railway  | Primary database | JDBC over SSL   |
+| MongoDB    | Atlas    | Document storage | MongoDB+SRV     |
+| Redis      | Render   | Cache layer      | Redis over SSL  |
+
+**Configured in [application.yml](src/main/resources/application.yml)**
+
+### Redis Cache Verification
+
+Redis is integrated as the caching layer for improved performance. To verify Redis functionality:
+
+#### Using Maven Test
+
+```powershell
+# Run Redis integration tests
+.\mvnw.cmd test "-Dtest=RedisIntegrationTest" "-Duser.timezone=UTC"
+```
+
+**Expected Output:**
+
+```
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
+- ✓ Redis Availability
+- ✓ Redis Server Info
+- ✓ Cache Operations (SET/GET/DELETE)
+- ✓ RedisTemplate Direct Usage
+- ✓ Cache Statistics
+- ✓ Connection Factory
+```
+
+#### Using Application Health Endpoints
+
+Once the application is running, Redis health can be checked via:
+
+- `GET /api/health/redis` - Redis connection status
+- `GET /api/health/redis/test` - Test cache operations
+- `GET /api/health/redis/stats` - Cache statistics
+
 ## Docker Compose Setup
+
 Use this when actively working on the application:
+
 ```bash
 docker compose up -d
 ```
@@ -98,11 +145,14 @@ git clone https://github.com/HCMUS-Software-Architecture/Back-end.git
 Set-Location Back-end
 ```
 
-### 3. Start Development Environment
+### 3. Build and Run the Application
 
 **Bash (Linux/macOS):**
 
 ```bash
+# Build the project
+./mvnw clean install -DskipTests
+
 # Run the application with UTC timezone
 ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-Duser.timezone=UTC"
 ```
@@ -110,8 +160,11 @@ Set-Location Back-end
 **PowerShell (Windows 10/11):**
 
 ```powershell
+# Build the project
+.\mvnw.cmd clean install -DskipTests
+
 # Run the application with UTC timezone
-.\mvnw.cmd spring-boot:run -D"spring-boot.run.jvmArguments=-Duser.timezone=UTC"
+java "-Duser.timezone=UTC" -jar target\back-end-0.0.1-SNAPSHOT.jar
 ```
 
 ### 4. Verify the Application
@@ -126,11 +179,68 @@ curl http://localhost:8081/actuator/health
 **PowerShell (Windows 10/11):**
 
 ```powershell
-# Health check
+# Health check (note: authentication required in production)
 Invoke-RestMethod -Uri http://localhost:8081/actuator/health
 ```
 
 > **Expected response:** `{"status":"UP"}`
+
+### 5. Verify Database Connections
+
+**Check Application Logs for:**
+
+- ✅ `HikariPool-1 - Start completed` (PostgreSQL)
+- ✅ `Monitor thread successfully connected` (MongoDB)
+- ✅ `Configuring RedisTemplate with JSON serialization` (Redis)
+- ✅ `Tomcat started on port 8081`
+
+**Run Integration Tests:**
+
+```powershell
+# Test Redis functionality
+.\mvnw.cmd test "-Dtest=RedisIntegrationTest" "-Duser.timezone=UTC"
+```
+
+---
+
+## Redis Integration - Verification Summary
+
+### ✅ Redis Successfully Integrated
+
+**Test Results:**
+
+```
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
+
+✓ Redis PING: PONG
+✓ Server Version: 7.2.4
+✓ Operating System: Linux 6.8.0-1042-aws x86_64
+✓ Cache Operations: SET/GET/DELETE all functional
+✓ RedisTemplate: Direct operations working
+✓ Connection Factory: Active and responding
+```
+
+**Cache Configuration:**
+
+- **Default TTL:** 10 minutes (600 seconds)
+- **Articles Cache:** 5 minutes
+- **Individual Article:** 15 minutes
+- **Price Candles:** 1 minute
+- **Serialization:** JSON (Jackson)
+- **Connection:** SSL/TLS enabled
+
+**Redis Health Endpoints:**
+
+- `GET /api/health/redis` - Connection status and server info
+- `GET /api/health/redis/test` - Run cache operation tests
+- `GET /api/health/redis/stats` - View cache hit/miss statistics
+
+**Service Class:** `RedisHealthService` provides programmatic access to:
+
+- Connection testing (PING)
+- Server information
+- Cache operations (SET/GET/DELETE with TTL)
+- Cache statistics (hits, misses, hit rate)
 
 ---
 
