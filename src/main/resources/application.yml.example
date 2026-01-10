@@ -22,10 +22,25 @@ spring:
       hibernate:
         jdbc:
           time_zone: UTC
-   data:
-     mongodb:
-       uri: example
-       database: your-database
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+      database: ${MONGODB_DATABASE:trading}
+    redis:
+      url: ${REDIS_URL}
+      ssl:
+        enabled: ${REDIS_SSL_ENABLED:true}
+      timeout: ${REDIS_TIMEOUT:60000}
+  cache:
+    type: redis
+    redis:
+      time-to-live: ${CACHE_TTL:600000}
+
+price:
+  symbols: ${PRICE_SYMBOLS:btcusdt,ethusdt,bnbusdt}
+
+token:
+  secret: ${JWT_SECRET}
 
 management:
   endpoints:
