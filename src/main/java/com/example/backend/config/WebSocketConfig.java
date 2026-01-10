@@ -13,7 +13,11 @@ import java.util.List;
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic");
+        config.enableStompBrokerRelay("/topic")
+                .setRelayHost("rabbit-mq")
+                .setRelayPort(61613)
+                .setClientLogin("guest")
+                .setClientPasscode("guest");
         config.setApplicationDestinationPrefixes("/app");
     }
 

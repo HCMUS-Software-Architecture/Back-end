@@ -934,7 +934,7 @@ package com.example.backend.controller;
 
 import com.example.backend.model.PriceCandle;
 import com.example.backend.service.candle.PriceCandleService;
-import com.example.backend.service.PriceCollectorService;
+import com.example.backend.service.collector.PriceCollectorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

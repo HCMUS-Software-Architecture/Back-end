@@ -1,12 +1,9 @@
-package com.example.backend.service;
+package com.example.backend.service.collector;
 
 import com.example.backend.dto.CandleDto;
 import com.example.backend.dto.binance.BinanceKlineEvent;
 import com.example.backend.entity.PriceCandle;
-import com.example.backend.entity.PriceTick;
 import com.example.backend.repository.PriceCandleRepository;
-import com.example.backend.repository.PriceTickRepository;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +12,7 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -25,17 +23,20 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PriceCollectorService {
+@Profile("collector")
+public class PriceCollectorService implements CollectorProvider {
     private final ObjectMapper objectMapper;
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final PriceCandleRepository priceCandleRepository;
     private final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1);
     private final String[] supportedInterval = {"1m", "3m", "5m", "15m", "30m", "1h"};
+    private final Map<String, WebSocketClient> webSocketClientMap = new ConcurrentHashMap<>();
 
     // Dùng Combined Stream URL
     @Value("${binance.ws.url:wss://stream.binance.com:9443/stream?streams=}")
@@ -44,23 +45,29 @@ public class PriceCollectorService {
     @Value("${price.symbols:btcusdt,ethusdt}")
     private String symbolsConfig;
 
-    private WebSocketClient webSocketClient;
-
     @EventListener(ApplicationReadyEvent.class)
-    public void init() {
+    private void init() {
         List<String> symbols = List.of(symbolsConfig.split(","));
         symbols.forEach(this::connectToBinanceStream);
     }
 
     @PreDestroy
-    public void cleanup() {
-        if (webSocketClient != null) {
-            webSocketClient.close();
-        }
+    private void cleanup() {
+        webSocketClientMap.forEach((symbol, client) -> {
+            if(client != null && client.isOpen()) {
+                client.close();
+            }
+        });
         executorService.shutdown();
     }
 
-    public void connectToBinanceStream(String symbol) {
+    private void connectToBinanceStream(String symbol) {
+        log.info("Collector service is activated due to profile's name of the service is collector-service");
+
+        if(webSocketClientMap.containsKey(symbol)) {
+            log.info("An existing WebSocket Client has been opened");
+            return;
+        }
 
         List<String> streamParams = new ArrayList<>();
 
@@ -72,7 +79,7 @@ public class PriceCollectorService {
         log.info("connect binance websocket for full url: {}", fullUrl);
 
         try {
-            webSocketClient = new WebSocketClient(new URI(fullUrl)) {
+            WebSocketClient webSocketClient = new WebSocketClient(new URI(fullUrl)) {
                 @Override
                 public void onOpen(ServerHandshake handshake) {
                     log.info("Connected to Binance Combined Stream: {}", fullUrl);
@@ -87,6 +94,7 @@ public class PriceCollectorService {
                 @Override
                 public void onClose(int code, String reason, boolean remote) {
                     log.warn("Disconnected from Binance: {}", reason);
+                    webSocketClientMap.remove(symbol);
                     scheduleReconnect(symbol);
                 }
 
@@ -97,6 +105,7 @@ public class PriceCollectorService {
             };
 
             webSocketClient.connect();
+            webSocketClientMap.put(symbol, webSocketClient);
 
         } catch (Exception e) {
             log.error("Failed to init WebSocket: {}", e.getMessage());
@@ -136,7 +145,7 @@ public class PriceCollectorService {
         candleDto.setOpenTime(kline.getOpenTime());
 
         // Topic: /topic/candles/1m/btcusdt
-        String destination = "/topic/candles/" + interval + "/" + symbol.toLowerCase();
+        String destination = "/topic/candles." + interval + "." + symbol.toLowerCase();
         simpMessagingTemplate.convertAndSend(destination, candleDto);
 
         // 2. Nếu nến đã đóng (isClosed = true) -> Lưu vào DB
@@ -174,11 +183,4 @@ public class PriceCollectorService {
         }, 5, TimeUnit.SECONDS);
     }
 
-
-    public List<String> getAllSymbols() {
-        return List.of(symbolsConfig.split(","));
-    }
-    public List<String> getAllSupportedIntervals() {
-        return List.of(supportedInterval);
-    }
 }

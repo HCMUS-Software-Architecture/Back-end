@@ -1,11 +1,71 @@
 name: trading-application
 
 services:
+  rabbit-mq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "15672:15672"
+      - "3001:61613"
+    command: >
+      sh -c "rabbitmq-plugins enable --offline rabbitmq_stomp rabbitmq_management && rabbitmq-server"
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  #price collector server
+  price-collector:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: price-collector-service
+    env_file:
+      - .env
+    environment:
+      - PROFILE=collector
+    depends_on:
+      rabbit-mq:
+        condition: service_healthy
+    networks:
+      - app-network
+
+
   # Backend server
   trading-backend:
     build:
       context: ./
       dockerfile: Dockerfile
-    container_name: trading-backend-service
+    env_file:
+      - .env
+    environment:
+      - PROFILE=user
     ports:
-      - "8081:8081"
+      - "8081"
+    deploy:
+      replicas: 3
+    depends_on:
+      rabbit-mq:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  load-balancer:
+    image: nginx:alpine
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - trading-backend
+    networks:
+      - app-network
+
+
+networks:
+  app-network:
+    driver: bridge

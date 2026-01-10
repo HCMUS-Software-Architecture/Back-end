@@ -13,7 +13,7 @@
 </div>
 
 <script>
-    const socket = new SockJS("http://localhost:8081/ws/prices", null, {
+    const socket = new SockJS("http://localhost:9000/ws/prices", null, {
         withCredentials: true
     });
     const stompClient = Stomp.over(socket);
@@ -23,7 +23,7 @@
     stompClient.connect({}, function () {
         console.log("Connected");
 
-        stompClient.subscribe("/topic/candles/3m/ethusdt", function (msg) {
+        stompClient.subscribe("/topic/candles.5m.ethusdt", function (msg) {
             console.log("Received:", msg.body);
             const child = document.createElement("p")
             child.innerHTML = msg.body;
