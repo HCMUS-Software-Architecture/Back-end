@@ -22,7 +22,6 @@ public class UserSeed implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         log.info("Seed begin");
-        userMongoRepository.deleteAll();
 
         Optional<User> authUserOptional = userMongoRepository.findByEmail("example@gmail.com");
         if(authUserOptional.isPresent()){
