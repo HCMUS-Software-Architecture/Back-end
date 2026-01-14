@@ -667,7 +667,7 @@ package com.example.backend.worker;
 import com.example.backend.event.ArticleNormalizedEvent;
 import com.example.backend.model.ArticleDocument;
 import com.example.backend.nlp.SentimentAnalysisService;
-import com.example.backend.repository.ArticleDocumentRepository;
+import com.example.backend.repository.mongodb.ArticleDocumentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -677,39 +677,39 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Slf4j
 public class NlpWorker {
-    
+
     private final ArticleDocumentRepository articleRepository;
     private final SentimentAnalysisService sentimentService;
-    
+
     @KafkaListener(
-        topics = "${kafka.topic.normalized-articles}",
-        groupId = "nlp-worker-group",
-        containerFactory = "kafkaListenerContainerFactory"
+            topics = "${kafka.topic.normalized-articles}",
+            groupId = "nlp-worker-group",
+            containerFactory = "kafkaListenerContainerFactory"
     )
     public void processNormalizedArticle(ArticleNormalizedEvent event) {
         log.info("Processing article for NLP: {}", event.getTitle());
-        
+
         try {
             // Find article in database
             articleRepository.findById(event.getArticleId()).ifPresent(article -> {
                 // Analyze sentiment
-                ArticleDocument.SentimentResult sentiment = 
-                    sentimentService.analyzeSentiment(article.getBody());
+                ArticleDocument.SentimentResult sentiment =
+                        sentimentService.analyzeSentiment(article.getBody());
                 article.setSentiment(sentiment);
-                
+
                 // Extract symbols
                 article.setSymbols(sentimentService.extractSymbols(article.getBody()));
-                
+
                 // Extract entities
                 article.setEntities(sentimentService.extractEntities(article.getBody()));
-                
+
                 articleRepository.save(article);
-                log.info("Completed NLP analysis for: {} - Sentiment: {}", 
-                    article.getTitle(), sentiment.getLabel());
+                log.info("Completed NLP analysis for: {} - Sentiment: {}",
+                        article.getTitle(), sentiment.getLabel());
             });
         } catch (Exception e) {
-            log.error("Failed to process NLP for article {}: {}", 
-                event.getArticleId(), e.getMessage());
+            log.error("Failed to process NLP for article {}: {}",
+                    event.getArticleId(), e.getMessage());
         }
     }
 }
@@ -725,7 +725,7 @@ package com.example.backend.worker;
 import com.example.backend.event.ArticleCrawledEvent;
 import com.example.backend.event.ArticleNormalizedEvent;
 import com.example.backend.model.ArticleDocument;
-import com.example.backend.repository.ArticleDocumentRepository;
+import com.example.backend.repository.mongodb.ArticleDocumentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -742,32 +742,32 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class NormalizerWorker {
-    
+
     private final ArticleDocumentRepository articleRepository;
     private final KafkaTemplate<String, Object> kafkaTemplate;
-    
+
     @Value("${kafka.topic.normalized-articles}")
     private String normalizedArticlesTopic;
-    
+
     @KafkaListener(
-        topics = "${kafka.topic.raw-articles}",
-        groupId = "normalizer-group",
-        containerFactory = "kafkaListenerContainerFactory"
+            topics = "${kafka.topic.raw-articles}",
+            groupId = "normalizer-group",
+            containerFactory = "kafkaListenerContainerFactory"
     )
     public void processRawArticle(ArticleCrawledEvent event) {
         log.info("Normalizing article: {}", event.getUrl());
-        
+
         try {
             // Check for duplicate
             if (articleRepository.existsByUrl(event.getUrl())) {
                 log.debug("Article already exists: {}", event.getUrl());
                 return;
             }
-            
+
             // Parse and normalize
             Document doc = Jsoup.parse(event.getRawHtml());
             String body = doc.text();
-            
+
             // Create and save article
             ArticleDocument article = ArticleDocument.builder()
                     .url(event.getUrl())
@@ -780,9 +780,9 @@ public class NormalizerWorker {
                     .createdAt(LocalDateTime.now())
                     .metadata(event.getMetadata())
                     .build();
-            
+
             ArticleDocument saved = articleRepository.save(article);
-            
+
             // Publish normalized event for NLP processing
             ArticleNormalizedEvent normalizedEvent = ArticleNormalizedEvent.builder()
                     .eventId(UUID.randomUUID().toString())
@@ -792,10 +792,10 @@ public class NormalizerWorker {
                     .source(saved.getSource())
                     .publishedAt(saved.getPublishedAt())
                     .build();
-            
+
             kafkaTemplate.send(normalizedArticlesTopic, saved.getUrl(), normalizedEvent);
             log.info("Normalized and published article: {}", event.getTitle());
-            
+
         } catch (Exception e) {
             log.error("Failed to normalize article {}: {}", event.getUrl(), e.getMessage());
         }

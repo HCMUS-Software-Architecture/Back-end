@@ -576,7 +576,7 @@ Update `src/main/java/com/example/backend/service/ArticleService.java`:
 package com.example.backend.service;
 
 import com.example.backend.model.ArticleDocument;
-import com.example.backend.repository.ArticleDocumentRepository;
+import com.example.backend.repository.mongodb.ArticleDocumentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -591,20 +591,20 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class ArticleService {
-    
+
     private final ArticleDocumentRepository articleRepository;
-    
+
     @Cacheable(value = "articles", key = "'all-' + #pageable.pageNumber + '-' + #pageable.pageSize")
     public Page<ArticleDocument> getAllArticles(Pageable pageable) {
         log.debug("Cache miss - fetching articles from database");
         return articleRepository.findAll(pageable);
     }
-    
+
     @Cacheable(value = "articles", key = "'id-' + #id")
     public Optional<ArticleDocument> getArticleById(String id) {
         return articleRepository.findById(id);
     }
-    
+
     @CacheEvict(value = "articles", allEntries = true)
     public ArticleDocument saveArticle(ArticleDocument article) {
         if (articleRepository.existsByUrl(article.getUrl())) {
@@ -613,12 +613,12 @@ public class ArticleService {
         }
         return articleRepository.save(article);
     }
-    
+
     @Cacheable(value = "articles", key = "'source-' + #source + '-' + #pageable.pageNumber")
     public Page<ArticleDocument> getArticlesBySource(String source, Pageable pageable) {
         return articleRepository.findBySource(source, pageable);
     }
-    
+
     public Page<ArticleDocument> searchArticles(String keyword, Pageable pageable) {
         return articleRepository.searchByKeyword(keyword, pageable);
     }

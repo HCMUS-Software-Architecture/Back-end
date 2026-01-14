@@ -1,9 +1,9 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.TokenResponse;
-import com.example.backend.entity.RefreshToken;
+import com.example.backend.model.RefreshToken;
 import com.example.backend.exception.RefreshTokenRevokeException;
-import com.example.backend.repository.RefreshTokenRepository;
+import com.example.backend.repository.mongodb.RefreshTokenMongoRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -27,7 +27,7 @@ public class JwtService {
     private final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 30;  // 1 hour
     private final long REFRESH_TOKEN_EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7 ngày
 
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final RefreshTokenMongoRepository refreshTokenRepository;
 
     private Key getSignKey() {
         return Keys.hmacShaKeyFor(jwtSecretKey.getBytes());
@@ -45,7 +45,7 @@ public class JwtService {
 
         refreshTokenRepository.save(RefreshToken.builder()
                         .expires_at(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
-                        .is_revoke(false)
+                        .isRevoked(false)
                         .userId(user_id)
                         .token(refreshToken)
                         .build());
@@ -67,11 +67,11 @@ public class JwtService {
         String userId = extractUserId(refreshToken);
 
         RefreshToken token = refreshTokenRepository.findByToken(refreshToken);
-        if(!token.getIs_revoke()) {
+        if(!token.getIsRevoked()) {
             final String newAccessToken = generateAccessToken(userId);
             final String newRefreshToken = generateRefreshToken(userId);
 
-            token.setIs_revoke(true);
+            token.setIsRevoked(true);
             refreshTokenRepository.save(token);
 
             TokenResponse tokenResponse = new TokenResponse();
