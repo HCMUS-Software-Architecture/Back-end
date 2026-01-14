@@ -2,77 +2,73 @@ package com.example.backend.service;
 
 import com.example.backend.dto.TokenResponse;
 import com.example.backend.dto.UserDto;
-import com.example.backend.entity.AuthUser;
-import com.example.backend.entity.RefreshToken;
-import com.example.backend.entity.User;
+import com.example.backend.model.RefreshToken;
 import com.example.backend.exception.RefreshTokenNotExist;
 import com.example.backend.exception.UserAlreadyExistsException;
-import com.example.backend.repository.AuthUserRepository;
-import com.example.backend.repository.RefreshTokenRepository;
+import com.example.backend.model.User;
+import com.example.backend.repository.mongodb.RefreshTokenMongoRepository;
+import com.example.backend.repository.mongodb.UserMongoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class AuthService {
     private final JwtService jwtService;
-    private final AuthUserRepository authUserRepository;
     private final PasswordEncoder passwordEncoder;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final RefreshTokenMongoRepository refreshTokenMongoRepository;
+    private final UserMongoRepository userMongoRepository;
 
     @Autowired
-    public AuthService(JwtService jwtService,  AuthUserRepository authUserRepository,
-                       PasswordEncoder passwordEncoder, RefreshTokenRepository refreshTokenRepository) {
+    public AuthService(JwtService jwtService, PasswordEncoder passwordEncoder,
+                       RefreshTokenMongoRepository refreshTokenMongoRepository,
+                       UserMongoRepository userMongoRepository) {
         this.jwtService = jwtService;
-        this.authUserRepository = authUserRepository;
         this.passwordEncoder = passwordEncoder;
-        this.refreshTokenRepository = refreshTokenRepository;
+        this.refreshTokenMongoRepository = refreshTokenMongoRepository;
+        this.userMongoRepository = userMongoRepository;
     }
 
     public UserDto registerUser(String email, String password, String fullName) throws UserAlreadyExistsException {
-        Optional<AuthUser> authUserExists = authUserRepository.findByEmail(email);
-        if (authUserExists.isPresent()) {
+        Optional<User> userOption = userMongoRepository.findByEmail(email);
+        if (userOption.isPresent()) {
             throw new UserAlreadyExistsException("Email already exists");
         }
 
-        User newUser = new User();
-        newUser.setFullName(fullName);
-        AuthUser authUser = AuthUser.builder()
-                .email(email)
-                .password(passwordEncoder.encode(password))
-                .user(newUser)
-                .build();
-        authUserRepository.save(authUser);
+        User newUser = User.builder()
+                        .email(email)
+                        .fullName(fullName)
+                        .password(passwordEncoder.encode(password))
+                        .build();
+        userMongoRepository.save(newUser);
 
         UserDto userDto = new UserDto();
         userDto.setEmail(email);
         userDto.setFullName(fullName);
-        userDto.setId(authUser.getUser().getId());
+        userDto.setId(newUser.getId());
         return userDto;
     }
 
     public TokenResponse login(String email, String password) throws BadCredentialsException {
-        Optional<AuthUser> authUserExists = authUserRepository.findByEmail(email);
+        Optional<User> authUserExists = userMongoRepository.findByEmail(email);
         if (authUserExists.isEmpty()) {
             throw new BadCredentialsException("Invalid email or password");
         }
-        AuthUser authUser = authUserExists.get();
+        User authUser = authUserExists.get();
 
         if (!passwordEncoder.matches(password, authUser.getPassword())) {
             throw new BadCredentialsException("Invalid email or password");
         }
 
-        String accessToken = jwtService.generateAccessToken(authUser.getUser().getId().toString());
-        String refreshToken = jwtService.generateRefreshToken(authUser.getUser().getId().toString());
+        String accessToken = jwtService.generateAccessToken(authUser.getId());
+        String refreshToken = jwtService.generateRefreshToken(authUser.getId());
 
         TokenResponse tokenResponse = new TokenResponse();
         tokenResponse.setAccessToken(accessToken);
@@ -82,12 +78,12 @@ public class AuthService {
     }
 
     public void logout(String oldRefreshToken) throws RefreshTokenNotExist {
-        Optional<RefreshToken> token = refreshTokenRepository.findByTokenRevoked(oldRefreshToken);
+        Optional<RefreshToken> token = refreshTokenMongoRepository.findByTokenAndIsRevokedFalse(oldRefreshToken);
 
         if(token.isPresent()) {
             RefreshToken refreshToken = token.get();
-            refreshToken.setIs_revoke(true);
-            refreshTokenRepository.save(refreshToken);
+            refreshToken.setIsRevoked(true);
+            refreshTokenMongoRepository.save(refreshToken);
         }
         else {
             throw new RefreshTokenNotExist("Refresh token not exist");
@@ -97,6 +93,6 @@ public class AuthService {
     @Scheduled(cron = "0 0 * * * *")
     @Transactional
     public void deleteTokenPeriodic() throws Exception {
-        refreshTokenRepository.removeByIsRevoke();
+        refreshTokenMongoRepository.removeByIsRevoked(true);
     }
 }

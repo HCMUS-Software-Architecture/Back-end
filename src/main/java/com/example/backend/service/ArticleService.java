@@ -1,7 +1,7 @@
 package com.example.backend.service;
 
 import com.example.backend.model.Article;
-import com.example.backend.repository.ArticleDocumentRepository;
+import com.example.backend.repository.mongodb.ArticleDocumentRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
