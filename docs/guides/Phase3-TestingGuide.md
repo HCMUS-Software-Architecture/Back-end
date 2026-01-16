@@ -281,7 +281,7 @@ package com.example.backend.controller;
 
 import com.example.backend.model.ArticleDocument;
 import com.example.backend.nlp.SentimentAnalysisService;
-import com.example.backend.repository.ArticleDocumentRepository;
+import com.example.backend.repository.mongodb.ArticleDocumentRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -298,16 +298,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(AnalysisController.class)
 class AnalysisControllerTest {
-    
+
     @Autowired
     private MockMvc mockMvc;
-    
+
     @MockBean
     private SentimentAnalysisService sentimentService;
-    
+
     @MockBean
     private ArticleDocumentRepository articleRepository;
-    
+
     @Test
     void shouldReturnArticleAnalysis() throws Exception {
         // Given
@@ -315,40 +315,40 @@ class AnalysisControllerTest {
                 .id("test-id")
                 .title("Test Article")
                 .sentiment(ArticleDocument.SentimentResult.builder()
-                    .label("bullish")
-                    .score(0.8)
-                    .build())
+                        .label("bullish")
+                        .score(0.8)
+                        .build())
                 .symbols(List.of("BTC", "ETH"))
                 .entities(List.of("Binance"))
                 .build();
-        
+
         when(articleRepository.findById("test-id")).thenReturn(Optional.of(article));
-        
+
         // When & Then
         mockMvc.perform(get("/api/analysis/test-id")
-                .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.articleId").value("test-id"))
                 .andExpect(jsonPath("$.sentiment.label").value("bullish"))
                 .andExpect(jsonPath("$.symbols").isArray());
     }
-    
+
     @Test
     void shouldReturn404ForNonExistentArticle() throws Exception {
         when(articleRepository.findById("non-existent")).thenReturn(Optional.empty());
-        
+
         mockMvc.perform(get("/api/analysis/non-existent")
-                .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
-    
+
     @Test
     void shouldTriggerAnalysis() throws Exception {
         mockMvc.perform(post("/api/analysis/analyze/test-id")
-                .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isAccepted())
                 .andExpect(jsonPath("$.status").value("processing"));
-        
+
         verify(sentimentService).analyzeArticle("test-id");
     }
 }
@@ -367,7 +367,6 @@ package com.example.backend.integration;
 
 import com.example.backend.model.ArticleDocument;
 import com.example.backend.nlp.SentimentAnalysisService;
-import com.example.backend.repository.ArticleDocumentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -382,7 +381,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -392,30 +390,30 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Testcontainers
 class Phase3IntegrationTest {
-    
+
     @Container
     static MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0");
-    
+
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
     }
-    
+
     @Autowired
     private MockMvc mockMvc;
-    
+
     @Autowired
-    private ArticleDocumentRepository articleRepository;
-    
+    private com.example.backend.repository.mongodb.ArticleDocumentRepository articleRepository;
+
     @Autowired
     private SentimentAnalysisService sentimentService;
-    
+
     private ArticleDocument testArticle;
-    
+
     @BeforeEach
     void setUp() {
         articleRepository.deleteAll();
-        
+
         testArticle = ArticleDocument.builder()
                 .url("https://example.com/bullish-btc")
                 .title("Bitcoin shows bullish momentum with strong gains")
@@ -423,37 +421,37 @@ class Phase3IntegrationTest {
                 .source("coindesk")
                 .publishedAt(LocalDateTime.now())
                 .build();
-        
+
         testArticle = articleRepository.save(testArticle);
     }
-    
+
     @Test
     void shouldAnalyzeArticleAndReturnSentiment() throws Exception {
         // Trigger analysis
         mockMvc.perform(post("/api/analysis/analyze/" + testArticle.getId())
-                .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isAccepted());
-        
+
         // Wait for async processing
         Thread.sleep(1000);
-        
+
         // Check analysis result
         mockMvc.perform(get("/api/analysis/" + testArticle.getId())
-                .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.sentiment.label").value("bullish"))
                 .andExpect(jsonPath("$.symbols", containsInAnyOrder("BTC", "ETH")));
     }
-    
+
     @Test
     void shouldFilterBySentiment() throws Exception {
         // First analyze the article
         sentimentService.analyzeArticle(testArticle.getId());
         Thread.sleep(500);
-        
+
         // Query by sentiment
         mockMvc.perform(get("/api/analysis/sentiment/bullish")
-                .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(greaterThanOrEqualTo(1))));
     }

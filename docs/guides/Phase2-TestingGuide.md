@@ -163,6 +163,7 @@ Create `src/test/java/com/example/backend/repository/ArticleDocumentRepositoryTe
 package com.example.backend.repository;
 
 import com.example.backend.model.ArticleDocument;
+import com.example.backend.repository.mongodb.ArticleDocumentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -185,24 +186,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataMongoTest
 @Testcontainers
 class ArticleDocumentRepositoryTest {
-    
+
     @Container
     static MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0");
-    
+
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
     }
-    
+
     @Autowired
     private ArticleDocumentRepository repository;
-    
+
     private ArticleDocument testArticle;
-    
+
     @BeforeEach
     void setUp() {
         repository.deleteAll();
-        
+
         testArticle = ArticleDocument.builder()
                 .url("https://example.com/test-article")
                 .title("Bitcoin Analysis")
@@ -213,54 +214,54 @@ class ArticleDocumentRepositoryTest {
                 .symbols(List.of("BTC", "USDT"))
                 .build();
     }
-    
+
     @Test
     void shouldSaveAndRetrieveDocument() {
         ArticleDocument saved = repository.save(testArticle);
-        
+
         assertThat(saved.getId()).isNotNull();
-        
+
         Optional<ArticleDocument> found = repository.findById(saved.getId());
         assertThat(found).isPresent();
         assertThat(found.get().getTitle()).isEqualTo("Bitcoin Analysis");
     }
-    
+
     @Test
     void shouldFindByUrl() {
         repository.save(testArticle);
-        
+
         Optional<ArticleDocument> found = repository.findByUrl(testArticle.getUrl());
-        
+
         assertThat(found).isPresent();
         assertThat(found.get().getSource()).isEqualTo("coindesk");
     }
-    
+
     @Test
     void shouldSearchByKeyword() {
         repository.save(testArticle);
-        
+
         Page<ArticleDocument> results = repository.searchByKeyword(
-            "Bitcoin", 
-            PageRequest.of(0, 10)
+                "Bitcoin",
+                PageRequest.of(0, 10)
         );
-        
+
         assertThat(results.getContent()).hasSize(1);
         assertThat(results.getContent().get(0).getBody()).contains("Bitcoin");
     }
-    
+
     @Test
     void shouldFindBySymbols() {
         repository.save(testArticle);
-        
+
         List<ArticleDocument> results = repository.findBySymbolsContaining("BTC");
-        
+
         assertThat(results).hasSize(1);
     }
-    
+
     @Test
     void shouldPreventDuplicateUrls() {
         repository.save(testArticle);
-        
+
         assertThat(repository.existsByUrl(testArticle.getUrl())).isTrue();
         assertThat(repository.existsByUrl("https://nonexistent.com")).isFalse();
     }
@@ -279,7 +280,7 @@ Create `src/test/java/com/example/backend/service/CacheServiceTest.java`:
 package com.example.backend.service;
 
 import com.example.backend.model.ArticleDocument;
-import com.example.backend.repository.ArticleDocumentRepository;
+import com.example.backend.repository.mongodb.ArticleDocumentRepository;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -298,44 +299,44 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 class CacheServiceTest {
-    
+
     private static RedisServer redisServer;
-    
+
     @Autowired
     private ArticleService articleService;
-    
+
     @Autowired
     private ArticleDocumentRepository repository;
-    
+
     @Autowired
     private CacheManager cacheManager;
-    
+
     @BeforeAll
     static void startRedis() {
         redisServer = new RedisServer(6370);
         redisServer.start();
     }
-    
+
     @AfterAll
     static void stopRedis() {
         if (redisServer != null) {
             redisServer.stop();
         }
     }
-    
+
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.data.redis.port", () -> "6370");
     }
-    
+
     @BeforeEach
     void setUp() {
         repository.deleteAll();
-        cacheManager.getCacheNames().forEach(name -> 
-            cacheManager.getCache(name).clear()
+        cacheManager.getCacheNames().forEach(name ->
+                cacheManager.getCache(name).clear()
         );
     }
-    
+
     @Test
     void shouldCacheArticles() {
         // Given
@@ -346,17 +347,17 @@ class CacheServiceTest {
                 .publishedAt(LocalDateTime.now())
                 .build();
         repository.save(article);
-        
+
         // When - First call (cache miss)
         articleService.getAllArticles(PageRequest.of(0, 10));
-        
+
         // Then - Second call should use cache
         articleService.getAllArticles(PageRequest.of(0, 10));
-        
+
         // Verify cache is populated
         assertThat(cacheManager.getCache("articles")).isNotNull();
     }
-    
+
     @Test
     void shouldEvictCacheOnSave() {
         // Given
@@ -366,10 +367,10 @@ class CacheServiceTest {
                 .source("test")
                 .build();
         repository.save(article1);
-        
+
         // Populate cache
         articleService.getAllArticles(PageRequest.of(0, 10));
-        
+
         // When - Save new article (should evict cache)
         ArticleDocument article2 = ArticleDocument.builder()
                 .url("https://test.com/article-2")
@@ -377,7 +378,7 @@ class CacheServiceTest {
                 .source("test")
                 .build();
         articleService.saveArticle(article2);
-        
+
         // Then - Cache should be evicted
         // Next call should fetch from database
         var result = articleService.getAllArticles(PageRequest.of(0, 10));
@@ -529,7 +530,7 @@ Create `src/test/java/com/example/backend/integration/Phase2IntegrationTest.java
 package com.example.backend.integration;
 
 import com.example.backend.model.ArticleDocument;
-import com.example.backend.repository.ArticleDocumentRepository;
+import com.example.backend.repository.mongodb.ArticleDocumentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -554,25 +555,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Testcontainers
 class Phase2IntegrationTest {
-    
+
     @Container
     static MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0");
-    
+
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
     }
-    
+
     @Autowired
     private MockMvc mockMvc;
-    
+
     @Autowired
     private ArticleDocumentRepository articleRepository;
-    
+
     @BeforeEach
     void setUp() {
         articleRepository.deleteAll();
-        
+
         // Seed test data
         ArticleDocument article1 = ArticleDocument.builder()
                 .url("https://example.com/btc-analysis")
@@ -582,7 +583,7 @@ class Phase2IntegrationTest {
                 .symbols(List.of("BTC", "USDT"))
                 .publishedAt(LocalDateTime.now().minusHours(1))
                 .build();
-        
+
         ArticleDocument article2 = ArticleDocument.builder()
                 .url("https://example.com/eth-update")
                 .title("Ethereum network upgrade")
@@ -591,32 +592,32 @@ class Phase2IntegrationTest {
                 .symbols(List.of("ETH"))
                 .publishedAt(LocalDateTime.now())
                 .build();
-        
+
         articleRepository.saveAll(List.of(article1, article2));
     }
-    
+
     @Test
     void shouldReturnArticlesFromMongoDB() throws Exception {
         mockMvc.perform(get("/api/articles")
-                .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)));
     }
-    
+
     @Test
     void shouldSearchArticlesInMongoDB() throws Exception {
         mockMvc.perform(get("/api/articles/search")
-                .param("q", "Bitcoin")
-                .contentType(MediaType.APPLICATION_JSON))
+                        .param("q", "Bitcoin")
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].title", containsString("Bitcoin")));
     }
-    
+
     @Test
     void shouldFilterBySource() throws Exception {
         mockMvc.perform(get("/api/articles/source/coindesk")
-                .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].source", is("coindesk")));
