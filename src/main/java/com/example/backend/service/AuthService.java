@@ -2,17 +2,12 @@ package com.example.backend.service;
 
 import com.example.backend.dto.TokenResponse;
 import com.example.backend.dto.UserDto;
-import com.example.backend.entity.AuthUser;
-import com.example.backend.entity.RefreshToken;
-import com.example.backend.entity.User;
-import com.example.backend.event.auth.UserLoggedInEvent;
+import com.example.backend.model.RefreshToken;
 import com.example.backend.exception.RefreshTokenNotExist;
 import com.example.backend.exception.UserAlreadyExistsException;
-import com.example.backend.repository.AuthUserRepository;
-import com.example.backend.repository.RefreshTokenRepository;
-import com.example.backend.service.cache.RefreshTokenCacheService;
-import com.example.backend.service.event.EventPublishingService;
-import lombok.extern.slf4j.Slf4j;
+import com.example.backend.model.User;
+import com.example.backend.repository.mongodb.RefreshTokenMongoRepository;
+import com.example.backend.repository.mongodb.UserMongoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,10 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -46,23 +39,17 @@ import java.util.UUID;
 public class AuthService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
-    private final RefreshTokenRepository refreshTokenRepository;
-    private final RefreshTokenCacheService tokenCacheService;
-    private final EventPublishingService eventPublishingService;
-
-    @Value("${token.refresh-expiration:604800000}") // 7 days default
-    private long refreshTokenExpiration;
+    private final RefreshTokenMongoRepository refreshTokenMongoRepository;
+    private final UserMongoRepository userMongoRepository;
 
     @Autowired
-    public AuthService(JwtService jwtService, AuthUserRepository authUserRepository,
-            PasswordEncoder passwordEncoder, RefreshTokenRepository refreshTokenRepository,
-            RefreshTokenCacheService tokenCacheService,
-            EventPublishingService eventPublishingService) {
+    public AuthService(JwtService jwtService, PasswordEncoder passwordEncoder,
+            RefreshTokenMongoRepository refreshTokenMongoRepository,
+            UserMongoRepository userMongoRepository) {
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
-        this.refreshTokenRepository = refreshTokenRepository;
-        this.tokenCacheService = tokenCacheService;
-        this.eventPublishingService = eventPublishingService;
+        this.refreshTokenMongoRepository = refreshTokenMongoRepository;
+        this.userMongoRepository = userMongoRepository;
     }
 
     public UserDto registerUser(String email, String password, String fullName) throws UserAlreadyExistsException {
@@ -96,21 +83,8 @@ public class AuthService {
             throw new BadCredentialsException("Invalid email or password");
         }
 
-        String userId = authUser.getUser().getId().toString();
-        String accessToken = jwtService.generateAccessToken(userId);
-        String refreshToken = jwtService.generateRefreshToken(userId);
-
-        // Store refresh token in Redis (PRIMARY)
-        Duration expiry = Duration.ofMillis(refreshTokenExpiration);
-        tokenCacheService.storeToken(refreshToken, userId, expiry);
-
-        log.info("User logged in successfully: {} (tokens stored in Redis)", email);
-
-        // TODO: Optionally store in PostgreSQL for backup/audit
-        // storeTokenInPostgres(refreshToken, userId);
-
-        // Emit UserLoggedInEvent (Event-Driven Architecture)
-        publishLoginEvent(userId, email);
+        String accessToken = jwtService.generateAccessToken(authUser.getId());
+        String refreshToken = jwtService.generateRefreshToken(authUser.getId());
 
         TokenResponse tokenResponse = new TokenResponse();
         tokenResponse.setAccessToken(accessToken);
@@ -120,24 +94,12 @@ public class AuthService {
     }
 
     public void logout(String oldRefreshToken) throws RefreshTokenNotExist {
-        // Try Redis first (FAST PATH)
-        Optional<String> userIdOpt = tokenCacheService.getUserIdByToken(oldRefreshToken);
-
-        if (userIdOpt.isPresent()) {
-            // Revoke from Redis (immediate effect)
-            tokenCacheService.revokeToken(oldRefreshToken);
-            log.info("User logged out successfully (Redis): {}", userIdOpt.get());
-            return;
-        }
-
-        // Fallback to PostgreSQL (SLOW PATH - legacy support)
-        Optional<RefreshToken> token = refreshTokenRepository.findByTokenRevoked(oldRefreshToken);
+        Optional<RefreshToken> token = refreshTokenMongoRepository.findByTokenAndIsRevokedFalse(oldRefreshToken);
 
         if (token.isPresent()) {
             RefreshToken refreshToken = token.get();
-            refreshToken.setIs_revoke(true);
-            refreshTokenRepository.save(refreshToken);
-            log.info("User logged out successfully (PostgreSQL fallback)");
+            refreshToken.setIsRevoked(true);
+            refreshTokenMongoRepository.save(refreshToken);
         } else {
             throw new RefreshTokenNotExist("Refresh token not exist");
         }
@@ -170,34 +132,6 @@ public class AuthService {
     @Scheduled(cron = "0 0 * * * *")
     @Transactional
     public void deleteTokenPeriodic() throws Exception {
-        // PostgreSQL cleanup (legacy tokens)
-        refreshTokenRepository.removeByIsRevoke();
-
-        // Redis cleanup is automatic via TTL
-        log.debug("Periodic token cleanup completed (PostgreSQL). Redis uses automatic TTL.");
-    }
-
-    /**
-     * Publish login event for event-driven architecture
-     */
-    private void publishLoginEvent(String userId, String email) {
-        try {
-            UserLoggedInEvent event = UserLoggedInEvent.userLoggedInBuilder()
-                    .eventId(UUID.randomUUID().toString())
-                    .timestamp(Instant.now())
-                    .aggregateId(userId)
-                    .version(1L)
-                    .causedBy(userId)
-                    .userId(userId)
-                    .email(email)
-                    .ipAddress("unknown") // TODO: Extract from request
-                    .userAgent("unknown") // TODO: Extract from request
-                    .build();
-
-            eventPublishingService.publish(event);
-        } catch (Exception e) {
-            log.error("Failed to publish login event: {}", e.getMessage());
-            // Don't fail login if event publishing fails
-        }
+        refreshTokenMongoRepository.removeByIsRevoked(true);
     }
 }
