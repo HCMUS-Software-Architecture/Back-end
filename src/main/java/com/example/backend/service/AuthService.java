@@ -8,6 +8,7 @@ import com.example.backend.exception.UserAlreadyExistsException;
 import com.example.backend.model.User;
 import com.example.backend.repository.mongodb.RefreshTokenMongoRepository;
 import com.example.backend.repository.mongodb.UserMongoRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -106,24 +107,16 @@ public class AuthService {
     }
 
     /**
-     * Validate refresh token - Redis-first strategy
+     * Validate refresh token - MongoDB-based validation
      * 
      * @return userId if token is valid
      */
     public Optional<String> validateRefreshToken(String token) {
-        // Try Redis first (10-100x faster)
-        Optional<String> userIdOpt = tokenCacheService.getUserIdByToken(token);
-
-        if (userIdOpt.isPresent()) {
-            log.debug("Token validated via Redis (fast path)");
-            return userIdOpt;
-        }
-
-        // Fallback to PostgreSQL (for tokens created before Redis migration)
-        Optional<RefreshToken> dbToken = refreshTokenRepository.findByTokenRevoked(token);
-        if (dbToken.isPresent() && !dbToken.get().getIs_revoke()) {
-            log.debug("Token validated via PostgreSQL (slow path - consider migrating)");
-            return Optional.of(dbToken.get().getUser().getId().toString());
+        // Validate via MongoDB
+        Optional<RefreshToken> dbToken = refreshTokenMongoRepository.findByTokenAndIsRevokedFalse(token);
+        if (dbToken.isPresent()) {
+            log.debug("Token validated via MongoDB");
+            return Optional.of(dbToken.get().getUserId());
         }
 
         return Optional.empty();
