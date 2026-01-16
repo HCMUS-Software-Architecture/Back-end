@@ -102,7 +102,7 @@ public class AuthService {
             refreshToken.setIsRevoked(true);
             refreshTokenMongoRepository.save(refreshToken);
         } else {
-            throw new RefreshTokenNotExist("Refresh token not exist");
+            throw new RefreshTokenNotExist("Refresh token does not exist");
         }
     }
 
