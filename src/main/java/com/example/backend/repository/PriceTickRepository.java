@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+// not used
 @Repository
 public interface PriceTickRepository extends JpaRepository<PriceTick, UUID> {
     List<PriceTick> findBySymbolAndTimestampBetween(String symbol, Instant start, Instant end);

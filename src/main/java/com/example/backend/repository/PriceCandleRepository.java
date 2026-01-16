@@ -13,15 +13,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+// hiện tại, lấy trực tiếp mọi candle từ BinanceAPI (cho mọi loại currency) (json), rồi bắn qua FE cho render
+// nhưng còn code mà tương tác với repository này để lưu xuống POstgresql hay không thì không chắc 100%
 @Repository
 public interface PriceCandleRepository extends JpaRepository<PriceCandle, UUID> {
     List<PriceCandle> findBySymbolAndIntervalOrderByOpenTimeDesc(String symbol, String interval, Pageable pageable);
+
     List<PriceCandle> findBySymbolAndIntervalAndOpenTimeBetween(
             String symbol,
             String interval,
             Instant startTime,
-            Instant endTime
-    );
+            Instant endTime);
 
     void deleteByCreatedAtBeforeOrCreatedAtIsNull(LocalDateTime createdAtBefore);
     

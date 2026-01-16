@@ -13,8 +13,8 @@ import java.util.List;
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic");
-        config.setApplicationDestinationPrefixes("/app");
+        config.enableSimpleBroker("/topic"); // prefix for BE -> FE in URL
+        config.setApplicationDestinationPrefixes("/app"); // prefix for FE -> BE in URL
     }
 
     @Override
