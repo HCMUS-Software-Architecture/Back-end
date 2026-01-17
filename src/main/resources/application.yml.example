@@ -2,31 +2,69 @@ server:
   port: ${SERVER_PORT:8081}
 
 spring:
+  application:
+    name: back-end
   datasource:
     driver-class-name: org.postgresql.Driver
-    # Remote PostgreSQL JDBC URL with timezone parameter
-    # Format: jdbc:postgresql://host:port/database?serverTimezone=UTC
-    url: ${PG_URI}
-    username: ${PG_USERNAME}
-    password: ${PG_PASSWORD}
+    # PostgreSQL JDBC URL - use environment variable
+    # Format: jdbc:postgresql://host:port/database
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/trading}
+    username: ${POSTGRES_USERNAME:postgres}
+    password: ${POSTGRES_PASSWORD}
     hikari:
       connection-init-sql: SET TIME ZONE 'UTC'
   jpa:
     database: postgresql
-    show-sql: ${SHOW_SQL:true}
+    show-sql: ${JPA_SHOW_SQL:false}
     hibernate:
       # Options: create, create-drop, update, validate, none
       # Use 'update' for development, 'validate' or 'none' for production
-      ddl-auto: ${DDL_AUTO:update}
+      ddl-auto: ${JPA_DDL_AUTO:update}
     properties:
       hibernate:
         jdbc:
           time_zone: UTC
-   data:
-     mongodb:
-       uri: example
-       database: your-database
+  data:
+    mongodb:
+      # MongoDB connection URI - use environment variable
+      # Format: mongodb://username:password@host:port/database?authSource=admin
+      uri: ${MONGODB_URI}
+      database: ${MONGODB_DATABASE:trading}
+    redis:
+      # Redis connection URL - use environment variable
+      # Format: redis://host:port or rediss://host:port (with SSL)
+      url: ${REDIS_URL}
+      ssl:
+        enabled: ${REDIS_SSL_ENABLED:false}
+      timeout: ${REDIS_TIMEOUT:60000}
+  cache:
+    type: redis
+    redis:
+      time-to-live: ${CACHE_TTL:600000}
 
+# Trading configuration
+price:
+  symbols: ${PRICE_SYMBOLS:btcusdt,ethusdt,bnbusdt}
+
+# JWT Token configuration
+token:
+  # Secret key for JWT signing - MUST be at least 256 bits for HS256
+  # Generate using: openssl rand -base64 32
+  secret: ${JWT_SECRET}
+  access-expiration: ${JWT_ACCESS_EXPIRATION:900000}
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
+
+# Crawler configuration
+crawler:
+  fixed-delay: ${CRAWLER_FIXED_DELAY:300000}
+  initial-delay: ${CRAWLER_INITIAL_DELAY:6000}
+
+# Binance WebSocket
+binance:
+  ws:
+    url: ${BINANCE_WS_URL:wss://stream.binance.com:9443/ws}
+
+# Actuator endpoints
 management:
   endpoints:
     web:

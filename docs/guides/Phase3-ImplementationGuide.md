@@ -460,7 +460,7 @@ Create `src/main/java/com/example/backend/nlp/SentimentAnalysisService.java`:
 package com.example.backend.nlp;
 
 import com.example.backend.model.ArticleDocument;
-import com.example.backend.repository.ArticleDocumentRepository;
+import com.example.backend.repository.mongodb.ArticleDocumentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -477,33 +477,33 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 @Slf4j
 public class SentimentAnalysisService {
-    
+
     private final ArticleDocumentRepository articleRepository;
     private final WebClient.Builder webClientBuilder;
-    
+
     @Value("${nlp.api.url:https://api.example.com/sentiment}")
     private String nlpApiUrl;
-    
+
     // Simple keyword-based sentiment (fallback)
     private static final Map<String, Double> SENTIMENT_KEYWORDS = Map.ofEntries(
-        Map.entry("bullish", 1.0),
-        Map.entry("surge", 0.8),
-        Map.entry("rally", 0.7),
-        Map.entry("gains", 0.6),
-        Map.entry("positive", 0.5),
-        Map.entry("bearish", -1.0),
-        Map.entry("crash", -0.9),
-        Map.entry("plunge", -0.8),
-        Map.entry("losses", -0.6),
-        Map.entry("negative", -0.5)
+            Map.entry("bullish", 1.0),
+            Map.entry("surge", 0.8),
+            Map.entry("rally", 0.7),
+            Map.entry("gains", 0.6),
+            Map.entry("positive", 0.5),
+            Map.entry("bearish", -1.0),
+            Map.entry("crash", -0.9),
+            Map.entry("plunge", -0.8),
+            Map.entry("losses", -0.6),
+            Map.entry("negative", -0.5)
     );
-    
+
     // Crypto symbol patterns
     private static final Pattern SYMBOL_PATTERN = Pattern.compile(
-        "\\b(BTC|ETH|BNB|XRP|SOL|ADA|DOGE|DOT|MATIC|LINK|USDT|USDC)\\b",
-        Pattern.CASE_INSENSITIVE
+            "\\b(BTC|ETH|BNB|XRP|SOL|ADA|DOGE|DOT|MATIC|LINK|USDT|USDC)\\b",
+            Pattern.CASE_INSENSITIVE
     );
-    
+
     @Async
     public void analyzeArticle(String articleId) {
         articleRepository.findById(articleId).ifPresent(article -> {
@@ -511,44 +511,44 @@ public class SentimentAnalysisService {
                 // Extract symbols
                 List<String> symbols = extractSymbols(article.getBody());
                 article.setSymbols(symbols);
-                
+
                 // Analyze sentiment
                 ArticleDocument.SentimentResult sentiment = analyzeSentiment(article.getBody());
                 article.setSentiment(sentiment);
-                
+
                 // Extract entities (simplified)
                 List<String> entities = extractEntities(article.getBody());
                 article.setEntities(entities);
-                
+
                 articleRepository.save(article);
                 log.info("Analyzed article: {} - Sentiment: {}", article.getTitle(), sentiment.getLabel());
-                
+
             } catch (Exception e) {
                 log.error("Failed to analyze article {}: {}", articleId, e.getMessage());
             }
         });
     }
-    
+
     public ArticleDocument.SentimentResult analyzeSentiment(String text) {
         if (text == null || text.isEmpty()) {
             return createNeutralSentiment();
         }
-        
+
         String lowerText = text.toLowerCase();
         double score = 0.0;
         int matchCount = 0;
-        
+
         for (Map.Entry<String, Double> entry : SENTIMENT_KEYWORDS.entrySet()) {
             if (lowerText.contains(entry.getKey())) {
                 score += entry.getValue();
                 matchCount++;
             }
         }
-        
+
         if (matchCount > 0) {
             score = score / matchCount;
         }
-        
+
         String label;
         if (score > 0.2) {
             label = "bullish";
@@ -557,38 +557,38 @@ public class SentimentAnalysisService {
         } else {
             label = "neutral";
         }
-        
+
         return ArticleDocument.SentimentResult.builder()
                 .label(label)
                 .score(Math.abs(score))
                 .model("keyword-based")
                 .build();
     }
-    
+
     public List<String> extractSymbols(String text) {
         if (text == null) return List.of();
-        
+
         Matcher matcher = SYMBOL_PATTERN.matcher(text);
         return matcher.results()
                 .map(m -> m.group().toUpperCase())
                 .distinct()
                 .toList();
     }
-    
+
     public List<String> extractEntities(String text) {
         // Simplified entity extraction - in production use NER
         Pattern entityPattern = Pattern.compile(
-            "\\b(Binance|Coinbase|Bitcoin|Ethereum|SEC|Fed|Federal Reserve)\\b",
-            Pattern.CASE_INSENSITIVE
+                "\\b(Binance|Coinbase|Bitcoin|Ethereum|SEC|Fed|Federal Reserve)\\b",
+                Pattern.CASE_INSENSITIVE
         );
-        
+
         Matcher matcher = entityPattern.matcher(text);
         return matcher.results()
                 .map(m -> m.group())
                 .distinct()
                 .toList();
     }
-    
+
     private ArticleDocument.SentimentResult createNeutralSentiment() {
         return ArticleDocument.SentimentResult.builder()
                 .label("neutral")
@@ -608,7 +608,7 @@ package com.example.backend.controller;
 
 import com.example.backend.model.ArticleDocument;
 import com.example.backend.nlp.SentimentAnalysisService;
-import com.example.backend.repository.ArticleDocumentRepository;
+import com.example.backend.repository.mongodb.ArticleDocumentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -621,32 +621,32 @@ import java.util.Map;
 @RequestMapping("/api/analysis")
 @RequiredArgsConstructor
 public class AnalysisController {
-    
+
     private final SentimentAnalysisService sentimentService;
     private final ArticleDocumentRepository articleRepository;
-    
+
     @GetMapping("/{articleId}")
     public ResponseEntity<Map<String, Object>> getAnalysis(@PathVariable String articleId) {
         return articleRepository.findById(articleId)
                 .map(article -> ResponseEntity.ok(Map.of(
-                    "articleId", article.getId(),
-                    "title", article.getTitle(),
-                    "sentiment", article.getSentiment(),
-                    "symbols", article.getSymbols(),
-                    "entities", article.getEntities()
+                        "articleId", article.getId(),
+                        "title", article.getTitle(),
+                        "sentiment", article.getSentiment(),
+                        "symbols", article.getSymbols(),
+                        "entities", article.getEntities()
                 )))
                 .orElse(ResponseEntity.notFound().build());
     }
-    
+
     @PostMapping("/analyze/{articleId}")
     public ResponseEntity<Map<String, String>> triggerAnalysis(@PathVariable String articleId) {
         sentimentService.analyzeArticle(articleId);
         return ResponseEntity.accepted().body(Map.of(
-            "status", "processing",
-            "articleId", articleId
+                "status", "processing",
+                "articleId", articleId
         ));
     }
-    
+
     @GetMapping("/sentiment/{label}")
     public ResponseEntity<Page<ArticleDocument>> getArticlesBySentiment(
             @PathVariable String label,
@@ -654,12 +654,12 @@ public class AnalysisController {
             @RequestParam(defaultValue = "20") int size
     ) {
         Page<ArticleDocument> articles = articleRepository.findBySentiment(
-            label, 
-            PageRequest.of(page, size)
+                label,
+                PageRequest.of(page, size)
         );
         return ResponseEntity.ok(articles);
     }
-    
+
     @GetMapping("/symbols/{symbol}")
     public ResponseEntity<Page<ArticleDocument>> getArticlesBySymbol(
             @PathVariable String symbol,

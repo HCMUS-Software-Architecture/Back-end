@@ -105,7 +105,7 @@ package com.example.backend.worker;
 
 import com.example.backend.event.ArticleCrawledEvent;
 import com.example.backend.model.ArticleDocument;
-import com.example.backend.repository.ArticleDocumentRepository;
+import com.example.backend.repository.mongodb.ArticleDocumentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -124,18 +124,18 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class NormalizerWorkerTest {
-    
+
     @Mock
     private ArticleDocumentRepository articleRepository;
-    
+
     @Mock
     private KafkaTemplate<String, Object> kafkaTemplate;
-    
+
     @InjectMocks
     private NormalizerWorker normalizerWorker;
-    
+
     private ArticleCrawledEvent testEvent;
-    
+
     @BeforeEach
     void setUp() {
         testEvent = ArticleCrawledEvent.builder()
@@ -148,7 +148,7 @@ class NormalizerWorkerTest {
                 .metadata(Map.of("test", "value"))
                 .build();
     }
-    
+
     @Test
     void shouldNormalizeAndSaveArticle() {
         // Given
@@ -159,32 +159,32 @@ class NormalizerWorkerTest {
                     doc.setId("generated-id");
                     return doc;
                 });
-        
+
         // When
         normalizerWorker.processRawArticle(testEvent);
-        
+
         // Then
         ArgumentCaptor<ArticleDocument> captor = ArgumentCaptor.forClass(ArticleDocument.class);
         verify(articleRepository).save(captor.capture());
-        
+
         ArticleDocument saved = captor.getValue();
         assertThat(saved.getUrl()).isEqualTo(testEvent.getUrl());
         assertThat(saved.getTitle()).isEqualTo(testEvent.getTitle());
         assertThat(saved.getBody()).contains("Test content");
     }
-    
+
     @Test
     void shouldSkipDuplicateArticle() {
         // Given
         when(articleRepository.existsByUrl(testEvent.getUrl())).thenReturn(true);
-        
+
         // When
         normalizerWorker.processRawArticle(testEvent);
-        
+
         // Then
         verify(articleRepository, never()).save(any());
     }
-    
+
     @Test
     void shouldPublishNormalizedEvent() {
         // Given
@@ -195,10 +195,10 @@ class NormalizerWorkerTest {
                     doc.setId("generated-id");
                     return doc;
                 });
-        
+
         // When
         normalizerWorker.processRawArticle(testEvent);
-        
+
         // Then
         verify(kafkaTemplate).send(anyString(), anyString(), any());
     }
@@ -215,7 +215,7 @@ package com.example.backend.worker;
 import com.example.backend.event.ArticleNormalizedEvent;
 import com.example.backend.model.ArticleDocument;
 import com.example.backend.nlp.SentimentAnalysisService;
-import com.example.backend.repository.ArticleDocumentRepository;
+import com.example.backend.repository.mongodb.ArticleDocumentRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -230,16 +230,16 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class NlpWorkerTest {
-    
+
     @Mock
     private ArticleDocumentRepository articleRepository;
-    
+
     @Mock
     private SentimentAnalysisService sentimentService;
-    
+
     @InjectMocks
     private NlpWorker nlpWorker;
-    
+
     @Test
     void shouldProcessArticleWithNlp() {
         // Given
@@ -251,32 +251,32 @@ class NlpWorkerTest {
                 .source("test")
                 .publishedAt(LocalDateTime.now())
                 .build();
-        
+
         ArticleDocument article = ArticleDocument.builder()
                 .id("article-1")
                 .title("Bitcoin bullish momentum")
                 .body("Bitcoin shows strong bullish signals")
                 .build();
-        
+
         ArticleDocument.SentimentResult sentiment = ArticleDocument.SentimentResult.builder()
                 .label("bullish")
                 .score(0.8)
                 .build();
-        
+
         when(articleRepository.findById("article-1")).thenReturn(Optional.of(article));
         when(sentimentService.analyzeSentiment(anyString())).thenReturn(sentiment);
         when(sentimentService.extractSymbols(anyString())).thenReturn(List.of("BTC"));
         when(sentimentService.extractEntities(anyString())).thenReturn(List.of("Bitcoin"));
-        
+
         // When
         nlpWorker.processNormalizedArticle(event);
-        
+
         // Then
         verify(sentimentService).analyzeSentiment(article.getBody());
         verify(sentimentService).extractSymbols(article.getBody());
         verify(articleRepository).save(article);
     }
-    
+
     @Test
     void shouldHandleArticleNotFound() {
         // Given
@@ -284,12 +284,12 @@ class NlpWorkerTest {
                 .eventId("event-1")
                 .articleId("non-existent")
                 .build();
-        
+
         when(articleRepository.findById("non-existent")).thenReturn(Optional.empty());
-        
+
         // When
         nlpWorker.processNormalizedArticle(event);
-        
+
         // Then
         verify(sentimentService, never()).analyzeSentiment(anyString());
     }
@@ -308,7 +308,7 @@ Create `src/test/java/com/example/backend/integration/KafkaIntegrationTest.java`
 package com.example.backend.integration;
 
 import com.example.backend.event.ArticleCrawledEvent;
-import com.example.backend.repository.ArticleDocumentRepository;
+import com.example.backend.repository.mongodb.ArticleDocumentRepository;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -326,7 +326,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -337,27 +336,27 @@ import static org.awaitility.Awaitility.await;
 @SpringBootTest
 @Testcontainers
 class KafkaIntegrationTest {
-    
+
     @Container
     static KafkaContainer kafkaContainer = new KafkaContainer(
-        DockerImageName.parse("confluentinc/cp-kafka:7.5.0")
+            DockerImageName.parse("confluentinc/cp-kafka:7.5.0")
     );
-    
+
     @Container
     static MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0");
-    
+
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.kafka.bootstrap-servers", kafkaContainer::getBootstrapServers);
         registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
     }
-    
+
     @Autowired
     private KafkaTemplate<String, Object> kafkaTemplate;
-    
+
     @Autowired
     private ArticleDocumentRepository articleRepository;
-    
+
     @Test
     void shouldProcessArticleThroughKafkaPipeline() throws Exception {
         // Given
@@ -370,10 +369,10 @@ class KafkaIntegrationTest {
                 .crawledAt(LocalDateTime.now())
                 .metadata(Map.of("test", "kafka"))
                 .build();
-        
+
         // When
         kafkaTemplate.send("raw-articles", event.getUrl(), event).get(10, TimeUnit.SECONDS);
-        
+
         // Then - wait for consumer to process
         await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
             assertThat(articleRepository.existsByUrl(event.getUrl())).isTrue();

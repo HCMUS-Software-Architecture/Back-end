@@ -1,71 +1,97 @@
 name: trading-application
 
 services:
-  rabbit-mq:
-    image: rabbitmq:3-management
-    container_name: rabbitmq
-    restart: always
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: trading-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-trading}
     ports:
-      - "15672:15672"
-      - "3001:61613"
-    command: >
-      sh -c "rabbitmq-plugins enable --offline rabbitmq_stomp rabbitmq_management && rabbitmq-server"
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - app-network
 
-  #price collector server
-  price-collector:
-    build:
-      context: ./
-      dockerfile: Dockerfile
-    container_name: price-collector-service
-    env_file:
-      - .env
+  # MongoDB Database
+  mongodb:
+    image: mongo:7
+    container_name: trading-mongodb
     environment:
-      - PROFILE=collector
-    depends_on:
-      rabbit-mq:
-        condition: service_healthy
-    networks:
-      - app-network
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-mongo}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:?MONGO_INITDB_ROOT_PASSWORD is required}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE:-trading}
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: trading-redis
+    command: redis-server --appendonly yes
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Backend server
   trading-backend:
     build:
       context: ./
       dockerfile: Dockerfile
-    env_file:
-      - .env
+    container_name: trading-backend-service
+    ports:
+      - '8081:8081'
     environment:
-      - PROFILE=user
-    ports:
-      - "8081"
-    deploy:
-      replicas: 3
+      SERVER_PORT: ${SERVER_PORT:-8081}
+      # PostgreSQL
+      POSTGRES_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-trading}
+      POSTGRES_USERNAME: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      # MongoDB
+      MONGODB_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME:-mongo}:${MONGO_INITDB_ROOT_PASSWORD:?MONGO_INITDB_ROOT_PASSWORD is required}@mongodb:27017/${MONGO_INITDB_DATABASE:-trading}?authSource=admin
+      MONGODB_DATABASE: ${MONGO_INITDB_DATABASE:-trading}
+      # Redis
+      REDIS_URL: redis://redis:6379
+      REDIS_SSL_ENABLED: 'false'
+      REDIS_TIMEOUT: ${REDIS_TIMEOUT:-60000}
+      CACHE_TTL: ${CACHE_TTL:-600000}
+      # JWT
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      JWT_ACCESS_EXPIRATION: ${JWT_ACCESS_EXPIRATION:-900000}
+      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION:-604800000}
+      # JPA
+      JPA_SHOW_SQL: ${JPA_SHOW_SQL:-true}
+      JPA_DDL_AUTO: ${JPA_DDL_AUTO:-update}
+      # Price symbols
+      PRICE_SYMBOLS: ${PRICE_SYMBOLS:-btcusdt,ethusdt,bnbusdt}
     depends_on:
-      rabbit-mq:
+      postgres:
         condition: service_healthy
-    networks:
-      - app-network
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
-  load-balancer:
-    image: nginx:alpine
-    ports:
-      - "9000:9000"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-    depends_on:
-      - trading-backend
-    networks:
-      - app-network
-
-
-networks:
-  app-network:
-    driver: bridge
+volumes:
+  postgres_data:
+  mongodb_data:
+  redis_data:

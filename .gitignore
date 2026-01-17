@@ -118,10 +118,11 @@ application.yml
 application-*.yml
 !application.yml.example
 
-# Legacy .env files (no longer used)
+# Environment files with secrets
 .env
 .env.local
 .env.*.local
+!.env.example
 *.pem
 *.key
 secrets/
