@@ -10,7 +10,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
@@ -48,15 +47,13 @@ public class GlobalExceptionHandler {
         return buildResponse("System error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-
-
     private ResponseEntity<ErrorResponseDto> buildResponse(String message, HttpStatus httpStatus) {
         ErrorResponseDto responseDto = ErrorResponseDto.builder()
                 .message(message)
                 .status(httpStatus)
                 .error(httpStatus.getReasonPhrase())
                 .build();
-
+        // httpStatus đang trùng 2 chỗ
         return ResponseEntity.status(httpStatus).body(responseDto);
     }
 }

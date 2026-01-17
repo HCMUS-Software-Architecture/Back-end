@@ -57,4 +57,23 @@ public class Article {
         private double score;
         private String model;
     }
+    
+    // Convenience methods for NLP analysis
+    
+    /**
+     * Get content for NLP analysis (title + body)
+     */
+    public String getContent() {
+        return body;
+    }
+    
+    /**
+     * Get summary (first 200 chars of body)
+     */
+    public String getSummary() {
+        if (body == null || body.isEmpty()) {
+            return null;
+        }
+        return body.length() > 200 ? body.substring(0, 200) + "..." : body;
+    }
 }

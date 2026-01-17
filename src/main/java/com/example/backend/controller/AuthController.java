@@ -20,53 +20,47 @@ import java.util.Map;
 @Slf4j
 @RequestMapping("/api/auth")
 public class AuthController {
-    private final AuthService authService;
-    private final JwtService jwtService;
+        private final AuthService authService;
+        private final JwtService jwtService;
 
-    @PostMapping("/register")
-    public ResponseEntity<UserDto> registerUser(@RequestBody RegisterRequest request) {
-        UserDto userDto = authService.registerUser(request.getEmail(), request.getPassword(), request.getUserName());
-        return ResponseEntity.status(HttpStatus.CREATED).body(userDto);
-    }
+        @PostMapping("/register")
+        public ResponseEntity<UserDto> registerUser(@RequestBody RegisterRequest request) {
+                UserDto userDto = authService.registerUser(request.getEmail(), request.getPassword(),
+                                request.getUserName());
+                return ResponseEntity.status(HttpStatus.CREATED).body(userDto);
+        }
 
-    @PostMapping("/login")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Login Successfully",
-                    content = @Content(schema = @Schema(implementation = TokenResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Invalid email or password",
-                    content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
-            @ApiResponse(responseCode = "500", description = "System error",
-                    content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
-    })
-    public ResponseEntity<TokenResponse> login(@RequestBody LoginRequest request) {
-        TokenResponse tokenResponse = authService.login(request.getEmail(), request.getPassword());
-        return ResponseEntity.status(HttpStatus.OK).body(tokenResponse);
-    }
+        @PostMapping("/login")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "Login Successfully", content = @Content(schema = @Schema(implementation = TokenResponse.class))),
+                        @ApiResponse(responseCode = "401", description = "Invalid email or password", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
+                        @ApiResponse(responseCode = "500", description = "System error", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
+        })
+        public ResponseEntity<TokenResponse> login(@RequestBody LoginRequest request) {
+                TokenResponse tokenResponse = authService.login(request.getEmail(), request.getPassword());
+                return ResponseEntity.status(HttpStatus.OK).body(tokenResponse);
+        }
 
-    @PostMapping("/refresh")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "re-new refresh token",
-                    content = @Content(schema = @Schema(implementation = TokenResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Refresh Token is invalid or revoked",
-                    content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
-    })
-    public ResponseEntity<TokenResponse> refresh(@RequestBody RefreshTokenRequest request) {
-        String refreshToken = request.getRefreshToken();
-        TokenResponse newCoupleToken = jwtService.getAccessTokenFromRefreshToken(refreshToken);
-        return ResponseEntity.status(HttpStatus.OK).body(newCoupleToken);
-    }
+        @PostMapping("/refresh")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "re-new refresh token", content = @Content(schema = @Schema(implementation = TokenResponse.class))),
+                        @ApiResponse(responseCode = "401", description = "Refresh Token is invalid or revoked", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
+        })
+        public ResponseEntity<TokenResponse> refresh(@RequestBody RefreshTokenRequest request) {
+                String refreshToken = request.getRefreshToken();
+                TokenResponse newCoupleToken = jwtService.getAccessTokenFromRefreshToken(refreshToken);
+                return ResponseEntity.status(HttpStatus.OK).body(newCoupleToken);
+        }
 
-    @PostMapping("/logout")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Logout successfully",
-                    content = @Content(schema = @Schema(implementation = MessageResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Token not found or user hasn't login",
-                    content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
-    })
-    public ResponseEntity<?> logout(@RequestBody RefreshTokenRequest request) {
-        String refreshToken = request.getRefreshToken();
-        authService.logout(refreshToken);
-        return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "User has been logged out"));
-    }
+        @PostMapping("/logout")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "Logout successfully", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+                        @ApiResponse(responseCode = "401", description = "Token not found or user hasn't login", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
+        })
+        public ResponseEntity<?> logout(@RequestBody RefreshTokenRequest request) {
+                String refreshToken = request.getRefreshToken();
+                authService.logout(refreshToken);
+                return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "User has been logged out"));
+        }
 
 }

@@ -27,7 +27,12 @@ This platform provides:
 - **AI/NLP Analysis**: Sentiment analysis and trend prediction
 - **Account Management**: User authentication and preferences
 
-See [Architecture Overview](./doc/Architecture.md) for detailed design.
+See [Architecture Overview](./docs/core/Architecture.md) for detailed design.
+
+### Related Projects
+
+- **Frontend**: [Front-end/README.md](../Front-end/README.md) - Next.js web application
+- **Swagger API**: [http://localhost:8081/swagger-ui.html](http://localhost:8081/swagger-ui.html) - Interactive API docs
 
 ---
 
@@ -176,16 +181,69 @@ Back-end/
 
 ---
 
+## API Documentation (Swagger/OpenAPI)
+
+Once the application is running, access the interactive API documentation:
+
+### Swagger UI
+
+**URL:** [http://localhost:8081/swagger-ui.html](http://localhost:8081/swagger-ui.html)
+
+The Swagger UI provides:
+- 📋 **Interactive API Explorer** - Test endpoints directly from the browser
+- 📖 **Request/Response Schemas** - See all DTOs and data models
+- 🔐 **Authentication** - Test endpoints with JWT tokens
+- 📦 **Request Examples** - Sample payloads for all endpoints
+
+### OpenAPI Specification
+
+**JSON:** [http://localhost:8081/v3/api-docs](http://localhost:8081/v3/api-docs)
+
+Use the OpenAPI spec to:
+- Generate client SDKs (TypeScript, Python, etc.)
+- Import into Postman/Insomnia
+- Validate API contracts
+
+### API Endpoint Categories
+
+| Category | Base Path | Description |
+|----------|-----------|-------------|
+| Health | `/api/health`, `/actuator/health` | Service health checks |
+| Articles | `/api/articles` | News article CRUD operations |
+| Prices | `/api/prices` | Price data and historical candles |
+| Analysis | `/api/analysis` | NLP sentiment analysis |
+| Auth | `/api/auth` | Authentication and authorization |
+
+### WebSocket Endpoints
+
+| Endpoint | Protocol | Description |
+|----------|----------|-------------|
+| `/ws/prices` | STOMP over SockJS | Real-time price updates |
+
+**Subscribe to Topics:**
+- `/topic/prices/{symbol}` - Price ticks for specific symbol
+- `/topic/candles/{symbol}/{interval}` - Aggregated candles
+
+---
+
 ## Documentation
 
 | Document                                         | Description                                         |
 | ------------------------------------------------ | --------------------------------------------------- |
-| [Architecture.md](./doc/Architecture.md)         | Evolutionary architecture with phases and rationale |
-| [CoreRequirements.md](./doc/CoreRequirements.md) | Business requirements                               |
-| [Features.md](./doc/Features.md)                 | Feature specifications and flows                    |
-| [ProjectPlan.md](./doc/ProjectPlan.md)           | 9-week implementation plan                          |
-| [UseCaseDiagram.md](./doc/UseCaseDiagram.md)     | User interactions and flows                         |
-| [Operations.md](./doc/Operations.md)             | Monitoring, CI/CD, Kubernetes                       |
+| [Architecture.md](./docs/core/Architecture.md)   | Evolutionary architecture with phases and rationale |
+| [CoreRequirements.md](./docs/core/CoreRequirements.md) | Business requirements                          |
+| [DatabaseDesign.md](./docs/core/DatabaseDesign.md) | Database schemas and optimization                 |
+| [UseCaseDiagram.md](./docs/core/UseCaseDiagram.md) | User interactions and flows                       |
+
+### Implementation Guides
+
+| Phase | Document | Focus |
+|-------|----------|-------|
+| 1 | [Phase1-ImplementationGuide.md](./docs/guides/Phase1-ImplementationGuide.md) | Monolithic foundation |
+| 2 | [Phase2-ImplementationGuide.md](./docs/guides/Phase2-ImplementationGuide.md) | Database optimization |
+| 3 | [Phase3-ImplementationGuide.md](./docs/guides/Phase3-ImplementationGuide.md) | Service separation |
+| 4 | [Phase4-ImplementationGuide.md](./docs/guides/Phase4-ImplementationGuide.md) | Event-driven architecture |
+| 5 | [Phase5-ImplementationGuide.md](./docs/guides/Phase5-ImplementationGuide.md) | Microservices ready |
 
 ---
 
