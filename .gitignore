@@ -114,7 +114,6 @@ temp/
 # Environment and Secrets
 # ===========================
 # Ignore actual application config with sensitive data
-application.yml
 application-*.yml
 !application.yml.example
 

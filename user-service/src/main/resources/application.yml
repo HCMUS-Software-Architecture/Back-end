@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: user-service
+  mongodb:
+    uri: ${MONGODB_URI}
+    database: ${MONGODB_DATABASE:trading}
+
+server:
+  port: 8082
+
+
+token:
+  secret: ${JWT_SECRET}
