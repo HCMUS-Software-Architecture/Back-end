@@ -5,9 +5,20 @@ spring:
     uri: ${MONGODB_URI}
     database: ${MONGODB_DATABASE:trading}
 
+management:
+  health:
+    mongodb:
+      enabled: false
+
 server:
   port: 8082
 
+eureka:
+  client:
+    service-url:
+      defaultZone: ${DISCOVERY_SERVER:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
 
 token:
   secret: ${JWT_SECRET}

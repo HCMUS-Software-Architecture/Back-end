@@ -5,3 +5,10 @@ spring:
   application:
     name: price-service
 
+eureka:
+  client:
+    service-url:
+      defaultZone: ${DISCOVERY_SERVER:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
+
