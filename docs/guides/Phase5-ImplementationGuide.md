@@ -49,10 +49,10 @@ This phase implements requirements from [CoreRequirements.md](../core/CoreRequir
 
 From [DatabaseDesign.md](../core/DatabaseDesign.md) - Phase 5 additions:
 
-| Technology | Purpose | Phase 5 Migration |
-|------------|---------|-------------------|
-| **TimescaleDB** | Optimized time-series | Hypertables for price_candles |
-| **Continuous Aggregates** | Pre-computed rollups | 1h, 4h, 1d candles |
+| Technology                | Purpose               | Phase 5 Migration             |
+| ------------------------- | --------------------- | ----------------------------- |
+| **TimescaleDB**           | Optimized time-series | Hypertables for price_candles |
+| **Continuous Aggregates** | Pre-computed rollups  | 1h, 4h, 1d candles            |
 
 ### Architecture Diagram
 
@@ -87,16 +87,16 @@ From [DatabaseDesign.md](../core/DatabaseDesign.md) - Phase 5 additions:
 
 ### Epics for Phase 5
 
-| Epic | Description | Priority |
-|------|-------------|----------|
-| E5.1 | Docker Image Creation | High |
-| E5.2 | OpenAPI Documentation | High |
-| E5.3 | Performance Optimization | High |
-| E5.4 | Kubernetes Manifests | Medium |
-| E5.5 | Final Integration Testing | High |
-| E5.6 | Deployment Documentation | High |
-| E5.7 | TimescaleDB Migration | High |
-| E5.8 | UI/UX Final Polish | Medium |
+| Epic | Description               | Priority |
+| ---- | ------------------------- | -------- |
+| E5.1 | Docker Image Creation     | High     |
+| E5.2 | OpenAPI Documentation     | High     |
+| E5.3 | Performance Optimization  | High     |
+| E5.4 | Kubernetes Manifests      | Medium   |
+| E5.5 | Final Integration Testing | High     |
+| E5.6 | Deployment Documentation  | High     |
+| E5.7 | TimescaleDB Migration     | High     |
+| E5.8 | UI/UX Final Polish        | Medium   |
 
 ---
 
@@ -106,11 +106,11 @@ From [DatabaseDesign.md](../core/DatabaseDesign.md) - Phase 5 additions:
 
 Ensure all Phase 1-4 prerequisites are installed, plus:
 
-| Software | Version | Purpose |
-|----------|---------|---------|
-| Kubernetes/kubectl | 1.28+ | Container orchestration |
-| Docker Buildx | Latest | Multi-platform builds |
-| Helm | 3.x | Kubernetes package manager |
+| Software           | Version | Purpose                    |
+| ------------------ | ------- | -------------------------- |
+| Kubernetes/kubectl | 1.28+   | Container orchestration    |
+| Docker Buildx      | Latest  | Multi-platform builds      |
+| Helm               | 3.x     | Kubernetes package manager |
 
 ---
 
@@ -142,6 +142,7 @@ K8S_REPLICA_COUNT=3
 ### Step 2: Verify Phase 4 Services
 
 **Bash (Linux/macOS):**
+
 ```bash
 cd docker
 docker compose up -d
@@ -154,6 +155,7 @@ docker exec trading-kafka kafka-topics --list --bootstrap-server localhost:9092
 ```
 
 **PowerShell (Windows 10/11):**
+
 ```powershell
 Set-Location docker
 docker compose up -d
@@ -239,7 +241,7 @@ services:
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     ports:
-      - "8081:8080"
+      - '8081:8080'
     depends_on:
       postgres:
         condition: service_healthy
@@ -250,7 +252,15 @@ services:
       kafka:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://localhost:8080/actuator/health',
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -270,11 +280,19 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=prod
     ports:
-      - "8080:8080"
+      - '8080:8080'
     depends_on:
       - api-service
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://localhost:8080/actuator/health',
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -290,7 +308,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -304,7 +322,7 @@ services:
     volumes:
       - mongo_data:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -316,7 +334,7 @@ services:
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -343,7 +361,14 @@ services:
     volumes:
       - kafka_data:/var/lib/kafka/data
     healthcheck:
-      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      test:
+        [
+          'CMD',
+          'kafka-topics',
+          '--bootstrap-server',
+          'localhost:9092',
+          '--list',
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -359,6 +384,7 @@ volumes:
 ### Step 3: Build Docker Images
 
 **Bash (Linux/macOS):**
+
 ```bash
 # Build main application image
 docker build -t trading-platform/api:latest .
@@ -377,6 +403,7 @@ docker tag trading-platform/gateway:latest your-registry/trading-platform/gatewa
 ```
 
 **PowerShell (Windows 10/11):**
+
 ```powershell
 # Build main application image
 docker build -t trading-platform/api:latest .
@@ -405,23 +432,23 @@ This section implements TimescaleDB migration from [DatabaseDesign.md](../core/D
 Update `docker/docker-compose.yml` to use TimescaleDB:
 
 ```yaml
-  postgres:
-    image: timescale/timescaledb:latest-pg15
-    container_name: trading-postgres
-    environment:
-      POSTGRES_DB: trading
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./init-timescale.sql:/docker-entrypoint-initdb.d/02-init-timescale.sql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+postgres:
+  image: timescale/timescaledb:latest-pg15
+  container_name: trading-postgres
+  environment:
+    POSTGRES_DB: trading
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+  ports:
+    - '5432:5432'
+  volumes:
+    - postgres_data:/var/lib/postgresql/data
+    - ./init-timescale.sql:/docker-entrypoint-initdb.d/02-init-timescale.sql
+  healthcheck:
+    test: ['CMD-SHELL', 'pg_isready -U postgres']
+    interval: 10s
+    timeout: 5s
+    retries: 5
 ```
 
 ### Step 2: Create TimescaleDB Migration Script
@@ -456,14 +483,14 @@ CREATE TABLE IF NOT EXISTS trading.price_candles_new (
     quote_volume    DECIMAL(30, 8),
     trade_count     INT,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    
+
     CONSTRAINT chk_interval CHECK (interval IN ('1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w')),
     PRIMARY KEY (symbol_id, interval, open_time)
 );
 
 -- Convert to hypertable
 SELECT create_hypertable(
-    'trading.price_candles_new', 
+    'trading.price_candles_new',
     'open_time',
     chunk_time_interval => INTERVAL '1 week',
     if_not_exists => TRUE
@@ -476,7 +503,7 @@ SELECT create_hypertable(
 -- 1-hour continuous aggregate from 1-minute candles
 CREATE MATERIALIZED VIEW IF NOT EXISTS trading.candles_1h_agg
 WITH (timescaledb.continuous) AS
-SELECT 
+SELECT
     symbol_id,
     time_bucket('1 hour', open_time) AS bucket,
     first(open, open_time) AS open,
@@ -493,7 +520,7 @@ WITH NO DATA;
 -- 4-hour continuous aggregate
 CREATE MATERIALIZED VIEW IF NOT EXISTS trading.candles_4h_agg
 WITH (timescaledb.continuous) AS
-SELECT 
+SELECT
     symbol_id,
     time_bucket('4 hours', open_time) AS bucket,
     first(open, open_time) AS open,
@@ -510,7 +537,7 @@ WITH NO DATA;
 -- Daily continuous aggregate
 CREATE MATERIALIZED VIEW IF NOT EXISTS trading.candles_1d_agg
 WITH (timescaledb.continuous) AS
-SELECT 
+SELECT
     symbol_id,
     time_bucket('1 day', open_time) AS bucket,
     first(open, open_time) AS open,
@@ -618,10 +645,10 @@ import java.util.UUID;
 
 @Repository
 public interface PriceCandleTimescaleRepository extends JpaRepository<PriceCandle, UUID> {
-    
+
     // Use TimescaleDB time_bucket for efficient aggregation
     @Query(value = """
-        SELECT symbol_id, 
+        SELECT symbol_id,
                time_bucket(:bucketSize, open_time) AS bucket,
                first(open, open_time) AS open,
                max(high) AS high,
@@ -643,7 +670,7 @@ public interface PriceCandleTimescaleRepository extends JpaRepository<PriceCandl
         Instant endTime,
         int limit
     );
-    
+
     // Use continuous aggregate for 1-hour candles
     @Query(value = """
         SELECT symbol_id, bucket, open, high, low, close, volume
@@ -654,7 +681,7 @@ public interface PriceCandleTimescaleRepository extends JpaRepository<PriceCandl
         LIMIT :limit
         """, nativeQuery = true)
     List<Object[]> find1HourCandles(String symbol, Instant startTime, int limit);
-    
+
     // Use continuous aggregate for daily candles
     @Query(value = """
         SELECT symbol_id, bucket, open, high, low, close, volume
@@ -704,7 +731,7 @@ import java.util.List;
 
 @Configuration
 public class OpenApiConfig {
-    
+
     @Bean
     public OpenAPI tradingPlatformOpenAPI() {
         return new OpenAPI()
@@ -745,7 +772,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Articles", description = "News article management endpoints")
 @RequiredArgsConstructor
 public class ArticleController {
-    
+
     @Operation(summary = "Get all articles", description = "Returns paginated list of articles")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved articles"),
@@ -753,9 +780,9 @@ public class ArticleController {
     })
     @GetMapping
     public ResponseEntity<Page<ArticleDocument>> getAllArticles(
-            @Parameter(description = "Page number (0-indexed)") 
+            @Parameter(description = "Page number (0-indexed)")
             @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Page size") 
+            @Parameter(description = "Page size")
             @RequestParam(defaultValue = "20") int size
     ) {
         // ... implementation
@@ -827,15 +854,15 @@ Add indexes to frequently queried fields:
 
 ```sql
 -- PostgreSQL indexes for price data
-CREATE INDEX CONCURRENTLY idx_price_ticks_symbol_time 
+CREATE INDEX CONCURRENTLY idx_price_ticks_symbol_time
 ON price_ticks (symbol, timestamp DESC);
 
-CREATE INDEX CONCURRENTLY idx_price_candles_symbol_interval_time 
+CREATE INDEX CONCURRENTLY idx_price_candles_symbol_interval_time
 ON price_candles (symbol, interval, open_time DESC);
 
 -- Partial index for recent data
-CREATE INDEX CONCURRENTLY idx_price_ticks_recent 
-ON price_ticks (symbol, timestamp) 
+CREATE INDEX CONCURRENTLY idx_price_ticks_recent
+ON price_ticks (symbol, timestamp)
 WHERE timestamp > NOW() - INTERVAL '7 days';
 ```
 
@@ -856,7 +883,7 @@ import dynamic from 'next/dynamic';
 export const LazyPriceChart = dynamic(
   () => import('@/components/chart/StreamingPriceChart').then(mod => mod.StreamingPriceChart),
   {
-    loading: () => <div className="h-[400px] animate-pulse bg-muted rounded-lg" />,
+    loading: () => <div className="h-100 animate-pulse bg-muted rounded-lg" />,
     ssr: false, // Charts need client-side rendering
   }
 );
@@ -864,7 +891,7 @@ export const LazyPriceChart = dynamic(
 export const LazyNewsFeed = dynamic(
   () => import('@/components/news/LiveNewsFeed').then(mod => mod.LiveNewsFeed),
   {
-    loading: () => <div className="h-[300px] animate-pulse bg-muted rounded-lg" />,
+    loading: () => <div className="h-75 animate-pulse bg-muted rounded-lg" />,
   }
 );
 ```
@@ -873,13 +900,13 @@ export const LazyNewsFeed = dynamic(
 
 Ensure WCAG 2.1 AA compliance:
 
-| Requirement | Implementation | Status |
-|-------------|----------------|--------|
-| **Color Contrast** | 4.5:1 minimum for text | ✅ |
-| **Focus Indicators** | Visible focus rings | ✅ |
-| **Keyboard Navigation** | Full Tab support | ✅ |
-| **Screen Reader** | ARIA labels | ✅ |
-| **Motion Preference** | Reduced motion support | ⬜ |
+| Requirement             | Implementation         | Status |
+| ----------------------- | ---------------------- | ------ |
+| **Color Contrast**      | 4.5:1 minimum for text | ✅     |
+| **Focus Indicators**    | Visible focus rings    | ✅     |
+| **Keyboard Navigation** | Full Tab support       | ✅     |
+| **Screen Reader**       | ARIA labels            | ✅     |
+| **Motion Preference**   | Reduced motion support | ⬜     |
 
 Add reduced motion support:
 
@@ -894,7 +921,7 @@ Add reduced motion support:
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  
+
   /* Keep essential price updates visible */
   .price-flash {
     animation: none !important;
@@ -984,7 +1011,12 @@ interface EmptyStateProps {
   };
 }
 
-export function EmptyState({ icon: Icon, title, description, action }: EmptyStateProps) {
+export function EmptyState({
+  icon: Icon,
+  title,
+  description,
+  action,
+}: EmptyStateProps) {
   return (
     <Card>
       <CardContent className="flex flex-col items-center justify-center py-12">
@@ -993,11 +1025,7 @@ export function EmptyState({ icon: Icon, title, description, action }: EmptyStat
         <p className="text-muted-foreground text-center mb-4 max-w-md">
           {description}
         </p>
-        {action && (
-          <Button onClick={action.onClick}>
-            {action.label}
-          </Button>
-        )}
+        {action && <Button onClick={action.onClick}>{action.label}</Button>}
       </CardContent>
     </Card>
   );
@@ -1035,14 +1063,14 @@ export default config;
 
 ### Step 5: Final Production Checklist
 
-| Category | Item | Status |
-|----------|------|--------|
-| **Performance** | Lighthouse score > 90 | ⬜ |
-| **SEO** | Meta tags configured | ⬜ |
-| **Accessibility** | WCAG 2.1 AA compliant | ⬜ |
-| **Security** | CSP headers configured | ⬜ |
-| **PWA** | Service worker (optional) | ⬜ |
-| **Analytics** | Error tracking enabled | ⬜ |
+| Category          | Item                      | Status |
+| ----------------- | ------------------------- | ------ |
+| **Performance**   | Lighthouse score > 90     | ⬜     |
+| **SEO**           | Meta tags configured      | ⬜     |
+| **Accessibility** | WCAG 2.1 AA compliant     | ⬜     |
+| **Security**      | CSP headers configured    | ⬜     |
+| **PWA**           | Service worker (optional) | ⬜     |
+| **Analytics**     | Error tracking enabled    | ⬜     |
 
 ---
 
@@ -1078,37 +1106,37 @@ spec:
         app: trading-api
     spec:
       containers:
-      - name: api
-        image: trading-platform/api:latest
-        ports:
-        - containerPort: 8080
-        env:
-        - name: SPRING_PROFILES_ACTIVE
-          value: "prod"
-        - name: SPRING_DATASOURCE_URL
-          valueFrom:
-            secretKeyRef:
-              name: trading-secrets
-              key: database-url
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "250m"
-          limits:
-            memory: "1Gi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /actuator/health/liveness
-            port: 8080
-          initialDelaySeconds: 60
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /actuator/health/readiness
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 5
+        - name: api
+          image: trading-platform/api:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: 'prod'
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: trading-secrets
+                  key: database-url
+          resources:
+            requests:
+              memory: '512Mi'
+              cpu: '250m'
+            limits:
+              memory: '1Gi'
+              cpu: '500m'
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 5
 ---
 apiVersion: v1
 kind: Service
@@ -1119,8 +1147,8 @@ spec:
   selector:
     app: trading-api
   ports:
-  - port: 80
-    targetPort: 8080
+    - port: 80
+      targetPort: 8080
   type: ClusterIP
 ```
 
@@ -1140,18 +1168,18 @@ spec:
   minReplicas: 2
   maxReplicas: 10
   metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 70
-  - type: Resource
-    resource:
-      name: memory
-      target:
-        type: Utilization
-        averageUtilization: 80
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
 ```
 
 ---
@@ -1161,6 +1189,7 @@ spec:
 ### Performance Benchmark Script
 
 **Bash (Linux/macOS):**
+
 ```bash
 #!/bin/bash
 echo "=== Phase 5 Performance Benchmark ==="
@@ -1196,6 +1225,7 @@ echo "=== Benchmark Complete ==="
 ```
 
 **PowerShell (Windows 10/11):**
+
 ```powershell
 Write-Host "=== Phase 5 Performance Benchmark ===" -ForegroundColor Cyan
 
@@ -1238,8 +1268,10 @@ Write-Host "=== Benchmark Complete ===" -ForegroundColor Cyan
 **Symptoms**: Container restarts with exit code 137
 
 **Solutions**:
+
 1. Increase memory limits in docker-compose
 2. Configure JVM memory properly:
+
 ```dockerfile
 ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
 ```
@@ -1249,6 +1281,7 @@ ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
 **Symptoms**: Health checks fail, container marked unhealthy
 
 **Solutions**:
+
 1. Increase `initialDelaySeconds` in health checks
 2. Use multi-stage builds to reduce image size
 3. Pre-warm the JVM with `-XX:TieredStopAtLevel=1`
@@ -1258,9 +1291,11 @@ ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
 **Symptoms**: `HikariPool-1 - Connection is not available`
 
 **Solutions**:
+
 1. Increase pool size
 2. Reduce connection timeout
 3. Add connection leak detection:
+
 ```properties
 spring.datasource.hikari.leak-detection-threshold=60000
 ```
