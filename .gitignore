@@ -126,6 +126,8 @@ temp/
 secrets/
 credentials/
 
+micro.env
+
 # ===========================
 # Docker (development)
 # ===========================

@@ -60,6 +60,13 @@ spring:
     type: redis
     redis:
       time-to-live: ${CACHE_TTL:600000}
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:guest}
+    password: ${SPRING_RABBITMQ_PASSWORD:guest}
+    stomp:
+      port: ${SPRING_RABBITMQ_STOMP_PORT:61613}
 
 price:
   symbols: ${PRICE_SYMBOLS:btcusdt,ethusdt,bnbusdt}

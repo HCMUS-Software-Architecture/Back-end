@@ -16,7 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.*;
@@ -67,12 +67,12 @@ class JwtServiceTest {
         assertThat(token).isNotNull().isNotEmpty();
 
         // Verify token structure and claims
-        Key key = Keys.hmacShaKeyFor(TEST_SECRET.getBytes());
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(key)
+        javax.crypto.SecretKey key = Keys.hmacShaKeyFor(TEST_SECRET.getBytes());
+        Claims claims = Jwts.parser()
+                .verifyWith(key)
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
 
         assertThat(claims.getSubject()).isEqualTo(TEST_USER_ID);
         assertThat(claims.get("user_id", String.class)).isEqualTo(TEST_USER_ID);

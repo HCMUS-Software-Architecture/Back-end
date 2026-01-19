@@ -27,7 +27,7 @@
         <url/>
     </scm>
     <properties>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
         <spring-cloud.version>2025.1.0</spring-cloud.version>
     </properties>
     <dependencies>
@@ -59,23 +59,18 @@
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
-            <version>0.11.5</version>
+            <version>0.12.6</version>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
-            <version>0.11.5</version>
-            <!-- ignore if  io.jsonwebtoken/jjwt-impl@0.11.5
-            rhtpa(osv-github) vulnerability info:
-            Known security vulnerabilities: 1
-            Highest severity: MEDIUM
-            -->
+            <version>0.12.6</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
-            <version>0.11.5</version>
+            <version>0.12.6</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
