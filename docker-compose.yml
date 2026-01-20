@@ -71,79 +71,83 @@ services:
 
   # Microservices commented out - run monolith standalone for now
   # Uncomment when ready to deploy microservices
-  # discovery-server:
-  #   build:
-  #     context: ./discovery-server
-  #     dockerfile: Dockerfile
-  #   container_name: discovery-server
-  #   ports:
-  #     - '8761:8761'
-  #   healthcheck:
-  #     test: ['CMD', 'curl', '-f', 'http://localhost:8761/actuator/health']
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
-  #     start_period: 30s
+  discovery-server:
+    build:
+      context: ./discovery-server
+      dockerfile: Dockerfile
+    container_name: discovery-server
+    ports:
+      - '8761:8761'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8761/actuator/health']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
-  # user-service:
-  #   build:
-  #     context: ./user-service
-  #     dockerfile: Dockerfile
-  #   env_file:
-  #     - ./user-service/.env
-  #   environment:
-  #     - DISCOVERY_SERVER=http://discovery-server:8761/eureka
-  #   container_name: user-service
-  #   ports:
-  #     - '8082:8082'
-  #   depends_on:
-  #     discovery-server:
-  #       condition: service_healthy
-  #   healthcheck:
-  #     test: ['CMD', 'curl', '-f', 'http://localhost:8082/actuator/health']
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
-  #     start_period: 30s
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      - DISCOVERY_SERVER=http://discovery-server:8761/eureka
+      - MONGODB_URI=mongodb://admin:admin123@mongodb:27017/?authSource=admin
+    container_name: user-service
+    ports:
+      - '8082:8082'
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: [ 'CMD', 'curl', '-f', 'http://localhost:8082/actuator/health' ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
-  # price-service:
-  #   build:
-  #     context: ./price-service
-  #     dockerfile: Dockerfile
-  #   container_name: price-service
-  #   environment:
-  #     - DISCOVERY_SERVER=http://discovery-server:8761/eureka
-  #   ports:
-  #     - '8083:8083'
-  #   depends_on:
-  #     discovery-server:
-  #       condition: service_healthy
-  #   healthcheck:
-  #     test: ['CMD', 'curl', '-f', 'http://localhost:8083/actuator/health']
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
-  #     start_period: 30s
 
-  # api-gateway:
-  #   build:
-  #     context: ./api-gateway
-  #     dockerfile: Dockerfile
-  #   env_file:
-  #     - ./api-gateway/.env
-  #   environment:
-  #     - SPRING_PROFILES_ACTIVE=docker
-  #     - DISCOVERY_SERVER=http://discovery-server:8761/eureka
-  #   container_name: api-gateway
-  #   ports:
-  #     - '8081:8081'
-  #   depends_on:
-  #     discovery-server:
-  #       condition: service_healthy
-  #     user-service:
-  #       condition: service_healthy
-  #     price-service:
-  #       condition: service_healthy
+  price-service:
+    build:
+      context: ./price-service
+      dockerfile: Dockerfile
+    container_name: price-service
+    environment:
+      - DISCOVERY_SERVER=http://discovery-server:8761/eureka
+    ports:
+      - '8083:8083'
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+    healthcheck:
+      test: [ 'CMD', 'curl', '-f', 'http://localhost:8083/actuator/health' ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      - DISCOVERY_SERVER=http://discovery-server:8761/eureka
+    container_name: api-gateway
+    ports:
+      - '8081:8081'
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+      price-service:
+        condition: service_healthy
 
 volumes:
   postgres_data:

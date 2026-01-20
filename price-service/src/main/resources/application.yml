@@ -5,6 +5,7 @@ spring:
   application:
     name: price-service
 
+
 eureka:
   client:
     service-url:
