@@ -16,7 +16,6 @@ services:
       test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 10s
       timeout: 5s
-      retries: 5
 
   mongodb:
     image: mongo:7
@@ -32,7 +31,6 @@ services:
       test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
-      retries: 5
 
   redis:
     image: redis:7-alpine
@@ -46,28 +44,23 @@ services:
       test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
       interval: 10s
       timeout: 5s
-      retries: 5
 
   rabbitmq:
-    image: rabbitmq:3.13-management-alpine
+    image: rabbitmq:3-management-alpine
     container_name: trading-rabbitmq
+    restart: always
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
     ports:
-      - '5672:5672' # AMQP port
       - '15672:15672' # Management UI
-      - '61613:61613' # STOMP port
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-      - ./rabbitmq-plugins.sh:/docker-entrypoint-initdb.d/rabbitmq-plugins.sh:ro
+      - '3001:61613' # STOMP port
     command: sh -c "rabbitmq-plugins enable --offline rabbitmq_management rabbitmq_stomp rabbitmq_web_stomp && docker-entrypoint.sh rabbitmq-server"
     healthcheck:
-      test: ['CMD', 'rabbitmq-diagnostics', 'ping']
+      test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
 
   # Microservices commented out - run monolith standalone for now
   # Uncomment when ready to deploy microservices
@@ -78,12 +71,6 @@ services:
     container_name: discovery-server
     ports:
       - '8761:8761'
-    healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:8761/actuator/health']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
 
   user-service:
     build:
@@ -98,37 +85,52 @@ services:
     ports:
       - '8082:8082'
     depends_on:
-      discovery-server:
-        condition: service_healthy
       mongodb:
         condition: service_healthy
-    healthcheck:
-      test: [ 'CMD', 'curl', '-f', 'http://localhost:8082/actuator/health' ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
 
   price-service:
     build:
       context: ./price-service
       dockerfile: Dockerfile
-    container_name: price-service
+    env_file:
+      - .env
     environment:
       - DISCOVERY_SERVER=http://discovery-server:8761/eureka
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/trading_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres123
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_PROFILES_ACTIVE=user
+      - SPRING_RABBITMQ_HOST=rabbitmq
+    deploy:
+      replicas: 2
+    ports:
+      - '8083'
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  price-collector:
+    build:
+      context: ./price-service
+      dockerfile: Dockerfile
+    container_name: price-collector
+    env_file:
+      - .env
+    environment:
+      - DISCOVERY_SERVER=http://discovery-server:8761/eureka
+      - SPRING_PROFILES_ACTIVE=collector
+      - SPRING_APPLICATION_NAME=price-collector-worker
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/trading_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres123
+      - SPRING_RABBITMQ_HOST=rabbitmq
     ports:
       - '8083:8083'
     depends_on:
-      discovery-server:
+      postgres:
         condition: service_healthy
-    healthcheck:
-      test: [ 'CMD', 'curl', '-f', 'http://localhost:8083/actuator/health' ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
 
   api-gateway:
     build:
@@ -141,13 +143,6 @@ services:
     container_name: api-gateway
     ports:
       - '8081:8081'
-    depends_on:
-      discovery-server:
-        condition: service_healthy
-      user-service:
-        condition: service_healthy
-      price-service:
-        condition: service_healthy
 
 volumes:
   postgres_data:

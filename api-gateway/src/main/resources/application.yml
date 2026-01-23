@@ -12,12 +12,13 @@ spring:
   cloud:
     gateway:
       server:
-        webmvc:
+        webflux:
           routes:
             - id: user-service
               uri: lb://user-service
               predicates:
                 - Path=/api/user/**, /api/auth/**
+
             - id: user-service-doc
               uri: lb://user-service
               predicates:
@@ -28,7 +29,14 @@ spring:
             - id: price-service
               uri: lb://price-service
               predicates:
-                - Path=/api/prices/**
+                - Path=/api/prices/**, /ws/prices/**
+
+            - id: price-websocket
+              uri: lb:ws://price-service
+              predicates:
+                - Path=/ws/prices
+
+
             - id: price-service-doc
               uri: lb://price-service
               predicates:
@@ -51,3 +59,9 @@ springdoc:
         url: /v3/api-docs/user-service
       - name: Price service
         url: /v3/api-docs/price-service
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.http.server.reactive: DEBUG
+    org.springframework.web.reactive: DEBUG
+    reactor.netty: DEBUG
