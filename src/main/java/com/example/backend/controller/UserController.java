@@ -11,6 +11,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+/**
+ * @deprecated SAFE TO DELETE - Migrated to user-service
+ * @see user-service/src/main/java/org/example/userservice/controller/UserController.java
+ */
+@Deprecated(forRemoval = true)
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -23,11 +28,12 @@ public class UserController {
         return ResponseEntity.ok().body(userService.getUserById());
     }
 
-//    @PostMapping
-//    public ResponseEntity<?> updateUserInfo(@RequestBody Map<String, String> body) throws BadRequestException {
-//        String newName = body.get("fullName");
-//        userService.updateFullName(newName);
-//        return ResponseEntity.ok().build();
-//    }
+    // @PostMapping
+    // public ResponseEntity<?> updateUserInfo(@RequestBody Map<String, String>
+    // body) throws BadRequestException {
+    // String newName = body.get("fullName");
+    // userService.updateFullName(newName);
+    // return ResponseEntity.ok().build();
+    // }
 
 }

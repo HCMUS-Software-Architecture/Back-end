@@ -14,6 +14,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * @deprecated SAFE TO DELETE - Security migrated to each microservice
+ *             - api-gateway: handles CORS and JWT validation
+ *             - user-service: has own SecurityConfig for password encoding
+ *             - price-service: has own SecurityConfig
+ * @see api-gateway/src/main/java/org/example/apigateway/config/SecurityConfig.java
+ */
+@Deprecated(forRemoval = true)
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor

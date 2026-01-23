@@ -10,6 +10,14 @@ import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * TODO: KEEP FOR NOW - Will be migrated to article-service later
+ * This controller and related Article classes (ArticleService,
+ * ArticleRepository,
+ * Article model, CrawlerService) should be migrated to a dedicated
+ * article-service
+ * microservice in the future.
+ */
 @RestController
 @RequestMapping("/api/articles")
 @RequiredArgsConstructor
@@ -21,8 +29,7 @@ public class ArticleController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "publishedAt") String sortBy,
-            @RequestParam(defaultValue = "desc") String direction
-    ) {
+            @RequestParam(defaultValue = "desc") String direction) {
         Sort sort = direction.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
@@ -41,8 +48,7 @@ public class ArticleController {
     public ResponseEntity<PagedModel<Article>> getArticlesBySource(
             @PathVariable String source,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
-    ) {
+            @RequestParam(defaultValue = "20") int size) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by("publishedAt").descending());
         return ResponseEntity.ok(articleService.getArticlesBySource(source, pageRequest));
     }
@@ -51,8 +57,7 @@ public class ArticleController {
     public ResponseEntity<PagedModel<Article>> searchArticles(
             @RequestParam String q,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
-    ) {
+            @RequestParam(defaultValue = "20") int size) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by("publishedAt").descending());
         return ResponseEntity.ok(articleService.searchArticles(q, pageRequest));
     }

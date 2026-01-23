@@ -12,6 +12,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+/**
+ * @deprecated SAFE TO DELETE - Migrated to user-service
+ * @see user-service/src/main/java/org/example/userservice/service/JwtService.java
+ */
+@Deprecated(forRemoval = true)
 import javax.security.auth.RefreshFailedException;
 import javax.crypto.SecretKey;
 import java.util.Date;

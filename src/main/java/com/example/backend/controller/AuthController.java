@@ -15,6 +15,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+/**
+ * @deprecated SAFE TO DELETE - Migrated to user-service
+ * @see user-service/src/main/java/org/example/userservice/controller/AuthController.java
+ */
+@Deprecated(forRemoval = true)
 @RequiredArgsConstructor
 @RestController
 @Slf4j

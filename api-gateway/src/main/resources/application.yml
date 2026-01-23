@@ -4,6 +4,11 @@ server:
 token:
   secret: ${JWT_SECRET}
 
+# CORS Configuration (used by SecurityConfig.java)
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+  max-age: ${CORS_MAX_AGE:3600}
+
 spring:
   application:
     name: api-gateway
@@ -11,6 +16,8 @@ spring:
     active: dev
   cloud:
     gateway:
+      # CORS is handled by SecurityConfig.java for better control
+      # globalcors config removed to avoid duplicate/conflicting configs
       server:
         webflux:
           routes:
@@ -35,7 +42,6 @@ spring:
               uri: lb:ws://price-service
               predicates:
                 - Path=/ws/prices
-
 
             - id: price-service-doc
               uri: lb://price-service

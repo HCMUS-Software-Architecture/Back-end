@@ -13,6 +13,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+/**
+ * @deprecated SAFE TO DELETE - Migrated to api-gateway
+ * @see api-gateway/src/main/java/org/example/apigateway/filter/JwtAuthFilter.java
+ */
+@Deprecated(forRemoval = true)
 import java.io.IOException;
 import java.util.ArrayList;
 

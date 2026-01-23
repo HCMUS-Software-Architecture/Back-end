@@ -11,6 +11,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+/**
+ * @deprecated SAFE TO DELETE - Migrated to user-service
+ * @see user-service/src/main/java/org/example/userservice/service/UserService.java
+ */
+@Deprecated(forRemoval = true)
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -19,8 +24,10 @@ public class UserService {
     private String getUserId() {
         return (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
+
     public UserDto getUserById() throws UsernameNotFoundException {
-        User user = userRepository.findUserById(getUserId()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        User user = userRepository.findUserById(getUserId())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         UserDto userDto = new UserDto();
         userDto.setId(user.getId());
         userDto.setEmail(user.getEmail());

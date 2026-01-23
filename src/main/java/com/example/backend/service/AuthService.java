@@ -17,6 +17,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * @deprecated SAFE TO DELETE - Migrated to user-service
+ * @see user-service/src/main/java/org/example/userservice/service/AuthService.java
+ */
+@Deprecated(forRemoval = true)
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

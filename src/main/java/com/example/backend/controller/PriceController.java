@@ -8,6 +8,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * @deprecated SAFE TO DELETE - Migrated to price-service
+ * @see price-service/src/main/java/org/example/priceservice/controller/PriceController.java
+ */
+@Deprecated(forRemoval = true)
 @RestController
 @RequestMapping("/api/prices")
 public class PriceController {
@@ -19,13 +24,11 @@ public class PriceController {
         this.candleService = candleService;
     }
 
-
     @GetMapping("/historical")
     public ResponseEntity<List<PriceCandle>> getHistoricalCandles(
             @RequestParam(defaultValue = "BTCUSDT") String symbol,
             @RequestParam(defaultValue = "1h") String interval,
-            @RequestParam(defaultValue = "100") int limit
-    ) {
+            @RequestParam(defaultValue = "100") int limit) {
         List<PriceCandle> candles = candleService.getCandles(symbol, interval, limit);
         return ResponseEntity.ok(candles);
     }
@@ -40,4 +43,3 @@ public class PriceController {
         return ResponseEntity.ok(priceCollectorService.getAllSupportedIntervals());
     }
 }
-

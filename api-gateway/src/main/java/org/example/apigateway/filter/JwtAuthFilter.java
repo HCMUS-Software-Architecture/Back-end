@@ -31,15 +31,19 @@ public class JwtAuthFilter implements GlobalFilter {
 
     public static final List<String> openApiEndpoints = List.of(
             "/api/auth/login",
-            "/api/health/**",
-            "/v3/**",
-            "/ws/**",
-            "/swagger-ui/**"
-    );
-    private Predicate<ServerHttpRequest> isSecured =
-            request -> openApiEndpoints.stream()
-                    .noneMatch(uri -> request.getURI().getPath().contains(uri));
+            "/api/auth/register",
+            "/api/auth/refresh",
+            "/api/health",
+            "/v3",
+            "/ws",
+            "/swagger-ui");
 
+    // Fixed: Use startsWith for prefix matching instead of contains with wildcards
+    private Predicate<ServerHttpRequest> isSecured = request -> {
+        String path = request.getURI().getPath();
+        return openApiEndpoints.stream()
+                .noneMatch(endpoint -> path.startsWith(endpoint) || path.equals(endpoint));
+    };
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -80,7 +84,8 @@ public class JwtAuthFilter implements GlobalFilter {
             }
         }
 
-        // 4. Cho đi tiếp (nếu là route public, hoặc nếu là route private và token hợp lệ)
+        // 4. Cho đi tiếp (nếu là route public, hoặc nếu là route private và token hợp
+        // lệ)
         return chain.filter(exchange.mutate().request(request).build());
 
     }
