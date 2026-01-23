@@ -13,28 +13,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
-
-    @ExceptionHandler({
-            BadCredentialsException.class,
-            RefreshTokenNotExist.class,
-            RefreshTokenRevokeException.class
-    })
-    public ResponseEntity<?> handleException(Exception e) {
-        return buildResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
-    }
-
-    @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<?> handleRegisterFail(UserAlreadyExistsException ex) {
-        log.error(ex.getMessage(), ex);
-        return buildResponse(ex.getMessage(), HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<ErrorResponseDto> handleUsernameNotFoundException(UsernameNotFoundException ex) {
-        log.error(ex.getMessage());
-        return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<?> handleBadRequestException(BadRequestException ex) {
         log.error(ex.getMessage(), ex);

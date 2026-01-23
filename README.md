@@ -40,12 +40,31 @@ See [Architecture Overview](./docs/core/Architecture.md) for detailed design.
 
 ### Required Software
 
-| Software | Version | Purpose                        |
-| -------- | ------- | ------------------------------ |
-| Java     | 17+     | Backend runtime                |
-| Maven    | 3.8+    | Build tool                     |
-| Node.js  | 18+     | Frontend runtime (for Next.js) |
-| Git      | 2.30+   | Version control                |
+| Software       | Version | Purpose                        |
+| -------------- | ------- | ------------------------------ |
+| Java           | 21      | Backend runtime                |
+| Maven          | 3.8+    | Build tool                     |
+| Docker         | 20.10+  | Containerization               |
+| Docker Compose | 2.0+    | Multi-container orchestration  |
+| Node.js        | 18+     | Frontend runtime (for Next.js) |
+| Git            | 2.30+   | Version control                |
+
+### Required Environment Files
+
+Before running the application, you need to create the following configuration files:
+
+1. **micro.env** - Main environment configuration (copy from `micro.env.example`)
+2. **src/main/resources/application.yml** - Application configuration (copy from `application.yml.example`)
+
+```powershell
+# Create micro.env from example
+Copy-Item micro.env.example micro.env
+
+# Create application.yml from example
+Copy-Item src\main\resources\application.yml.example src\main\resources\application.yml
+
+# Edit these files with your actual credentials
+```
 
 ### Recommended Tools
 
@@ -57,16 +76,22 @@ See [Architecture Overview](./docs/core/Architecture.md) for detailed design.
 
 ### Verify Installation
 
-These can run on both Windows and Linux-based OS
-
 ```powershell
-# Check Java
+# Check Java (must be version 21)
 java -version
-# Expected: openjdk version "17.x.x" or higher
+# Expected: openjdk version "21.x.x"
 
 # Check Maven
 mvn -version
 # Expected: Apache Maven 3.8.x or higher
+
+# Check Docker
+docker --version
+# Expected: Docker version 20.10.x or higher
+
+# Check Docker Compose
+docker compose version
+# Expected: Docker Compose version v2.x.x or higher
 
 # Check Node.js (optional, for frontend)
 node --version
@@ -75,64 +100,106 @@ node --version
 
 ---
 
-## Docker Compose Setup
-Use this when actively working on the application:
-```bash
+## Docker Compose Setup (Recommended)
+
+Use Docker Compose for running the application with all required services (PostgreSQL, MongoDB, Redis, RabbitMQ):
+
+```powershell
+# Start all services in detached mode
+docker compose up -d
+
+# View logs
+docker compose logs -f
+
+# Stop all services
+docker compose down
+
+# Rebuild and restart services
+docker compose down
+docker compose build --no-cache
 docker compose up -d
 ```
+
+### Docker Services
+
+The following services will be started:
+
+| Service     | Port  | Purpose                      |
+| ----------- | ----- | ---------------------------- |
+| PostgreSQL  | 5432  | Relational database          |
+| MongoDB     | 27017 | Document database (articles) |
+| Redis       | 6379  | Cache & session storage      |
+| RabbitMQ    | 5672  | Message broker (STOMP)       |
+| RabbitMQ UI | 15672 | RabbitMQ management console  |
+
+---
 
 ## Quick Start Local
 
 ### 1. Clone the Repository
-
-**Bash (Linux/macOS):**
-
-```bash
-git clone https://github.com/HCMUS-Software-Architecture/Back-end.git
-cd Back-end
-```
-
-### 2. Set .env (If you are using Intellij as the main IDE)
-
-Refer to this doc: https://stackoverflow.com/questions/71450194/how-do-i-add-environment-variables-in-intellij-spring-boot-project
-
-**PowerShell (Windows 10/11):**
 
 ```powershell
 git clone https://github.com/HCMUS-Software-Architecture/Back-end.git
 Set-Location Back-end
 ```
 
-### 3. Start Development Environment
-
-**Bash (Linux/macOS):**
-
-```bash
-# Run the application with UTC timezone
-./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-Duser.timezone=UTC"
-```
-
-**PowerShell (Windows 10/11):**
+### 2. Set Up Environment Files
 
 ```powershell
-# Run the application with UTC timezone
+# Create micro.env from example
+Copy-Item micro.env.example micro.env
+
+# Create application.yml from example
+Copy-Item src\main\resources\application.yml.example src\main\resources\application.yml
+
+# Edit the files with your actual credentials
+# For IntelliJ: https://stackoverflow.com/questions/71450194/how-do-i-add-environment-variables-in-intellij-spring-boot-project
+notepad micro.env
+notepad src\main\resources\application.yml
+```
+
+### 3. Start Docker Services
+
+```powershell
+# Start all required services (PostgreSQL, MongoDB, Redis, RabbitMQ)
+docker compose up -d
+
+# Verify all services are running
+docker compose ps
+```
+
+### 4. Run the Application
+
+```powershell
+# Build and run with Maven
+.\mvnw.cmd clean install
 .\mvnw.cmd spring-boot:run -D"spring-boot.run.jvmArguments=-Duser.timezone=UTC"
 ```
 
-### 4. Verify the Application
+### 5. Run Tests
 
-**Bash (Linux/macOS):**
+```powershell
+# Run all unit tests
+.\mvnw.cmd test
 
-```bash
-# Health check
-curl http://localhost:8081/actuator/health
+# Run unit tests only (skip integration tests that need full context)
+.\mvnw.cmd test -Dtest=*Test -DfailIfNoTests=false
+
+# Run specific test class
+.\mvnw.cmd test -Dtest=JwtServiceTest
+
+# Run with coverage report
+.\mvnw.cmd clean verify
 ```
 
-**PowerShell (Windows 10/11):**
+### 6. Verify the Application
 
 ```powershell
 # Health check
 Invoke-RestMethod -Uri http://localhost:8081/actuator/health
+
+# Access Swagger UI
+Start-Process "http://localhost:8081/swagger-ui.html"
 ```
 
 > **Expected response:** `{"status":"UP"}`
@@ -143,13 +210,27 @@ Invoke-RestMethod -Uri http://localhost:8081/actuator/health
 
 ```
 Back-end/
-├── doc/                          # Documentation
-│   ├── Architecture.md           # System architecture (evolutionary phases)
-│   ├── CoreRequirements.md       # Business requirements
-│   ├── Features.md               # Feature specifications
-│   ├── ProjectPlan.md            # Implementation timeline
-│   ├── UseCaseDiagram.md         # Use cases and flows
-│   └── Operations.md             # Monitoring, CI/CD, Kubernetes guide
+├── docs/                          # Documentation
+│   ├── core/                      # Core architecture docs
+│   │   ├── Architecture.md        # System architecture (evolutionary phases)
+│   │   ├── CoreRequirements.md    # Business requirements
+│   │   ├── DatabaseDesign.md      # Database schemas and optimization
+│   │   ├── Features.md            # Feature specifications
+│   │   ├── Operations.md          # Monitoring, CI/CD, Kubernetes guide
+│   │   ├── UIUXGuidelines.md      # UI/UX design guidelines
+│   │   └── UseCaseDiagram.md      # Use cases and flows
+│   ├── guides/                    # Implementation guides
+│   │   ├── Phase2-ImplementationGuide.md
+│   │   ├── Phase3-ImplementationGuide.md
+│   │   ├── Phase4-ImplementationGuide.md
+│   │   ├── Phase5-ImplementationGuide.md
+│   │   └── Testing guides...
+│   ├── api/                       # API documentation
+│   │   ├── README.md
+│   │   └── Websocket.md
+│   ├── ProjectPlan.md             # Implementation timeline
+│   ├── Price-Collector-Architecture.md
+│   └── TESTING_SUMMARY.md
 │
 ├── src/
 │   ├── main/
@@ -161,18 +242,43 @@ Back-end/
 │   │   │   ├── repository/                # Data access
 │   │   │   ├── model/                     # Domain entities
 │   │   │   ├── dto/                       # Data transfer objects
+│   │   │   ├── exception/                 # Custom exceptions
+│   │   │   ├── security/                  # Security & JWT
 │   │   │   └── crawler/                   # News crawler module
 │   │   └── resources/
-│   │       ├── application.yml            # Application configuration (git-ignored)
-│   │       └── application.yml.example    # Configuration template (committed)
+│   │       ├── application.yml            # Application config (git-ignored)
+│   │       └── application.yml.example    # Config template (committed)
 │   └── test/
 │       └── java/com/example/backend/      # Test classes
+│           ├── service/                   # Unit tests
+│           └── integration/               # Integration tests
 │
-├── docker/                        # Docker configurations (Phase 2+)
-│   ├── docker-compose.yml         # Development stack
-│   └── Dockerfile                 # Application container
+├── api-gateway/                   # API Gateway microservice
+│   ├── src/
+│   └── pom.xml
+│
+├── discovery-server/              # Service discovery (Eureka)
+│   ├── src/
+│   └── pom.xml
+│
+├── price-service/                 # Price data microservice
+│   ├── src/
+│   └── pom.xml
+│
+├── user-service/                  # User management microservice
+│   ├── src/
+│   └── pom.xml
+│
+├── nginx/                         # NGINX configuration
+│   └── nginx.conf
+│
+├── target/                        # Build output (git-ignored)
 │
 ├── .gitignore                     # Git ignore rules
+├── docker-compose.yml             # Docker services configuration
+├── Dockerfile                     # Application container
+├── micro.env.example              # Environment variables template
+├── micro.env                      # Actual env variables (git-ignored)
 ├── pom.xml                        # Maven build configuration
 ├── mvnw                           # Maven wrapper (Unix)
 ├── mvnw.cmd                       # Maven wrapper (Windows)
@@ -190,6 +296,7 @@ Once the application is running, access the interactive API documentation:
 **URL:** [http://localhost:8081/swagger-ui.html](http://localhost:8081/swagger-ui.html)
 
 The Swagger UI provides:
+
 - 📋 **Interactive API Explorer** - Test endpoints directly from the browser
 - 📖 **Request/Response Schemas** - See all DTOs and data models
 - 🔐 **Authentication** - Test endpoints with JWT tokens
@@ -200,27 +307,29 @@ The Swagger UI provides:
 **JSON:** [http://localhost:8081/v3/api-docs](http://localhost:8081/v3/api-docs)
 
 Use the OpenAPI spec to:
+
 - Generate client SDKs (TypeScript, Python, etc.)
 - Import into Postman/Insomnia
 - Validate API contracts
 
 ### API Endpoint Categories
 
-| Category | Base Path | Description |
-|----------|-----------|-------------|
-| Health | `/api/health`, `/actuator/health` | Service health checks |
-| Articles | `/api/articles` | News article CRUD operations |
-| Prices | `/api/prices` | Price data and historical candles |
-| Analysis | `/api/analysis` | NLP sentiment analysis |
-| Auth | `/api/auth` | Authentication and authorization |
+| Category | Base Path                         | Description                       |
+| -------- | --------------------------------- | --------------------------------- |
+| Health   | `/api/health`, `/actuator/health` | Service health checks             |
+| Articles | `/api/articles`                   | News article CRUD operations      |
+| Prices   | `/api/prices`                     | Price data and historical candles |
+| Analysis | `/api/analysis`                   | NLP sentiment analysis            |
+| Auth     | `/api/auth`                       | Authentication and authorization  |
 
 ### WebSocket Endpoints
 
-| Endpoint | Protocol | Description |
-|----------|----------|-------------|
+| Endpoint     | Protocol          | Description             |
+| ------------ | ----------------- | ----------------------- |
 | `/ws/prices` | STOMP over SockJS | Real-time price updates |
 
 **Subscribe to Topics:**
+
 - `/topic/prices/{symbol}` - Price ticks for specific symbol
 - `/topic/candles/{symbol}/{interval}` - Aggregated candles
 
@@ -228,22 +337,22 @@ Use the OpenAPI spec to:
 
 ## Documentation
 
-| Document                                         | Description                                         |
-| ------------------------------------------------ | --------------------------------------------------- |
-| [Architecture.md](./docs/core/Architecture.md)   | Evolutionary architecture with phases and rationale |
-| [CoreRequirements.md](./docs/core/CoreRequirements.md) | Business requirements                          |
-| [DatabaseDesign.md](./docs/core/DatabaseDesign.md) | Database schemas and optimization                 |
-| [UseCaseDiagram.md](./docs/core/UseCaseDiagram.md) | User interactions and flows                       |
+| Document                                               | Description                                         |
+| ------------------------------------------------------ | --------------------------------------------------- |
+| [Architecture.md](./docs/core/Architecture.md)         | Evolutionary architecture with phases and rationale |
+| [CoreRequirements.md](./docs/core/CoreRequirements.md) | Business requirements                               |
+| [DatabaseDesign.md](./docs/core/DatabaseDesign.md)     | Database schemas and optimization                   |
+| [UseCaseDiagram.md](./docs/core/UseCaseDiagram.md)     | User interactions and flows                         |
 
 ### Implementation Guides
 
-| Phase | Document | Focus |
-|-------|----------|-------|
-| 1 | [Phase1-ImplementationGuide.md](./docs/guides/Phase1-ImplementationGuide.md) | Monolithic foundation |
-| 2 | [Phase2-ImplementationGuide.md](./docs/guides/Phase2-ImplementationGuide.md) | Database optimization |
-| 3 | [Phase3-ImplementationGuide.md](./docs/guides/Phase3-ImplementationGuide.md) | Service separation |
-| 4 | [Phase4-ImplementationGuide.md](./docs/guides/Phase4-ImplementationGuide.md) | Event-driven architecture |
-| 5 | [Phase5-ImplementationGuide.md](./docs/guides/Phase5-ImplementationGuide.md) | Microservices ready |
+| Phase | Document                                                                     | Focus                     |
+| ----- | ---------------------------------------------------------------------------- | ------------------------- |
+| 1     | [Phase1-ImplementationGuide.md](./docs/guides/Phase1-ImplementationGuide.md) | Monolithic foundation     |
+| 2     | [Phase2-ImplementationGuide.md](./docs/guides/Phase2-ImplementationGuide.md) | Database optimization     |
+| 3     | [Phase3-ImplementationGuide.md](./docs/guides/Phase3-ImplementationGuide.md) | Service separation        |
+| 4     | [Phase4-ImplementationGuide.md](./docs/guides/Phase4-ImplementationGuide.md) | Event-driven architecture |
+| 5     | [Phase5-ImplementationGuide.md](./docs/guides/Phase5-ImplementationGuide.md) | Microservices ready       |
 
 ---
 

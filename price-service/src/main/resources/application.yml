@@ -1,0 +1,71 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: price-service
+  profiles:
+    active: user
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    username: ${SPRING_RABBITMQ_USERNAME:guest}
+    password: ${SPRING_RABBITMQ_PASSWORD:guest}
+    stomp:
+      port: ${SPRING_RABBITMQ_STOMP_PORT:61613}
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/trading}
+    username: ${POSTGRES_USERNAME:postgres}
+    password: ${POSTGRES_PASSWORD}
+    hikari:
+      # HikariCP connection pool settings
+      minimum-idle: ${HIKARI_MIN_IDLE:5}
+      maximum-pool-size: ${HIKARI_MAX_POOL_SIZE:20}
+      idle-timeout: ${HIKARI_IDLE_TIMEOUT:300000}
+      max-lifetime: ${HIKARI_MAX_LIFETIME:1800000}
+      connection-timeout: ${HIKARI_CONNECTION_TIMEOUT:30000}
+      pool-name: TradingHikariPool
+      auto-commit: true
+      connection-test-query: SELECT 1
+  jpa:
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: ${JPA_SHOW_SQL:true}
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:update}
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+        implicit-strategy: org.springframework.boot.hibernate.SpringImplicitNamingStrategy
+    properties:
+      hibernate:
+        # Connection pooling properties
+        connection:
+          provider_disables_autocommit: false
+        # Performance optimization
+        jdbc:
+          batch_size: ${HIBERNATE_BATCH_SIZE:20}
+          fetch_size: ${HIBERNATE_FETCH_SIZE:50}
+          time_zone: UTC
+        order_inserts: true
+        order_updates: true
+        # Query optimization
+        query:
+          in_clause_parameter_padding: true
+        # Logging and statistics
+        format_sql: ${HIBERNATE_FORMAT_SQL:true}
+        use_sql_comments: ${HIBERNATE_SQL_COMMENTS:true}
+        generate_statistics: ${HIBERNATE_GENERATE_STATS:false}
+
+
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${DISCOVERY_SERVER:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
+
+price:
+  symbols: ${PRICE_SYMBOLS}
+
+

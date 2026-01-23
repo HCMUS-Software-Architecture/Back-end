@@ -1,0 +1,67 @@
+server:
+  port: 8081
+
+token:
+  secret: ${JWT_SECRET}
+
+spring:
+  application:
+    name: api-gateway
+  profiles:
+    active: dev
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: user-service
+              uri: lb://user-service
+              predicates:
+                - Path=/api/user/**, /api/auth/**
+
+            - id: user-service-doc
+              uri: lb://user-service
+              predicates:
+                - Path=/v3/api-docs/user-service
+              filters:
+                - RewritePath=/v3/api-docs/user-service, /v3/api-docs
+
+            - id: price-service
+              uri: lb://price-service
+              predicates:
+                - Path=/api/prices/**, /ws/prices/**
+
+            - id: price-websocket
+              uri: lb:ws://price-service
+              predicates:
+                - Path=/ws/prices
+
+
+            - id: price-service-doc
+              uri: lb://price-service
+              predicates:
+                - Path=/v3/api-docs/price-service
+              filters:
+                - RewritePath=/v3/api-docs/price-service, /v3/api-docs
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${DISCOVERY_SERVER:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
+
+springdoc:
+  swagger-ui:
+    disable-swagger-default-url: true
+    urls:
+      - name: User service
+        url: /v3/api-docs/user-service
+      - name: Price service
+        url: /v3/api-docs/price-service
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.http.server.reactive: DEBUG
+    org.springframework.web.reactive: DEBUG
+    reactor.netty: DEBUG

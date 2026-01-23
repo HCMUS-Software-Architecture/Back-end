@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.security.auth.RefreshFailedException;
-import java.security.Key;
+import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,31 +24,32 @@ public class JwtService {
     @Value("${token.secret}")
     private String jwtSecretKey;
 
-    private final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 30;  // 1 hour
+    private final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 30; // 1 hour
     private final long REFRESH_TOKEN_EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7 ngày
 
     private final RefreshTokenMongoRepository refreshTokenRepository;
 
-    private Key getSignKey() {
+    private javax.crypto.SecretKey getSignKey() {
         return Keys.hmacShaKeyFor(jwtSecretKey.getBytes());
     }
 
     public String generateAccessToken(String user_id) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("user_id",  user_id);
+        claims.put("user_id", user_id);
         return createToken(claims, user_id, ACCESS_TOKEN_EXPIRATION);
     }
+
     public String generateRefreshToken(String user_id) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("user_id",  user_id);
+        claims.put("user_id", user_id);
         String refreshToken = createToken(claims, user_id, REFRESH_TOKEN_EXPIRATION);
 
         refreshTokenRepository.save(RefreshToken.builder()
-                        .expires_at(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
-                        .isRevoked(false)
-                        .userId(user_id)
-                        .token(refreshToken)
-                        .build());
+                .expires_at(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
+                .isRevoked(false)
+                .userId(user_id)
+                .token(refreshToken)
+                .build());
 
         return refreshToken;
     }
@@ -67,7 +68,7 @@ public class JwtService {
         String userId = extractUserId(refreshToken);
 
         RefreshToken token = refreshTokenRepository.findByToken(refreshToken);
-        if(!token.getIsRevoked()) {
+        if (!token.getIsRevoked()) {
             final String newAccessToken = generateAccessToken(userId);
             final String newRefreshToken = generateRefreshToken(userId);
 
@@ -79,12 +80,10 @@ public class JwtService {
             tokenResponse.setRefreshToken(newRefreshToken);
 
             return tokenResponse;
-        }
-        else {
+        } else {
             throw new RefreshTokenRevokeException("refresh token is revoke");
         }
     }
-
 
     public String extractUsername(String token) {
         return parseToken(token).getSubject();
@@ -92,7 +91,8 @@ public class JwtService {
 
     public String extractUserId(String token) {
         Object id = parseToken(token).get("user_id");
-        if (id instanceof String i) return id.toString();
+        if (id instanceof String i)
+            return id.toString();
         return null;
     }
 
@@ -100,21 +100,23 @@ public class JwtService {
         final String extractedUsername = extractUsername(token);
         return (extractedUsername.equals(username) && !isTokenExpired(token));
     }
+
     private boolean isTokenExpired(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSignKey())
+        return Jwts.parser()
+                .verifyWith(getSignKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody()
+                .parseSignedClaims(token)
+                .getPayload()
                 .getExpiration()
                 .before(new Date());
     }
+
     private Claims parseToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSignKey())
+        return Jwts.parser()
+                .verifyWith(getSignKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
 }

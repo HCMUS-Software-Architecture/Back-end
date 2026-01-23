@@ -1,0 +1,78 @@
+# Test Profile Configuration
+# This profile is activated during test execution
+
+spring:
+  # Disable embedded MongoDB - use Docker MongoDB instead
+  autoconfigure:
+    exclude:
+      - de.flapdoodle.embed.mongo.spring.autoconfigure.EmbeddedMongoAutoConfiguration
+
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://admin:admin123@localhost:27017/?authSource=admin}
+      database: ${MONGODB_DATABASE:trading_test}
+
+server:
+  port: 0 # Random port for tests
+
+spring:
+  application:
+    name: back-end-test
+
+  # H2 In-Memory Database for JPA Tests
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+    username: sa
+    password:
+    hikari:
+      maximum-pool-size: 10
+
+  h2:
+    console:
+      enabled: false
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          time_zone: UTC
+
+  # Embedded MongoDB for Document Tests
+  data:
+    mongodb:
+      database: trading_test
+      # Will use embedded MongoDB (Flapdoodle) when available
+
+  # Simple Cache (In-Memory) for Testing
+  cache:
+    type: simple
+
+  # Disable Redis for tests
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.cache.RedisCacheConfiguration
+
+# JWT Configuration for Tests
+token:
+  secret: TestSecretKeyForUnitTestingThatIsAtLeast256BitsLongAndSecureEnoughForHS256Algorithm
+  access-expiration: 3600000 # 1 hour
+  refresh-expiration: 604800000 # 7 days
+
+# Price Configuration for Tests
+price:
+  symbols: btcusdt,ethusdt
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    com.example.backend: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate: WARN

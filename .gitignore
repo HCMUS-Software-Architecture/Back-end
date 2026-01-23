@@ -114,8 +114,6 @@ temp/
 # Environment and Secrets
 # ===========================
 # Ignore actual application config with sensitive data
-application.yml
-application-*.yml
 !application.yml.example
 
 # Environment files with secrets
@@ -127,6 +125,8 @@ application-*.yml
 *.key
 secrets/
 credentials/
+
+micro.env
 
 # ===========================
 # Docker (development)
