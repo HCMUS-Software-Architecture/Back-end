@@ -6,6 +6,7 @@ import org.example.userservice.dto.UserDto;
 import org.example.userservice.exception.RefreshTokenNotExist;
 import org.example.userservice.exception.UserAlreadyExistsException;
 import org.example.userservice.model.RefreshToken;
+import org.example.userservice.model.SubscriptionType;
 import org.example.userservice.model.User;
 import org.example.userservice.repository.RefreshTokenRepository;
 import org.example.userservice.repository.UserRepository;
@@ -16,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -28,31 +30,52 @@ public class AuthService {
 
     @Autowired
     public AuthService(JwtService jwtService, PasswordEncoder passwordEncoder,
-                       RefreshTokenRepository refreshTokenMongoRepository,
-                       UserRepository userMongoRepository) {
+            RefreshTokenRepository refreshTokenMongoRepository,
+            UserRepository userMongoRepository) {
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
         this.refreshTokenMongoRepository = refreshTokenMongoRepository;
         this.userMongoRepository = userMongoRepository;
     }
 
-    public UserDto registerUser(String email, String password, String fullName) throws UserAlreadyExistsException {
+    public UserDto registerUser(String email, String password, String fullName, SubscriptionType subscriptionType)
+            throws UserAlreadyExistsException {
         Optional<User> userOption = userMongoRepository.findByEmail(email);
         if (userOption.isPresent()) {
             throw new UserAlreadyExistsException("Email already exists");
         }
 
+        // Default to REGULAR if not specified
+        SubscriptionType effectiveType = subscriptionType != null ? subscriptionType : SubscriptionType.REGULAR;
+
         User newUser = User.builder()
                 .email(email)
                 .fullName(fullName)
                 .password(passwordEncoder.encode(password))
+                .subscriptionType(effectiveType)
+                .emailVerified(false)
+                .isActive(true)
+                .createdAt(LocalDateTime.now())
                 .build();
+
+        // For VIP registration, set indefinite subscription (no end date)
+        if (effectiveType == SubscriptionType.VIP) {
+            newUser.setSubscriptionStartDate(LocalDateTime.now());
+            // If need end date
+            // newUser.setSubscriptionEndDate(LocalDateTime.now().getMonth().plus(1));
+        }
+
+        // Sync roles with subscription (adds USER role, and VIP if applicable)
+        newUser.syncRolesWithSubscription();
         userMongoRepository.save(newUser);
 
         UserDto userDto = new UserDto();
         userDto.setEmail(email);
         userDto.setFullName(fullName);
         userDto.setId(newUser.getId());
+        userDto.setSubscriptionType(newUser.getSubscriptionType());
+        userDto.setEmailVerified(newUser.getEmailVerified());
+        userDto.setCreatedAt(newUser.getCreatedAt());
         return userDto;
     }
 

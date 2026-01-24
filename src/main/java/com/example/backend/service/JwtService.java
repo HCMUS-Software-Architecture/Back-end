@@ -1,127 +1,131 @@
-package com.example.backend.service;
+// package com.example.backend.service;
 
-import com.example.backend.dto.TokenResponse;
-import com.example.backend.model.RefreshToken;
-import com.example.backend.exception.RefreshTokenRevokeException;
-import com.example.backend.repository.mongodb.RefreshTokenMongoRepository;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+// import com.example.backend.dto.TokenResponse;
+// import com.example.backend.model.RefreshToken;
+// import com.example.backend.exception.RefreshTokenRevokeException;
+// import com.example.backend.repository.mongodb.RefreshTokenMongoRepository;
+// import io.jsonwebtoken.Claims;
+// import io.jsonwebtoken.Jwts;
+// import io.jsonwebtoken.SignatureAlgorithm;
+// import io.jsonwebtoken.security.Keys;
+// import lombok.RequiredArgsConstructor;
+// import org.springframework.beans.factory.annotation.Value;
+// import org.springframework.stereotype.Service;
 
-/**
- * @deprecated SAFE TO DELETE - Migrated to user-service
- * @see user-service/src/main/java/org/example/userservice/service/JwtService.java
- */
-@Deprecated(forRemoval = true)
-import javax.security.auth.RefreshFailedException;
-import javax.crypto.SecretKey;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+// /**
+// * @deprecated SAFE TO DELETE - Migrated to user-service
+// * @see
+// user-service/src/main/java/org/example/userservice/service/JwtService.java
+// */
+// @Deprecated(forRemoval = true)
+// import javax.security.auth.RefreshFailedException;
+// import javax.crypto.SecretKey;
+// import java.util.Date;
+// import java.util.HashMap;
+// import java.util.Map;
 
-@Service
-@RequiredArgsConstructor
-public class JwtService {
-    @Value("${token.secret}")
-    private String jwtSecretKey;
+// @Service
+// @RequiredArgsConstructor
+// public class JwtService {
+// @Value("${token.secret}")
+// private String jwtSecretKey;
 
-    private final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 30; // 1 hour
-    private final long REFRESH_TOKEN_EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7 ngày
+// private final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 30; // 1 hour
+// private final long REFRESH_TOKEN_EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7
+// ngày
 
-    private final RefreshTokenMongoRepository refreshTokenRepository;
+// private final RefreshTokenMongoRepository refreshTokenRepository;
 
-    private javax.crypto.SecretKey getSignKey() {
-        return Keys.hmacShaKeyFor(jwtSecretKey.getBytes());
-    }
+// private javax.crypto.SecretKey getSignKey() {
+// return Keys.hmacShaKeyFor(jwtSecretKey.getBytes());
+// }
 
-    public String generateAccessToken(String user_id) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("user_id", user_id);
-        return createToken(claims, user_id, ACCESS_TOKEN_EXPIRATION);
-    }
+// public String generateAccessToken(String user_id) {
+// Map<String, Object> claims = new HashMap<>();
+// claims.put("user_id", user_id);
+// return createToken(claims, user_id, ACCESS_TOKEN_EXPIRATION);
+// }
 
-    public String generateRefreshToken(String user_id) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("user_id", user_id);
-        String refreshToken = createToken(claims, user_id, REFRESH_TOKEN_EXPIRATION);
+// public String generateRefreshToken(String user_id) {
+// Map<String, Object> claims = new HashMap<>();
+// claims.put("user_id", user_id);
+// String refreshToken = createToken(claims, user_id, REFRESH_TOKEN_EXPIRATION);
 
-        refreshTokenRepository.save(RefreshToken.builder()
-                .expires_at(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
-                .isRevoked(false)
-                .userId(user_id)
-                .token(refreshToken)
-                .build());
+// refreshTokenRepository.save(RefreshToken.builder()
+// .expires_at(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
+// .isRevoked(false)
+// .userId(user_id)
+// .token(refreshToken)
+// .build());
 
-        return refreshToken;
-    }
+// return refreshToken;
+// }
 
-    private String createToken(Map<String, Object> claims, String userId, long expiration) {
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(userId)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSignKey(), SignatureAlgorithm.HS256)
-                .compact();
-    }
+// private String createToken(Map<String, Object> claims, String userId, long
+// expiration) {
+// return Jwts.builder()
+// .setClaims(claims)
+// .setSubject(userId)
+// .setIssuedAt(new Date(System.currentTimeMillis()))
+// .setExpiration(new Date(System.currentTimeMillis() + expiration))
+// .signWith(getSignKey(), SignatureAlgorithm.HS256)
+// .compact();
+// }
 
-    public TokenResponse getAccessTokenFromRefreshToken(String refreshToken) throws RefreshTokenRevokeException {
-        String userId = extractUserId(refreshToken);
+// public TokenResponse getAccessTokenFromRefreshToken(String refreshToken)
+// throws RefreshTokenRevokeException {
+// String userId = extractUserId(refreshToken);
 
-        RefreshToken token = refreshTokenRepository.findByToken(refreshToken);
-        if (!token.getIsRevoked()) {
-            final String newAccessToken = generateAccessToken(userId);
-            final String newRefreshToken = generateRefreshToken(userId);
+// RefreshToken token = refreshTokenRepository.findByToken(refreshToken);
+// if (!token.getIsRevoked()) {
+// final String newAccessToken = generateAccessToken(userId);
+// final String newRefreshToken = generateRefreshToken(userId);
 
-            token.setIsRevoked(true);
-            refreshTokenRepository.save(token);
+// token.setIsRevoked(true);
+// refreshTokenRepository.save(token);
 
-            TokenResponse tokenResponse = new TokenResponse();
-            tokenResponse.setAccessToken(newAccessToken);
-            tokenResponse.setRefreshToken(newRefreshToken);
+// TokenResponse tokenResponse = new TokenResponse();
+// tokenResponse.setAccessToken(newAccessToken);
+// tokenResponse.setRefreshToken(newRefreshToken);
 
-            return tokenResponse;
-        } else {
-            throw new RefreshTokenRevokeException("refresh token is revoke");
-        }
-    }
+// return tokenResponse;
+// } else {
+// throw new RefreshTokenRevokeException("refresh token is revoke");
+// }
+// }
 
-    public String extractUsername(String token) {
-        return parseToken(token).getSubject();
-    }
+// public String extractUsername(String token) {
+// return parseToken(token).getSubject();
+// }
 
-    public String extractUserId(String token) {
-        Object id = parseToken(token).get("user_id");
-        if (id instanceof String i)
-            return id.toString();
-        return null;
-    }
+// public String extractUserId(String token) {
+// Object id = parseToken(token).get("user_id");
+// if (id instanceof String i)
+// return id.toString();
+// return null;
+// }
 
-    public boolean validateToken(String token, String username) {
-        final String extractedUsername = extractUsername(token);
-        return (extractedUsername.equals(username) && !isTokenExpired(token));
-    }
+// public boolean validateToken(String token, String username) {
+// final String extractedUsername = extractUsername(token);
+// return (extractedUsername.equals(username) && !isTokenExpired(token));
+// }
 
-    private boolean isTokenExpired(String token) {
-        return Jwts.parser()
-                .verifyWith(getSignKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getExpiration()
-                .before(new Date());
-    }
+// private boolean isTokenExpired(String token) {
+// return Jwts.parser()
+// .verifyWith(getSignKey())
+// .build()
+// .parseSignedClaims(token)
+// .getPayload()
+// .getExpiration()
+// .before(new Date());
+// }
 
-    private Claims parseToken(String token) {
-        return Jwts.parser()
-                .verifyWith(getSignKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-    }
+// private Claims parseToken(String token) {
+// return Jwts.parser()
+// .verifyWith(getSignKey())
+// .build()
+// .parseSignedClaims(token)
+// .getPayload();
+// }
 
-}
+// }
