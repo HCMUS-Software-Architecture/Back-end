@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SubscriptionService {
     private final UserRepository userRepository;
+    private final UserSettingsService userSettingsService;
 
     /**
      * Get current subscription status for a user
@@ -64,7 +65,7 @@ public class SubscriptionService {
         // If already VIP, extend the subscription
         LocalDateTime startDate;
         LocalDateTime endDate;
-        
+
         if (user.hasActiveVipSubscription() && user.getSubscriptionEndDate() != null) {
             // Extend from current end date
             startDate = user.getSubscriptionStartDate();
@@ -80,14 +81,17 @@ public class SubscriptionService {
         user.setSubscriptionType(SubscriptionType.VIP);
         user.setSubscriptionStartDate(startDate);
         user.setSubscriptionEndDate(endDate);
-        
+
         // Sync roles with subscription
         user.syncRolesWithSubscription();
 
         userRepository.save(user);
 
+        // Update user settings for VIP tier (API key, increased limits)
+        userSettingsService.handleSubscriptionChange(userId, SubscriptionType.VIP);
+
         // TODO: Mock payment processing here
-        log.info("Mock payment processed: ${} for {} months VIP", 
+        log.info("Mock payment processed: ${} for {} months VIP",
                 SubscriptionType.VIP.getMonthlyPrice() * request.getDurationMonths(),
                 request.getDurationMonths());
 
@@ -141,11 +145,14 @@ public class SubscriptionService {
         user.setSubscriptionType(SubscriptionType.REGULAR);
         user.setSubscriptionStartDate(null);
         user.setSubscriptionEndDate(null);
-        
+
         // Sync roles - remove VIP role
         user.syncRolesWithSubscription();
 
         userRepository.save(user);
+
+        // Update user settings for REGULAR tier (remove API key, apply limits)
+        userSettingsService.handleSubscriptionChange(userId, SubscriptionType.REGULAR);
 
         log.info("Cancelled VIP subscription for user {}, downgraded to REGULAR", userId);
     }
