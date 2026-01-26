@@ -34,7 +34,7 @@ public class MongoIndexInitializer {
                 .named("idx_userId")
                 .unique();
 
-        indexOps.ensureIndex(userIdIndex);
+        indexOps.createIndex(userIdIndex);
 
         log.info("Created index: idx_userId on user_settings.userId (unique)");
 
@@ -44,7 +44,7 @@ public class MongoIndexInitializer {
                 .on("favoriteSymbols", Sort.Direction.ASC)
                 .named("idx_userId_favoriteSymbols");
 
-        indexOps.ensureIndex(favoritesIndex);
+        indexOps.createIndex(favoritesIndex);
 
         log.info("Created index: idx_userId_favoriteSymbols on user_settings");
     }
