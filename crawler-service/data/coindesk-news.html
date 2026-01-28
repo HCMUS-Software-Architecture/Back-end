@@ -1,0 +1,2832 @@
+<section
+  data-module-name="page"
+  data-module-version="1.0.0"
+  data-module-instance="default"
+  class="flex-grow container"
+>
+  <div
+    class="pt-2 md:pt-8 grid grid-cols-4 gap-2 md:grid-cols-8 md:gap-4 lg:grid-cols-12 xl:grid-cols-16 items-stretch"
+  >
+    <div
+      class="article-content-wrapper font-title_5 text-subtle tracking-normal flex justify-between m-auto items-center row-start-1"
+    >
+      <div class="flex gap-2 font-metadata-lg font-medium text-default">
+        <a class="capitalize" href="/policy">Policy</a>
+      </div>
+      <div data-submodule-name="social-share" class="relative">
+        <button
+          class="share-dialog-button flex gap-1 items-center outline-0 font-metadata-lg font-medium text-default leading-6"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+          >
+            <g mask="url(#mask0_5141_6895)">
+              <path
+                d="M5.51324 18.3334C5.12963 18.3334 4.80935 18.205 4.55241 17.948C4.29546 17.6911 4.16699 17.3708 4.16699 16.9872V8.84636C4.16699 8.46275 4.29546 8.14247 4.55241 7.88553C4.80935 7.62858 5.12963 7.50011 5.51324 7.50011H7.27595V8.33344H5.51324C5.38491 8.33344 5.26734 8.38685 5.16053 8.49365C5.05373 8.60046 5.00033 8.71803 5.00033 8.84636V16.9872C5.00033 17.1155 5.05373 17.2331 5.16053 17.3399C5.26734 17.4467 5.38491 17.5001 5.51324 17.5001H14.4874C14.6157 17.5001 14.7333 17.4467 14.8401 17.3399C14.9469 17.2331 15.0003 17.1155 15.0003 16.9872V8.84636C15.0003 8.71803 14.9469 8.60046 14.8401 8.49365C14.7333 8.38685 14.6157 8.33344 14.4874 8.33344H12.7247V7.50011H14.4874C14.871 7.50011 15.1913 7.62858 15.4482 7.88553C15.7052 8.14247 15.8337 8.46275 15.8337 8.84636V16.9872C15.8337 17.3708 15.7052 17.6911 15.4482 17.948C15.1913 18.205 14.871 18.3334 14.4874 18.3334H5.51324ZM9.58366 12.9168V3.84469L7.83366 5.59469L7.24387 5.00011L10.0003 2.24365L12.7568 5.00011L12.167 5.59469L10.417 3.84469V12.9168H9.58366Z"
+                fill="var(--text-default)"
+              ></path>
+            </g></svg
+          >Share
+        </button>
+        <div
+          class="fixed left-0 top-auto h-[300px] right-0 bottom-0 md:absolute md:bottom-auto md:left-auto md:top-[calc(100%_+_8px)] md:h-max md:right-[-3px] md:transition-none z-[200] bg-surface-default p-8 shadow rounded-lg translate-x-0 transition-transform translate-y-full md:hidden"
+        >
+          <button
+            class="absolute top-4 right-4"
+            aria-label="Close share dialog"
+          >
+            <svg
+              fill="var(--text-default)"
+              height="24"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <mask
+                id="mask0_1535_1927"
+                maskUnits="userSpaceOnUse"
+                x="0"
+                y="0"
+                width="24"
+                height="24"
+                style="mask-type: alpha"
+              >
+                <rect width="24" height="24" fill="var(--text-strong)"></rect>
+              </mask>
+              <g mask="url(#mask0_1535_1927)">
+                <path
+                  d="M6.39994 18.6538L5.34619 17.6L10.9462 12L5.34619 6.4L6.39994 5.34625L11.9999 10.9463L17.5999 5.34625L18.6537 6.4L13.0537 12L18.6537 17.6L17.5999 18.6538L11.9999 13.0538L6.39994 18.6538Z"
+                  fill="var(--text-default)"
+                ></path>
+              </g>
+            </svg></button
+          ><span class="block mb-6 text-default font-title"
+            >Share this article</span
+          >
+          <div
+            class="dialog grid grid-cols-[repeat(3,_minmax(64px,_1fr))] xxs_smax:gap-x-6 gap-x-12 gap-y-6 font-normal tracking-wide text-xs [&amp;_.share-button]:text-center [&amp;_.share-button]:text-default [&amp;_.share-button]:flex [&amp;_.share-button]:flex-col [&amp;_.share-button]:gap-2 [&amp;_.share-button]:shadow-none [&amp;_.share-button]:items-center [&amp;_span]:flex [&amp;_span]:justify-center [&amp;_span]:items-center [&amp;_span]:w-10 [&amp;_span]:h-10 [&amp;_span]:rounded-full [&amp;_span]:bg-surface-subtle"
+          >
+            <button class="share-button">
+              <span
+                ><svg
+                  width="24"
+                  height="24"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M17 7H14C13.45 7 13 7.45 13 8C13 8.55 13.45 9 14 9H17C18.65 9 20 10.35 20 12C20 13.65 18.65 15 17 15H14C13.45 15 13 15.45 13 16C13 16.55 13.45 17 14 17H17C19.76 17 22 14.76 22 12C22 9.24 19.76 7 17 7ZM8 12C8 12.55 8.45 13 9 13H15C15.55 13 16 12.55 16 12C16 11.45 15.55 11 15 11H9C8.45 11 8 11.45 8 12ZM10 15H7C5.35 15 4 13.65 4 12C4 10.35 5.35 9 7 9H10C10.55 9 11 8.55 11 8C11 7.45 10.55 7 10 7H7C4.24 7 2 9.24 2 12C2 14.76 4.24 17 7 17H10C10.55 17 11 16.55 11 16C11 15.45 10.55 15 10 15Z"
+                      fill="var(--text-default)"
+                    ></path>
+                  </svg></svg></span
+              >Copy link</button
+            ><a
+              class="share-button"
+              target="_blank"
+              href="https://x.com/intent/tweet?utm_source=twitter&amp;text=Australia%27s+corporate+regulator+flags+risks+from+rapid+innovation+in+digital+assets+https%3A%2F%2Fwww.coindesk.com%2Fpolicy%2F2026%2F01%2F27%2Faustralia-s-corporate-regulator-flags-risks-from-rapid-innovation-in-digital-assets+via+%40coindesk&amp;editorial=utm_content&amp;social=utm_medium&amp;organic=utm_term"
+              ><span
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 1400 1027"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-labelledby="twitter-svg-a11y-label-id"
+                >
+                  <title id="twitter-svg-a11y-label-id">X icon</title>
+                  <path
+                    d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z"
+                    fill="var(--text-default)"
+                  ></path></svg></span
+              >X (Twitter)</a
+            ><a
+              class="share-button"
+              target="_blank"
+              href="https://www.linkedin.com/shareArticle?utm_source=linkedin&amp;mini=true&amp;summary=The+Australian+Securities+and+Investments+Commission+has+flagged+digital+assets+and+AI+risks+in+its+annual+report.+&amp;url=https%3A%2F%2Fwww.coindesk.com%2Fpolicy%2F2026%2F01%2F27%2Faustralia-s-corporate-regulator-flags-risks-from-rapid-innovation-in-digital-assets&amp;editorial=utm_content&amp;social=utm_medium&amp;organic=utm_term"
+              ><span
+                ><svg
+                  width="24"
+                  height="24"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M2.25362 9.21772H6.53986V22.1164H2.25362V9.21772ZM4.42543 3C2.95843 3 2 3.9631 2 5.22719C2 6.46529 2.93038 7.45638 4.36933 7.45638H4.39667C5.89171 7.45638 6.82276 6.46524 6.82276 5.22719C6.79471 3.9631 5.89176 3 4.42543 3ZM17.0638 8.91471C14.7886 8.91471 13.7693 10.1661 13.2007 11.0438V9.21772H8.91314C8.9699 10.4278 8.91314 22.1164 8.91314 22.1164H13.2007V14.9129C13.2007 14.527 13.2287 14.1427 13.3415 13.8663C13.652 13.0961 14.3574 12.2985 15.5407 12.2985C17.0931 12.2985 17.7131 13.4819 17.7131 15.2151V22.1163H22V14.72C22 10.7581 19.8856 8.91471 17.0638 8.91471Z"
+                    fill="var(--text-default)"
+                  ></path></svg></span
+              >LinkedIn</a
+            ><a
+              class="share-button"
+              target="_blank"
+              href="https://www.facebook.com/sharer/sharer.php?utm_source=facebook&amp;u=https%3A%2F%2Fwww.coindesk.com%2Fpolicy%2F2026%2F01%2F27%2Faustralia-s-corporate-regulator-flags-risks-from-rapid-innovation-in-digital-assets&amp;editorial=utm_content&amp;social=utm_medium&amp;organic=utm_term"
+              ><span
+                ><svg
+                  width="24"
+                  height="24"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M16.3447 13.6068L16.863 10.1942H13.621V7.9796C13.621 7.04596 14.0739 6.13593 15.526 6.13593H17V3.2306C17 3.2306 15.6623 3 14.3834 3C11.7132 3 9.96805 4.63437 9.96805 7.59321V10.1942H7V13.6068H9.96805V21.8566C10.5632 21.9509 11.1732 22 11.7945 22C12.4159 22 13.0259 21.9509 13.621 21.8566V13.6068H16.3447Z"
+                    fill="var(--text-default)"
+                  ></path></svg></span
+              >Facebook</a
+            ><a
+              class="share-button"
+              target="_blank"
+              href="mailto:%20?subject=Australia's%20corporate%20regulator%20flags%20risks%20from%20rapid%20innovation%20in%20digital%20assets%20%E2%80%94%20CoinDesk&amp;body=Australia's%20corporate%20regulator%20flags%20risks%20from%20rapid%20innovation%20in%20digital%20assets%0AThe%20Australian%20Securities%20and%20Investments%20Commission%20has%20flagged%20digital%20assets%20and%20AI%20risks%20in%20its%20annual%20report.%20%0A%0ARead%20the%20full%20article%20on%20CoinDesk%3A%0A%0Ahttps%3A%2F%2Fwww.coindesk.com%2Fpolicy%2F2026%2F01%2F27%2Faustralia-s-corporate-regulator-flags-risks-from-rapid-innovation-in-digital-assets"
+              ><span
+                ><svg
+                  width="16"
+                  height="16"
+                  fill="var(--text-default)"
+                  version="1.1"
+                  id="Capa_1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 75.294 75.294"
+                >
+                  <g>
+                    <path
+                      d="M66.097,12.089h-56.9C4.126,12.089,0,16.215,0,21.286v32.722c0,5.071,4.126,9.197,9.197,9.197h56.9   c5.071,0,9.197-4.126,9.197-9.197V21.287C75.295,16.215,71.169,12.089,66.097,12.089z M61.603,18.089L37.647,33.523L13.691,18.089   H61.603z M66.097,57.206h-56.9C7.434,57.206,6,55.771,6,54.009V21.457l29.796,19.16c0.04,0.025,0.083,0.042,0.124,0.065   c0.043,0.024,0.087,0.047,0.131,0.069c0.231,0.119,0.469,0.215,0.712,0.278c0.025,0.007,0.05,0.01,0.075,0.016   c0.267,0.063,0.537,0.102,0.807,0.102c0.001,0,0.002,0,0.002,0c0.002,0,0.003,0,0.004,0c0.27,0,0.54-0.038,0.807-0.102   c0.025-0.006,0.05-0.009,0.075-0.016c0.243-0.063,0.48-0.159,0.712-0.278c0.044-0.022,0.088-0.045,0.131-0.069   c0.041-0.023,0.084-0.04,0.124-0.065l29.796-19.16v32.551C69.295,55.771,67.86,57.206,66.097,57.206z"
+                    ></path>
+                  </g></svg></span
+              >Email</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      data-module-name="article-header"
+      data-module-version="1.0.0"
+      data-module-instance="default"
+      class="article-content-wrapper flex flex-col gap-4 row-start-2"
+    >
+      <div class="flex flex-col gap-2">
+        <h1 class="font-headline-lg font-medium">
+          Australia's corporate regulator flags risks from rapid innovation in
+          digital assets
+        </h1>
+        <h2
+          class="font-sans text-default text-lg leading-[26px] tracking-normal mb-4"
+        >
+          The Australian Securities and Investments Commission has flagged
+          digital assets and AI risks in its annual report.
+        </h2>
+        <div
+          class="font-sans text-default text-sm leading-[22px] tracking-normal"
+        >
+          By
+          <a class="underline" href="/author/omkar-godbole">Omkar Godbole</a>,
+          <a class="underline" href="/author/ai-boost">AI Boost</a
+          ><span class="mx-1">|</span><span>Edited by </span
+          ><a class="underline" href="/author/sam-reynolds">Sam Reynolds</a>
+        </div>
+        <div
+          class="font-sans text-sm leading-[22px] tracking-normal flex gap-4 text-subtle flex-col md:block"
+        >
+          <span class=""> Jan 27, 2026, 2:15 p.m. </span>
+        </div>
+        <div>
+          <a
+            target="_blank"
+            class="font-metadata-lg py-1 pl-1 pr-2 rounded-md border-1 border-default text-default inline-flex items-center gap-2"
+            href="https://www.google.com/preferences/source?q=coindesk.com"
+            ><img
+              alt="Google"
+              loading="lazy"
+              width="20"
+              height="20"
+              decoding="async"
+              data-nimg="1"
+              srcset="
+                /_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fgoogle-logo.b0062917.png&amp;w=32&amp;q=75&amp;dpl=dpl_F98beSppBCpbMJq7f52NygY69a8u 1x,
+                /_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fgoogle-logo.b0062917.png&amp;w=48&amp;q=75&amp;dpl=dpl_F98beSppBCpbMJq7f52NygY69a8u 2x
+              "
+              src="/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fgoogle-logo.b0062917.png&amp;w=48&amp;q=75&amp;dpl=dpl_F98beSppBCpbMJq7f52NygY69a8u"
+              style="color: transparent"
+            />Make us preferred on Google</a
+          >
+        </div>
+      </div>
+    </div>
+    <div
+      class="article-content-wrapper flex flex-col justify-end gap-4 row-start-3 empty:hidden"
+    >
+      <figure>
+        <img
+          alt="Australia's corporate regulator flags digital assets risks. "
+          width="1920"
+          height="1080"
+          decoding="async"
+          data-nimg="1"
+          class="rounded-md aspect-video object-cover"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 800px, 1200px"
+          srcset="
+            /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fb46953e482ab39655f365f72531dc0ab649a151e-1919x1080.jpg%3Fauto%3Dformat&amp;w=640&amp;q=75   640w,
+            /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fb46953e482ab39655f365f72531dc0ab649a151e-1919x1080.jpg%3Fauto%3Dformat&amp;w=750&amp;q=75   750w,
+            /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fb46953e482ab39655f365f72531dc0ab649a151e-1919x1080.jpg%3Fauto%3Dformat&amp;w=828&amp;q=75   828w,
+            /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fb46953e482ab39655f365f72531dc0ab649a151e-1919x1080.jpg%3Fauto%3Dformat&amp;w=1080&amp;q=75 1080w,
+            /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fb46953e482ab39655f365f72531dc0ab649a151e-1919x1080.jpg%3Fauto%3Dformat&amp;w=1200&amp;q=75 1200w,
+            /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fb46953e482ab39655f365f72531dc0ab649a151e-1919x1080.jpg%3Fauto%3Dformat&amp;w=1920&amp;q=75 1920w,
+            /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fb46953e482ab39655f365f72531dc0ab649a151e-1919x1080.jpg%3Fauto%3Dformat&amp;w=2048&amp;q=75 2048w,
+            /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fb46953e482ab39655f365f72531dc0ab649a151e-1919x1080.jpg%3Fauto%3Dformat&amp;w=3840&amp;q=75 3840w
+          "
+          src="/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fb46953e482ab39655f365f72531dc0ab649a151e-1919x1080.jpg%3Fauto%3Dformat&amp;w=3840&amp;q=75"
+          style="color: transparent"
+        />
+        <div
+          class="flex justify-between font-body-sm text-subtle mt-1 leading-[1.3125rem] tracking-normal"
+        >
+          <figcaption
+            class="whitespace-nowrap overflow-hidden text-ellipsis w-[calc(100%_-12ch)]"
+          >
+            Australian flag
+          </figcaption>
+        </div>
+      </figure>
+      <div class="py-8 mt-4 mb-8 border-y border-solid border-default">
+        <h4 class="flex font-headline-xs font-medium text-default mb-8">
+          What to know:
+        </h4>
+        <div
+          class="document-body font-body-lg [&amp;_ul_li::before]:bg-surface-brand-fixed [&amp;_ol_li::before]:text-brand-fixed [&amp;_ol_li::before]:text-medium [&amp;_ol_li::before]:leading-9 [&amp;_ol_li::before]:content-[counter(ol-counter)]"
+        >
+          <ul class="unordered-list">
+            <li>
+              Australia's corporate regulator, ASIC, warns that rapid growth in
+              unlicensed crypto, payments and artificial intelligence firms has
+              created regulatory gaps that expose consumers to risk.
+            </li>
+            <li>
+              In its new "Key issues outlook 2026" report, ASIC says it is up to
+              the government to decide whether emerging digital asset products
+              and services should fall under existing regulatory frameworks.
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="lg:hidden [&amp;_.amt-item]:justify-between -mt-6 mb-3"></div>
+      <div
+        class="article-ad ad-desktop relative w-[calc(100vw-10px)] md:translate-x-[-50%] md:left-[49.5%] lg:left-[75.5%] xl:left-[49.75%]"
+      >
+        <div
+          class="color-black relative flex items-start justify-center h-[var(--ad-height)]"
+          style="--ad-width: 1440px; --ad-height: 280px"
+        >
+          <div
+            id="article_summary"
+            class="transition-box duration-250 align-center background-repeat relative flex justify-center ease-in [&amp;&gt;iframe]:m-auto bg-inherit opacity-100 items-start w-[var(--ad-width)] h-[var(--ad-height)]"
+            data-google-query-id="CP35mKWLrJIDFSOe2AUdn1wQtw"
+          >
+            <div
+              id="google_ads_iframe_/22031491390/cddesktop/article_8__container__"
+              style="
+                border: 0pt none;
+                display: inline-block;
+                width: 728px;
+                height: 90px;
+              "
+            >
+              <iframe
+                frameborder="0"
+                src="https://f6e53cbcb87c12bd7d4b5e18466583aa.safeframe.googlesyndication.com/safeframe/1-0-45/html/container.html"
+                id="google_ads_iframe_/22031491390/cddesktop/article_8"
+                title="3rd party ad content"
+                name=""
+                scrolling="no"
+                marginwidth="0"
+                marginheight="0"
+                width="728"
+                height="90"
+                data-is-safeframe="true"
+                sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
+                allow="private-state-token-redemption; attribution-reporting"
+                aria-label="Advertisement"
+                tabindex="0"
+                data-google-container-id="9"
+                style="border: 0px; vertical-align: bottom"
+                data-load-complete="true"
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </div>
+    <div
+      data-module-name="article-body"
+      data-module-version="1.0.0"
+      data-module-instance="default"
+      class="article-content-wrapper"
+    >
+      <div class="document-body font-body-lg">
+        <p>
+          The Australian Securities and Investments Commission (ASIC), an
+          independent government body acting as the national corporate
+          regulator, has identified regulatory gaps in fast-growing fintech
+          areas, especially digital assets.
+        </p>
+        <p>
+          The regulator's new report titled "<a
+            href="https://www.asic.gov.au/about-asic/news-centre/news-items/key-issues-outlook-2026/"
+            target="_blank"
+            >Key issues outlook 2026</a
+          >" released Tuesday expressed concerns that consumers are exposed to
+          the rapidly expanding and unlicensed crypto, payments and artificial
+          intelligence companies.
+        </p>
+        <div class="w-full min-h-[250px]">
+          <div
+            class="w-full [&amp;_.jwplayer.jw-flag-floating_.jw-wrapper]:!w-[calc(100%-20px)] [&amp;_.jwplayer.jw-skin-cdtv.jw-flag-floating_.jw-float-bar]:block [&amp;_.jwplayer.jw-skin-cdtv.jw-flag-floating_.jw-float-bar]:bg-transparent [&amp;_.jwplayer.jw-skin-cdtv.jw-flag-floating_.jw-float-bar]:p-0 [&amp;_.jwplayer.jw-skin-cdtv.jw-flag-floating_.jw-float-bar]:top-[10px] [&amp;_.jwplayer.jw-skin-cdtv.jw-flag-floating_.jw-float-bar]:right-0 [&amp;_.jwplayer.jw-skin-cdtv.jw-flag-floating_.jw-float-bar]:left-[60px] [&amp;_.jwplayer.jw-skin-cdtv.jw-flag-floating_.jw-float-bar]:w-auto [&amp;_.jwplayer.jw-skin-cdtv.jw-flag-floating_.jw-float-bar]:z-2 [&amp;_.jwplayer.jw-skin-cdtv.jw-flag-floating_.jw-float-bar]:cursor-auto [&amp;_.jwplayer.jw-skin-cdtv.jw-flag-floating_.jw-float-bar_.jw-wrapper]:cursor-auto [&amp;_.jwplayer.jw-skin-cdtv.jw-flag-floating_.jw-float-bar_.jw-float-bar-icon]:top-0 [&amp;_.jwplayer.jw-skin-cdtv.jw-flag-floating_.jw-float-bar_.jw-float-bar-icon]:right-[10px] [&amp;_.cnx-content-wrapper:not(.cnx-float)]:z-0"
+          >
+            <div
+              class="grid [&amp;&gt;*]:col-start-1 [&amp;&gt;*]:row-start-1 [&amp;_[data-jw-placement-id]]:w-full [&amp;_.jwplayer]:aspect-video [&amp;_.jwplayer]:!w-auto [&amp;_.jwplayer]:!h-auto [&amp;_.jwplayer]:!z-1"
+            >
+              <div
+                class="container-jwp [&amp;_[id^='jwExperienceDiv']+_[id^='jwExperienceDiv']]:hidden"
+                id="jwp-placement-mtt8oWFk"
+              >
+                <script
+                  id="embed-mtt8oWFk"
+                  async=""
+                  src="https://cdn.jwplayer.com/v2/sites/jCGTjK65/placements/mtt8oWFk/embed.js"
+                ></script>
+                <div
+                  id="jwPlacementDiv_mtt8oWFk"
+                  data-jw-placement-id="mtt8oWFk"
+                >
+                  <div
+                    id="jwExperienceDiv_1s32s6wmd2x0"
+                    class="jwplayer jw-reset jw-state-playing jw-stretch-uniform jw-flag-aspect-mode jw-breakpoint-1 jw-floating-dismissible jw-flag-user-inactive jw-flag-floating jw-flag-small-player"
+                    tabindex="0"
+                    aria-label="Video Player - WH advisor Patrick Witt defends stablecoin yields: 'consumers win when there’s choice'"
+                    role="application"
+                    style="
+                      width: 100%;
+                      background-image: url('https://cdn.jwplayer.com/v2/media/ulf1wmfO/poster.jpg?width=720');
+                    "
+                    aria-describedby="jw-jwExperienceDiv_1s32s6wmd2x0-shortcuts-tooltip-explanation"
+                  >
+                    <div
+                      class="jw-aspect jw-reset"
+                      style="padding-top: 56.25%"
+                    ></div>
+                    <div
+                      class="jw-wrapper jw-reset"
+                      style="
+                        will-change: auto;
+                        transform: translate(0px);
+                        width: 100%;
+                        max-width: 400px;
+                      "
+                    >
+                      <div
+                        style="
+                          opacity: 0;
+                          visibility: hidden;
+                          overflow: hidden;
+                          display: block;
+                          position: absolute;
+                          top: 0px;
+                          left: 0px;
+                          width: 100%;
+                          height: 100%;
+                        "
+                      >
+                        <div
+                          style="
+                            overflow: auto;
+                            display: block;
+                            position: absolute;
+                            top: 0px;
+                            left: 0px;
+                            width: 100%;
+                            height: 100%;
+                          "
+                        >
+                          <div style="height: 1px; width: 408px"></div>
+                        </div>
+                        <div
+                          class="jw-contract-trigger"
+                          style="
+                            overflow: auto;
+                            display: block;
+                            position: absolute;
+                            top: 0px;
+                            left: 0px;
+                            width: 100%;
+                            height: 100%;
+                          "
+                        ></div>
+                      </div>
+                      <div class="jw-top jw-reset"></div>
+                      <div
+                        class="jw-aspect jw-reset"
+                        style="padding-top: 56.25%"
+                      ></div>
+                      <div class="jw-media jw-reset">
+                        <video
+                          class="jw-video jw-reset"
+                          tabindex="-1"
+                          disableremoteplayback=""
+                          webkit-playsinline=""
+                          playsinline=""
+                          src="blob:https://www.coindesk.com/4fecc28c-acaa-4e64-8e1b-897941a780f1"
+                        ></video>
+                      </div>
+                      <div
+                        class="jw-preview jw-reset"
+                        style="
+                          background-image: url('https://cdn.jwplayer.com/v2/media/ulf1wmfO/poster.jpg?width=720');
+                          background-size: cover;
+                        "
+                      ></div>
+                      <div class="jw-controls-backdrop jw-reset"></div>
+                      <div
+                        class="jw-captions jw-reset jw-captions-enabled"
+                        style="font-size: 12px"
+                      >
+                        <div class="jw-captions-window jw-reset">
+                          <span
+                            class="jw-captions-text jw-reset"
+                            style="
+                              text-shadow:
+                                rgb(0, 0, 0) -2px 0px 1px,
+                                rgb(0, 0, 0) 2px 0px 1px,
+                                rgb(0, 0, 0) 0px -2px 1px,
+                                rgb(0, 0, 0) 0px 2px 1px,
+                                rgb(0, 0, 0) -1px 1px 1px,
+                                rgb(0, 0, 0) 1px 1px 1px,
+                                rgb(0, 0, 0) 1px -1px 1px,
+                                rgb(0, 0, 0) 1px 1px 1px;
+                            "
+                          ></span>
+                        </div>
+                      </div>
+                      <div class="jw-title jw-reset-text" dir="auto">
+                        <div class="jw-title-primary jw-reset-text">
+                          WH advisor Patrick Witt defends stablecoin yields:
+                          'consumers win when there’s choice'
+                        </div>
+                        <div class="jw-title-secondary jw-reset-text"></div>
+                      </div>
+                      <div class="jw-overlays jw-reset">
+                        <div
+                          id="jwExperienceDiv_1s32s6wmd2x0_vast"
+                          class="jw-plugin jw-reset jw-plugin-vast"
+                        ></div>
+                        <div
+                          id="jwExperienceDiv_1s32s6wmd2x0_jwpsrv"
+                          class="jw-plugin jw-reset"
+                        ></div>
+                        <div
+                          id="jwExperienceDiv_1s32s6wmd2x0_gapro"
+                          class="jw-plugin jw-reset"
+                        ></div>
+                        <div
+                          id="jwExperienceDiv_1s32s6wmd2x0_related"
+                          class="jw-plugin jw-reset jw-plugin-related"
+                        >
+                          <div class="jw-reset jw-related jw-overlay">
+                            <div
+                              class="jw-reset jw-icon jw-icon-inline jw-related-close jw-button-color"
+                              role="button"
+                              tabindex="0"
+                              aria-label="Close"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="jw-svg-icon jw-svg-icon-close"
+                                viewBox="0 0 240 240"
+                                focusable="false"
+                              >
+                                <path
+                                  d="M134.8,120l48.6-48.6c2-1.9,2.1-5.2,0.2-7.2c0,0-0.1-0.1-0.2-0.2l-7.4-7.4c-1.9-2-5.2-2.1-7.2-0.2c0,0-0.1,0.1-0.2,0.2L120,105.2L71.4,56.6c-1.9-2-5.2-2.1-7.2-0.2c0,0-0.1,0.1-0.2,0.2L56.6,64c-2,1.9-2.1,5.2-0.2,7.2c0,0,0.1,0.1,0.2,0.2l48.6,48.7l-48.6,48.6c-2,1.9-2.1,5.2-0.2,7.2c0,0,0.1,0.1,0.2,0.2l7.4,7.4c1.9,2,5.2,2.1,7.2,0.2c0,0,0.1-0.1,0.2-0.2l48.7-48.6l48.6,48.6c1.9,2,5.2,2.1,7.2,0.2c0,0,0.1-0.1,0.2-0.2l7.4-7.4c2-1.9,2.1-5.2,0.2-7.2c0,0-0.1-0.1-0.2-0.2L134.8,120z"
+                                ></path>
+                              </svg>
+                            </div>
+                            <div
+                              class="jw-reset jw-icon jw-icon-inline jw-related-page jw-related-page-left jw-button-color"
+                              role="button"
+                              tabindex="0"
+                              aria-label="Previous"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="jw-svg-icon jw-svg-icon-arrow-left"
+                                viewBox="0 0 240 240"
+                                focusable="false"
+                              >
+                                <path
+                                  d="M55.4,104.4c-1.1,1.1-2.2,2.3-3.1,3.6c-6.9,9.9-4.4,23.5,5.5,30.4L159.7,240l33.9-33.9l-84.9-84.9l84.9-84.9L157.3,0L55.4,104.4L55.4,104.4z"
+                                ></path>
+                              </svg>
+                            </div>
+                            <div
+                              class="jw-related-title jw-reset-text"
+                              aria-label="More Videos"
+                              dir="auto"
+                            >
+                              More Videos
+                            </div>
+                            <div class="jw-reset jw-related-container">
+                              <div class="jw-reset jw-related-item-group"></div>
+                            </div>
+                            <div
+                              class="jw-reset jw-icon jw-icon-inline jw-related-page jw-related-page-right jw-button-color"
+                              role="button"
+                              tabindex="0"
+                              aria-label="Next"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="jw-svg-icon jw-svg-icon-arrow-right"
+                                viewBox="0 0 240 240"
+                                focusable="false"
+                              >
+                                <path
+                                  d="M183.6,104.4L81.8,0L45.4,36.3l84.9,84.9l-84.9,84.9L79.3,240l101.9-101.7c9.9-6.9,12.4-20.4,5.5-30.4C185.8,106.7,184.8,105.4,183.6,104.4L183.6,104.4z"
+                                ></path>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="jw-hidden-accessibility">
+                        <span class="jw-time-update" aria-live="assertive"
+                          >0 seconds of 13 minutes, 6 seconds</span
+                        ><span class="jw-volume-update" aria-live="assertive"
+                          >Volume 0%</span
+                        >
+                      </div>
+                      <div
+                        class="jw-shortcuts-tooltip jw-modal jw-reset"
+                        title="Keyboard Shortcuts"
+                      >
+                        <div
+                          class="jw-icon jw-icon-inline jw-button-color jw-reset jw-shortcuts-close"
+                          role="button"
+                          tabindex="0"
+                          aria-label="Close"
+                          style=""
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="jw-svg-icon jw-svg-icon-close"
+                            viewBox="0 0 240 240"
+                            focusable="false"
+                          >
+                            <path
+                              d="M134.8,120l48.6-48.6c2-1.9,2.1-5.2,0.2-7.2c0,0-0.1-0.1-0.2-0.2l-7.4-7.4c-1.9-2-5.2-2.1-7.2-0.2c0,0-0.1,0.1-0.2,0.2L120,105.2L71.4,56.6c-1.9-2-5.2-2.1-7.2-0.2c0,0-0.1,0.1-0.2,0.2L56.6,64c-2,1.9-2.1,5.2-0.2,7.2c0,0,0.1,0.1,0.2,0.2l48.6,48.7l-48.6,48.6c-2,1.9-2.1,5.2-0.2,7.2c0,0,0.1,0.1,0.2,0.2l7.4,7.4c1.9,2,5.2,2.1,7.2,0.2c0,0,0.1-0.1,0.2-0.2l48.7-48.6l48.6,48.6c1.9,2,5.2,2.1,7.2,0.2c0,0,0.1-0.1,0.2-0.2l7.4-7.4c2-1.9,2.1-5.2,0.2-7.2c0,0-0.1-0.1-0.2-0.2L134.8,120z"
+                            ></path>
+                          </svg>
+                        </div>
+                        <span
+                          class="jw-hidden"
+                          id="jw-jwExperienceDiv_1s32s6wmd2x0-shortcuts-tooltip-explanation"
+                          >Press shift question mark to access a list of
+                          keyboard shortcuts</span
+                        >
+                        <div
+                          class="jw-reset jw-shortcuts-container"
+                          role="menu"
+                        >
+                          <div class="jw-reset jw-shortcuts-header">
+                            <span class="jw-reset jw-shortcuts-title"
+                              >Keyboard Shortcuts</span
+                            ><button
+                              role="switch"
+                              aria-label="Keyboard Shortcuts"
+                              class="jw-reset jw-switch"
+                            >
+                              <span class="jw-reset jw-switch-knob"></span
+                              ><span class="jw-reset-text jw-switch-enabled"
+                                >Enabled</span
+                              ><span class="jw-reset-text jw-switch-disabled"
+                                >Disabled</span
+                              >
+                            </button>
+                          </div>
+                          <div class="jw-reset jw-shortcuts-tooltip-list">
+                            <div
+                              class="jw-shortcuts-tooltip-descriptions jw-reset"
+                            >
+                              <div
+                                class="jw-shortcuts-row jw-reset"
+                                tabindex="0"
+                                role="menuitem"
+                                aria-label="Shortcuts Open/Close - / or ?"
+                              >
+                                <span class="jw-shortcuts-description jw-reset"
+                                  >Shortcuts Open/Close</span
+                                ><span class="jw-shortcuts-key jw-reset"
+                                  >/ or ?</span
+                                >
+                              </div>
+                              <div
+                                class="jw-shortcuts-row jw-reset"
+                                tabindex="0"
+                                role="menuitem"
+                                aria-label="Play/Pause - SPACE"
+                              >
+                                <span class="jw-shortcuts-description jw-reset"
+                                  >Play/Pause</span
+                                ><span class="jw-shortcuts-key jw-reset"
+                                  >SPACE</span
+                                >
+                              </div>
+                              <div
+                                class="jw-shortcuts-row jw-reset"
+                                tabindex="0"
+                                role="menuitem"
+                                aria-label="Increase Volume - ↑"
+                              >
+                                <span class="jw-shortcuts-description jw-reset"
+                                  >Increase Volume</span
+                                ><span class="jw-shortcuts-key jw-reset"
+                                  >↑</span
+                                >
+                              </div>
+                              <div
+                                class="jw-shortcuts-row jw-reset"
+                                tabindex="0"
+                                role="menuitem"
+                                aria-label="Decrease Volume - ↓"
+                              >
+                                <span class="jw-shortcuts-description jw-reset"
+                                  >Decrease Volume</span
+                                ><span class="jw-shortcuts-key jw-reset"
+                                  >↓</span
+                                >
+                              </div>
+                              <div
+                                class="jw-shortcuts-row jw-reset"
+                                tabindex="0"
+                                role="menuitem"
+                                aria-label="Seek Forward - →"
+                              >
+                                <span class="jw-shortcuts-description jw-reset"
+                                  >Seek Forward</span
+                                ><span class="jw-shortcuts-key jw-reset"
+                                  >→</span
+                                >
+                              </div>
+                              <div
+                                class="jw-shortcuts-row jw-reset"
+                                tabindex="0"
+                                role="menuitem"
+                                aria-label="Seek Backward - ←"
+                              >
+                                <span class="jw-shortcuts-description jw-reset"
+                                  >Seek Backward</span
+                                ><span class="jw-shortcuts-key jw-reset"
+                                  >←</span
+                                >
+                              </div>
+                              <div
+                                class="jw-shortcuts-row jw-reset"
+                                tabindex="0"
+                                role="menuitem"
+                                aria-label="Captions On/Off - c"
+                              >
+                                <span class="jw-shortcuts-description jw-reset"
+                                  >Captions On/Off</span
+                                ><span class="jw-shortcuts-key jw-reset"
+                                  >c</span
+                                >
+                              </div>
+                              <div
+                                class="jw-shortcuts-row jw-reset"
+                                tabindex="0"
+                                role="menuitem"
+                                aria-label="Fullscreen/Exit Fullscreen - f"
+                              >
+                                <span class="jw-shortcuts-description jw-reset"
+                                  >Fullscreen/Exit Fullscreen</span
+                                ><span class="jw-shortcuts-key jw-reset"
+                                  >f</span
+                                >
+                              </div>
+                              <div
+                                class="jw-shortcuts-row jw-reset"
+                                tabindex="0"
+                                role="menuitem"
+                                aria-label="Mute/Unmute - m"
+                              >
+                                <span class="jw-shortcuts-description jw-reset"
+                                  >Mute/Unmute</span
+                                ><span class="jw-shortcuts-key jw-reset"
+                                  >m</span
+                                >
+                              </div>
+                              <div
+                                class="jw-shortcuts-row jw-reset"
+                                tabindex="0"
+                                role="menuitem"
+                                aria-label="Decrease Caption Size - -"
+                              >
+                                <span class="jw-shortcuts-description jw-reset"
+                                  >Decrease Caption Size</span
+                                ><span class="jw-shortcuts-key jw-reset"
+                                  >-</span
+                                >
+                              </div>
+                              <div
+                                class="jw-shortcuts-row jw-reset"
+                                tabindex="0"
+                                role="menuitem"
+                                aria-label="Increase Caption Size - + or ="
+                              >
+                                <span class="jw-shortcuts-description jw-reset"
+                                  >Increase Caption Size</span
+                                ><span class="jw-shortcuts-key jw-reset"
+                                  >+ or =</span
+                                >
+                              </div>
+                              <div
+                                class="jw-shortcuts-row jw-reset"
+                                tabindex="0"
+                                role="menuitem"
+                                aria-label="Seek % - 0-9"
+                              >
+                                <span class="jw-shortcuts-description jw-reset"
+                                  >Seek %</span
+                                ><span class="jw-shortcuts-key jw-reset"
+                                  >0-9</span
+                                >
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="jw-float-bar jw-reset">
+                        <div class="jw-float-bar-title" aria-label=" "></div>
+                        <div
+                          class="jw-float-bar-icon jw-float-icon jw-icon jw-button-color jw-reset"
+                          role="button"
+                          aria-label="Close"
+                          tabindex="0"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 11 11"
+                            fill="none"
+                            class="jw-svg-icon jw-svg-icon-floating-close"
+                            focusable="false"
+                          >
+                            <path
+                              d="M7.41499 5.00001L10.705 1.70501C10.8688 1.51371 10.9544 1.26763 10.9447 1.01595C10.935 0.764278 10.8307 0.525539 10.6526 0.347444C10.4745 0.16935 10.2357 0.0650171 9.98405 0.055296C9.73237 0.0455748 9.48629 0.131181 9.29499 0.295007L5.99999 3.58501L2.70499 0.295007C2.51369 0.131181 2.26762 0.0455748 2.01594 0.055296C1.76426 0.0650171 1.52552 0.16935 1.34743 0.347444C1.16934 0.525539 1.065 0.764278 1.05528 1.01595C1.04556 1.26763 1.13117 1.51371 1.29499 1.70501L4.58499 5.00001L1.29499 8.29501C1.19031 8.38466 1.10529 8.49497 1.04527 8.61904C0.985244 8.7431 0.951515 8.87824 0.946195 9.01596C0.940876 9.15367 0.964081 9.29101 1.01436 9.41933C1.06463 9.54766 1.14089 9.6642 1.23834 9.76166C1.3358 9.85911 1.45235 9.93537 1.58067 9.98565C1.709 10.0359 1.84633 10.0591 1.98405 10.0538C2.12177 10.0485 2.2569 10.0148 2.38096 9.95473C2.50503 9.89471 2.61535 9.80969 2.70499 9.70501L5.99999 6.41501L9.29499 9.70501C9.48629 9.86884 9.73237 9.95444 9.98405 9.94472C10.2357 9.935 10.4745 9.83067 10.6526 9.65257C10.8307 9.47448 10.935 9.23574 10.9447 8.98406C10.9544 8.73239 10.8688 8.48631 10.705 8.29501L7.41499 5.00001Z"
+                              fill="white"
+                              fill-opacity="0.8"
+                            ></path>
+                          </svg>
+                        </div>
+                      </div>
+                      <div class="jw-controls jw-reset">
+                        <div class="jw-display jw-reset">
+                          <div class="jw-display-container jw-reset">
+                            <div class="jw-display-controls jw-reset">
+                              <div
+                                class="jw-display-icon-container jw-display-icon-rewind jw-reset"
+                              >
+                                <div
+                                  class="jw-icon jw-icon-rewind jw-button-color jw-reset"
+                                  role="button"
+                                  tabindex="0"
+                                  aria-label="Rewind 10 Seconds"
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="jw-svg-icon jw-svg-icon-rewind"
+                                    viewBox="0 0 240 240"
+                                    focusable="false"
+                                  >
+                                    <path
+                                      d="M113.2,131.078a21.589,21.589,0,0,0-17.7-10.6,21.589,21.589,0,0,0-17.7,10.6,44.769,44.769,0,0,0,0,46.3,21.589,21.589,0,0,0,17.7,10.6,21.589,21.589,0,0,0,17.7-10.6,44.769,44.769,0,0,0,0-46.3Zm-17.7,47.2c-7.8,0-14.4-11-14.4-24.1s6.6-24.1,14.4-24.1,14.4,11,14.4,24.1S103.4,178.278,95.5,178.278Zm-43.4,9.7v-51l-4.8,4.8-6.8-6.8,13-13a4.8,4.8,0,0,1,8.2,3.4v62.7l-9.6-.1Zm162-130.2v125.3a4.867,4.867,0,0,1-4.8,4.8H146.6v-19.3h48.2v-96.4H79.1v19.3c0,5.3-3.6,7.2-8,4.3l-41.8-27.9a6.013,6.013,0,0,1-2.7-8,5.887,5.887,0,0,1,2.7-2.7l41.8-27.9c4.4-2.9,8-1,8,4.3v19.3H209.2A4.974,4.974,0,0,1,214.1,57.778Z"
+                                    ></path>
+                                  </svg>
+                                  <div
+                                    class="jw-reset-text jw-tooltip jw-tooltip-display-rewind"
+                                    dir="auto"
+                                  >
+                                    <div class="jw-text"></div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div
+                                class="jw-display-icon-container jw-display-icon-display jw-reset"
+                              >
+                                <div
+                                  class="jw-icon jw-icon-display jw-button-color jw-reset"
+                                  role="button"
+                                  tabindex="0"
+                                  aria-label="Pause"
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="jw-svg-icon jw-svg-icon-buffer"
+                                    viewBox="0 0 240 240"
+                                    focusable="false"
+                                  >
+                                    <path
+                                      d="M120,186.667a66.667,66.667,0,0,1,0-133.333V40a80,80,0,1,0,80,80H186.667A66.846,66.846,0,0,1,120,186.667Z"
+                                    ></path></svg
+                                  ><svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="jw-svg-icon jw-svg-icon-replay"
+                                    viewBox="0 0 240 240"
+                                    focusable="false"
+                                  >
+                                    <path
+                                      d="M120,41.9v-20c0-5-4-8-8-4l-44,28a5.865,5.865,0,0,0-3.3,7.6A5.943,5.943,0,0,0,68,56.8l43,29c5,4,9,1,9-4v-20a60,60,0,1,1-60,60H40a80,80,0,1,0,80-79.9Z"
+                                    ></path></svg
+                                  ><svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="jw-svg-icon jw-svg-icon-play"
+                                    viewBox="0 0 240 240"
+                                    focusable="false"
+                                  >
+                                    <path
+                                      d="M62.8,199.5c-1,0.8-2.4,0.6-3.3-0.4c-0.4-0.5-0.6-1.1-0.5-1.8V42.6c-0.2-1.3,0.7-2.4,1.9-2.6c0.7-0.1,1.3,0.1,1.9,0.4l154.7,77.7c2.1,1.1,2.1,2.8,0,3.8L62.8,199.5z"
+                                    ></path></svg
+                                  ><svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="jw-svg-icon jw-svg-icon-pause"
+                                    viewBox="0 0 240 240"
+                                    focusable="false"
+                                  >
+                                    <path
+                                      d="M100,194.9c0.2,2.6-1.8,4.8-4.4,5c-0.2,0-0.4,0-0.6,0H65c-2.6,0.2-4.8-1.8-5-4.4c0-0.2,0-0.4,0-0.6V45c-0.2-2.6,1.8-4.8,4.4-5c0.2,0,0.4,0,0.6,0h30c2.6-0.2,4.8,1.8,5,4.4c0,0.2,0,0.4,0,0.6V194.9z M180,45.1c0.2-2.6-1.8-4.8-4.4-5c-0.2,0-0.4,0-0.6,0h-30c-2.6-0.2-4.8,1.8-5,4.4c0,0.2,0,0.4,0,0.6V195c-0.2,2.6,1.8,4.8,4.4,5c0.2,0,0.4,0,0.6,0h30c2.6,0.2,4.8-1.8,5-4.4c0-0.2,0-0.4,0-0.6V45.1z"
+                                    ></path>
+                                  </svg>
+                                  <div
+                                    class="jw-reset-text jw-tooltip jw-tooltip-display"
+                                    dir="auto"
+                                  >
+                                    <div class="jw-text"></div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div
+                                class="jw-display-icon-container jw-display-icon-next jw-reset"
+                                style=""
+                              >
+                                <div
+                                  class="jw-icon jw-icon-next jw-button-color jw-reset"
+                                  role="button"
+                                  tabindex="0"
+                                  aria-label="Next"
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="jw-svg-icon jw-svg-icon-next"
+                                    viewBox="0 0 240 240"
+                                    focusable="false"
+                                  >
+                                    <path
+                                      d="M165,60v53.3L59.2,42.8C56.9,41.3,55,42.3,55,45v150c0,2.7,1.9,3.8,4.2,2.2L165,126.6v53.3h20v-120L165,60L165,60z"
+                                    ></path>
+                                  </svg>
+                                  <div
+                                    class="jw-reset-text jw-tooltip jw-tooltip-display-next"
+                                    dir="auto"
+                                  >
+                                    <div class="jw-text"></div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="jw-nextup-container jw-reset">
+                          <div
+                            class="jw-nextup jw-background-color jw-reset jw-nextup-thumbnail-visible"
+                          >
+                            <div class="jw-nextup-tooltip jw-reset">
+                              <div
+                                class="jw-nextup-thumbnail jw-reset"
+                                style="
+                                  background-image: url('https://cdn.jwplayer.com/v2/media/holo4ixf/poster.jpg?width=120');
+                                "
+                              ></div>
+                              <div class="jw-nextup-body jw-reset">
+                                <div class="jw-nextup-header jw-reset">
+                                  Next Up
+                                </div>
+                                <div
+                                  class="jw-nextup-title jw-reset-text"
+                                  dir="auto"
+                                >
+                                  Why BlackRock’s former crypto head is betting
+                                  on Ethereum
+                                </div>
+                                <div class="jw-nextup-duration jw-reset">
+                                  23:50
+                                </div>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              class="jw-icon jw-nextup-close jw-reset"
+                              aria-label="Close"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="jw-svg-icon jw-svg-icon-close"
+                                viewBox="0 0 240 240"
+                                focusable="false"
+                              >
+                                <path
+                                  d="M134.8,120l48.6-48.6c2-1.9,2.1-5.2,0.2-7.2c0,0-0.1-0.1-0.2-0.2l-7.4-7.4c-1.9-2-5.2-2.1-7.2-0.2c0,0-0.1,0.1-0.2,0.2L120,105.2L71.4,56.6c-1.9-2-5.2-2.1-7.2-0.2c0,0-0.1,0.1-0.2,0.2L56.6,64c-2,1.9-2.1,5.2-0.2,7.2c0,0,0.1,0.1,0.2,0.2l48.6,48.7l-48.6,48.6c-2,1.9-2.1,5.2-0.2,7.2c0,0,0.1,0.1,0.2,0.2l7.4,7.4c1.9,2,5.2,2.1,7.2,0.2c0,0,0.1-0.1,0.2-0.2l48.7-48.6l48.6,48.6c1.9,2,5.2,2.1,7.2,0.2c0,0,0.1-0.1,0.2-0.2l7.4-7.4c2-1.9,2.1-5.2,0.2-7.2c0,0-0.1-0.1-0.2-0.2L134.8,120z"
+                                ></path>
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                        <div
+                          id="jw-jwExperienceDiv_1s32s6wmd2x0-settings-menu"
+                          class="jw-reset jw-settings-menu"
+                          aria-expanded="false"
+                          aria-label="Settings"
+                        >
+                          <div class="jw-reset jw-settings-topbar">
+                            <div class="jw-reset jw-settings-topbar-text"></div>
+                            <div class="jw-reset jw-settings-topbar-buttons">
+                              <div
+                                class="jw-icon jw-icon-inline jw-button-color jw-reset jw-settings-quality jw-submenu-quality"
+                                role="button"
+                                tabindex="0"
+                                aria-label="Quality"
+                                name="quality"
+                                type="button"
+                                aria-expanded="false"
+                                aria-controls="jw-jwExperienceDiv_1s32s6wmd2x0-settings-submenu-quality"
+                                style=""
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  class="jw-svg-icon jw-svg-icon-quality-100"
+                                  viewBox="0 0 240 240"
+                                  focusable="false"
+                                >
+                                  <path
+                                    d="M55,200H35c-3,0-5-2-5-4c0,0,0,0,0-1v-30c0-3,2-5,4-5c0,0,0,0,1,0h20c3,0,5,2,5,4c0,0,0,0,0,1v30C60,198,58,200,55,200L55,200z M110,195v-70c0-3-2-5-4-5c0,0,0,0-1,0H85c-3,0-5,2-5,4c0,0,0,0,0,1v70c0,3,2,5,4,5c0,0,0,0,1,0h20C108,200,110,198,110,195L110,195z M160,195V85c0-3-2-5-4-5c0,0,0,0-1,0h-20c-3,0-5,2-5,4c0,0,0,0,0,1v110c0,3,2,5,4,5c0,0,0,0,1,0h20C158,200,160,198,160,195L160,195z M210,195V45c0-3-2-5-4-5c0,0,0,0-1,0h-20c-3,0-5,2-5,4c0,0,0,0,0,1v150c0,3,2,5,4,5c0,0,0,0,1,0h20C208,200,210,198,210,195L210,195z"
+                                  ></path>
+                                </svg>
+                                <div
+                                  class="jw-reset-text jw-tooltip jw-tooltip-quality"
+                                  dir="auto"
+                                >
+                                  <div class="jw-text"></div>
+                                </div>
+                              </div>
+                              <div
+                                class="jw-icon jw-icon-inline jw-button-color jw-reset jw-settings-close"
+                                role="button"
+                                tabindex="0"
+                                aria-label="Close"
+                                style=""
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  class="jw-svg-icon jw-svg-icon-close"
+                                  viewBox="0 0 240 240"
+                                  focusable="false"
+                                >
+                                  <path
+                                    d="M134.8,120l48.6-48.6c2-1.9,2.1-5.2,0.2-7.2c0,0-0.1-0.1-0.2-0.2l-7.4-7.4c-1.9-2-5.2-2.1-7.2-0.2c0,0-0.1,0.1-0.2,0.2L120,105.2L71.4,56.6c-1.9-2-5.2-2.1-7.2-0.2c0,0-0.1,0.1-0.2,0.2L56.6,64c-2,1.9-2.1,5.2-0.2,7.2c0,0,0.1,0.1,0.2,0.2l48.6,48.7l-48.6,48.6c-2,1.9-2.1,5.2-0.2,7.2c0,0,0.1,0.1,0.2,0.2l7.4,7.4c1.9,2,5.2,2.1,7.2,0.2c0,0,0.1-0.1,0.2-0.2l48.7-48.6l48.6,48.6c1.9,2,5.2,2.1,7.2,0.2c0,0,0.1-0.1,0.2-0.2l7.4-7.4c2-1.9,2.1-5.2,0.2-7.2c0,0-0.1-0.1-0.2-0.2L134.8,120z"
+                                  ></path>
+                                </svg>
+                                <div
+                                  class="jw-reset-text jw-tooltip jw-tooltip-close"
+                                  dir="auto"
+                                >
+                                  <div class="jw-text"></div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div
+                            id="jw-jwExperienceDiv_1s32s6wmd2x0-settings-submenu-quality"
+                            class="jw-reset jw-settings-submenu jw-settings-submenu-quality"
+                            role="menu"
+                            aria-expanded="false"
+                            aria-label="Quality"
+                          >
+                            <div class="jw-reset jw-settings-submenu-items">
+                              <button
+                                type="button"
+                                class="jw-reset-text jw-settings-content-item jw-settings-item-active"
+                                aria-label="Auto"
+                                role="menuitemradio"
+                                aria-checked="true"
+                                dir="auto"
+                              >
+                                Auto<span class="jw-reset jw-auto-label"
+                                  >406p</span
+                                ></button
+                              ><button
+                                type="button"
+                                class="jw-reset-text jw-settings-content-item"
+                                aria-label="1080p"
+                                role="menuitemradio"
+                                aria-checked="false"
+                                dir="auto"
+                              >
+                                1080p</button
+                              ><button
+                                type="button"
+                                class="jw-reset-text jw-settings-content-item"
+                                aria-label="720p"
+                                role="menuitemradio"
+                                aria-checked="false"
+                                dir="auto"
+                              >
+                                720p</button
+                              ><button
+                                type="button"
+                                class="jw-reset-text jw-settings-content-item"
+                                aria-label="406p"
+                                role="menuitemradio"
+                                aria-checked="false"
+                                dir="auto"
+                              >
+                                406p</button
+                              ><button
+                                type="button"
+                                class="jw-reset-text jw-settings-content-item"
+                                aria-label="270p"
+                                role="menuitemradio"
+                                aria-checked="false"
+                                dir="auto"
+                              >
+                                270p</button
+                              ><button
+                                type="button"
+                                class="jw-reset-text jw-settings-content-item"
+                                aria-label="180p"
+                                role="menuitemradio"
+                                aria-checked="false"
+                                dir="auto"
+                              >
+                                180p
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="jw-controlbar jw-reset">
+                          <div
+                            class="jw-slider-time jw-chapter-slider-time jw-background-color jw-reset jw-slider-horizontal jw-reset"
+                            aria-valuetext="0 seconds of 13 minutes, 6 seconds"
+                            aria-valuenow="0"
+                            tabindex="0"
+                            role="slider"
+                            aria-label="Seek"
+                            aria-valuemin="0"
+                            aria-valuemax="786.8333"
+                          >
+                            <div class="jw-slider-container jw-reset">
+                              <div class="jw-reset jw-old-rail">
+                                <div
+                                  class="jw-timesegment jw-reset"
+                                  aria-hidden="true"
+                                  style="flex-grow: 787"
+                                >
+                                  <div class="jw-timesegment-resetter jw-reset">
+                                    <div
+                                      class="jw-timesegment-container jw-reset"
+                                    >
+                                      <div
+                                        class="jw-timesegment-bar jw-rail jw-timesegment-background jw-reset"
+                                      ></div>
+                                      <div
+                                        class="jw-timesegment-bar jw-buffer jw-timesegment-buffered jw-reset"
+                                        style="width: 12.7094%"
+                                      ></div>
+                                      <div
+                                        class="jw-timesegment-bar jw-progress jw-timesegment-progress jw-reset"
+                                        style="width: 9.48923%"
+                                      ></div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div
+                                class="jw-reset jw-old-buffer"
+                                style="width: 12.7102%"
+                              ></div>
+                              <div
+                                class="jw-reset jw-old-progress"
+                                style="width: 9.49187%"
+                              ></div>
+                              <div
+                                class="jw-knob jw-reset"
+                                style="left: 9.49187%"
+                              ></div>
+                              <div
+                                class="jw-icon jw-icon-tooltip jw-tooltip-time jw-button-color jw-reset"
+                              >
+                                <div class="jw-overlay jw-reset">
+                                  <div class="jw-time-tip jw-reset">
+                                    <div
+                                      class="jw-time-thumb jw-reset"
+                                      style="
+                                        width: 120px;
+                                        height: 67px;
+                                        margin: 0px auto;
+                                        background-image: url('https://cdn.jwplayer.com/strips/ulf1wmfO-120.jpg');
+                                        background-position: 0px 0px;
+                                        background-repeat: no-repeat;
+                                      "
+                                    ></div>
+                                    <span
+                                      class="jw-time-chapter jw-text jw-reset"
+                                      style="display: none"
+                                    ></span
+                                    ><span
+                                      class="jw-time-time jw-text jw-reset"
+                                    ></span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="jw-reset jw-button-container">
+                            <div
+                              class="jw-icon jw-icon-inline jw-button-color jw-reset jw-icon-playback"
+                              role="button"
+                              tabindex="0"
+                              aria-label="Pause"
+                              style=""
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="jw-svg-icon jw-svg-icon-play"
+                                viewBox="0 0 240 240"
+                                focusable="false"
+                              >
+                                <path
+                                  d="M62.8,199.5c-1,0.8-2.4,0.6-3.3-0.4c-0.4-0.5-0.6-1.1-0.5-1.8V42.6c-0.2-1.3,0.7-2.4,1.9-2.6c0.7-0.1,1.3,0.1,1.9,0.4l154.7,77.7c2.1,1.1,2.1,2.8,0,3.8L62.8,199.5z"
+                                ></path></svg
+                              ><svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="jw-svg-icon jw-svg-icon-pause"
+                                viewBox="0 0 240 240"
+                                focusable="false"
+                              >
+                                <path
+                                  d="M100,194.9c0.2,2.6-1.8,4.8-4.4,5c-0.2,0-0.4,0-0.6,0H65c-2.6,0.2-4.8-1.8-5-4.4c0-0.2,0-0.4,0-0.6V45c-0.2-2.6,1.8-4.8,4.4-5c0.2,0,0.4,0,0.6,0h30c2.6-0.2,4.8,1.8,5,4.4c0,0.2,0,0.4,0,0.6V194.9z M180,45.1c0.2-2.6-1.8-4.8-4.4-5c-0.2,0-0.4,0-0.6,0h-30c-2.6-0.2-4.8,1.8-5,4.4c0,0.2,0,0.4,0,0.6V195c-0.2,2.6,1.8,4.8,4.4,5c0.2,0,0.4,0,0.6,0h30c2.6,0.2,4.8-1.8,5-4.4c0-0.2,0-0.4,0-0.6V45.1z"
+                                ></path></svg
+                              ><svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="jw-svg-icon jw-svg-icon-stop"
+                                viewBox="0 0 240 240"
+                                focusable="false"
+                              >
+                                <path
+                                  d="M190,185c0.2,2.6-1.8,4.8-4.4,5c-0.2,0-0.4,0-0.6,0H55c-2.6,0.2-4.8-1.8-5-4.4c0-0.2,0-0.4,0-0.6V55c-0.2-2.6,1.8-4.8,4.4-5c0.2,0,0.4,0,0.6,0h130c2.6-0.2,4.8,1.8,5,4.4c0,0.2,0,0.4,0,0.6V185z"
+                                ></path>
+                              </svg>
+                              <div
+                                class="jw-reset-text jw-tooltip jw-tooltip-play"
+                                dir="auto"
+                              >
+                                <div class="jw-text"></div>
+                              </div>
+                            </div>
+                            <div
+                              class="jw-icon jw-icon-inline jw-button-color jw-reset jw-icon-rewind"
+                              role="button"
+                              tabindex="0"
+                              aria-label="Rewind 10 Seconds"
+                              style=""
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="jw-svg-icon jw-svg-icon-rewind"
+                                viewBox="0 0 240 240"
+                                focusable="false"
+                              >
+                                <path
+                                  d="M113.2,131.078a21.589,21.589,0,0,0-17.7-10.6,21.589,21.589,0,0,0-17.7,10.6,44.769,44.769,0,0,0,0,46.3,21.589,21.589,0,0,0,17.7,10.6,21.589,21.589,0,0,0,17.7-10.6,44.769,44.769,0,0,0,0-46.3Zm-17.7,47.2c-7.8,0-14.4-11-14.4-24.1s6.6-24.1,14.4-24.1,14.4,11,14.4,24.1S103.4,178.278,95.5,178.278Zm-43.4,9.7v-51l-4.8,4.8-6.8-6.8,13-13a4.8,4.8,0,0,1,8.2,3.4v62.7l-9.6-.1Zm162-130.2v125.3a4.867,4.867,0,0,1-4.8,4.8H146.6v-19.3h48.2v-96.4H79.1v19.3c0,5.3-3.6,7.2-8,4.3l-41.8-27.9a6.013,6.013,0,0,1-2.7-8,5.887,5.887,0,0,1,2.7-2.7l41.8-27.9c4.4-2.9,8-1,8,4.3v19.3H209.2A4.974,4.974,0,0,1,214.1,57.778Z"
+                                ></path>
+                              </svg>
+                              <div
+                                class="jw-reset-text jw-tooltip jw-tooltip-rewind"
+                                dir="auto"
+                              >
+                                <div class="jw-text"></div>
+                              </div>
+                            </div>
+                            <div
+                              class="jw-icon jw-icon-inline jw-button-color jw-reset jw-icon-next"
+                              role="button"
+                              tabindex="0"
+                              aria-label="Next"
+                              dir="auto"
+                              style=""
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="jw-svg-icon jw-svg-icon-next"
+                                viewBox="0 0 240 240"
+                                focusable="false"
+                              >
+                                <path
+                                  d="M165,60v53.3L59.2,42.8C56.9,41.3,55,42.3,55,45v150c0,2.7,1.9,3.8,4.2,2.2L165,126.6v53.3h20v-120L165,60L165,60z"
+                                ></path>
+                              </svg>
+                              <div
+                                class="jw-reset-text jw-tooltip jw-tooltip-next"
+                                dir="auto"
+                              >
+                                <div class="jw-text"></div>
+                              </div>
+                            </div>
+                            <div
+                              aria-label="Unmute button"
+                              role="group"
+                              tabindex="0"
+                              class="jw-icon jw-icon-tooltip jw-icon-volume jw-button-color jw-reset jw-off"
+                            >
+                              <div
+                                class="jw-overlay jw-reset"
+                                tabindex="0"
+                                aria-label="Volume"
+                                aria-orientation="vertical"
+                                aria-valuemin="0"
+                                aria-valuemax="100"
+                                role="slider"
+                                aria-valuenow="0"
+                                aria-valuetext="Volume 0%"
+                              >
+                                <div
+                                  class="jw-slider-volume jw-volume-tip jw-reset jw-slider-vertical"
+                                  aria-hidden="true"
+                                >
+                                  <div class="jw-slider-container jw-reset">
+                                    <div class="jw-rail jw-reset"></div>
+                                    <div class="jw-buffer jw-reset"></div>
+                                    <div
+                                      class="jw-progress jw-reset"
+                                      style="height: 0%"
+                                    ></div>
+                                    <div
+                                      class="jw-knob jw-reset"
+                                      style="bottom: 0%"
+                                    ></div>
+                                  </div>
+                                </div>
+                              </div>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="jw-svg-icon jw-svg-icon-volume-0"
+                                viewBox="0 0 240 240"
+                                focusable="false"
+                              >
+                                <path
+                                  d="M116.4,42.8v154.5c0,2.8-1.7,3.6-3.8,1.7l-54.1-48.1H28.9c-2.8,0-5.2-2.3-5.2-5.2V94.2c0-2.8,2.3-5.2,5.2-5.2h29.6l54.1-48.1C114.6,39.1,116.4,39.9,116.4,42.8z M212.3,96.4l-14.6-14.6l-23.6,23.6l-23.6-23.6l-14.6,14.6l23.6,23.6l-23.6,23.6l14.6,14.6l23.6-23.6l23.6,23.6l14.6-14.6L188.7,120L212.3,96.4z"
+                                ></path></svg
+                              ><svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="jw-svg-icon jw-svg-icon-volume-50"
+                                viewBox="0 0 240 240"
+                                focusable="false"
+                              >
+                                <path
+                                  d="M116.4,42.8v154.5c0,2.8-1.7,3.6-3.8,1.7l-54.1-48.1H28.9c-2.8,0-5.2-2.3-5.2-5.2V94.2c0-2.8,2.3-5.2,5.2-5.2h29.6l54.1-48.1C114.7,39.1,116.4,39.9,116.4,42.8z M178.2,120c0-22.7-18.5-41.2-41.2-41.2v20.6c11.4,0,20.6,9.2,20.6,20.6c0,11.4-9.2,20.6-20.6,20.6v20.6C159.8,161.2,178.2,142.7,178.2,120z"
+                                ></path></svg
+                              ><svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="jw-svg-icon jw-svg-icon-volume-100"
+                                viewBox="0 0 240 240"
+                                focusable="false"
+                              >
+                                <path
+                                  d="M116.5,42.8v154.4c0,2.8-1.7,3.6-3.8,1.7l-54.1-48H29c-2.8,0-5.2-2.3-5.2-5.2V94.3c0-2.8,2.3-5.2,5.2-5.2h29.6l54.1-48C114.8,39.2,116.5,39.9,116.5,42.8z"
+                                ></path>
+                                <path
+                                  d="M136.2,160v-20c11.1,0,20-8.9,20-20s-8.9-20-20-20V80c22.1,0,40,17.9,40,40S158.3,160,136.2,160z"
+                                ></path>
+                                <path
+                                  d="M216.2,120c0-44.2-35.8-80-80-80v20c33.1,0,60,26.9,60,60s-26.9,60-60,60v20C180.4,199.9,216.1,164.1,216.2,120z"
+                                ></path>
+                              </svg>
+                            </div>
+                            <div
+                              class="jw-horizontal-volume-container"
+                              tabindex="0"
+                              aria-label="Volume"
+                              aria-orientation="horizontal"
+                              aria-valuemin="0"
+                              aria-valuemax="100"
+                              role="slider"
+                              aria-valuenow="0"
+                              aria-valuetext="Volume 0%"
+                            >
+                              <div
+                                class="jw-slider-volume jw-reset jw-slider-horizontal"
+                                aria-hidden="true"
+                              >
+                                <div class="jw-slider-container jw-reset">
+                                  <div class="jw-rail jw-reset"></div>
+                                  <div class="jw-buffer jw-reset"></div>
+                                  <div
+                                    class="jw-progress jw-reset"
+                                    style="width: 0%"
+                                  ></div>
+                                  <div
+                                    class="jw-knob jw-reset"
+                                    style="left: 0%"
+                                  ></div>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              class="jw-icon jw-icon-inline jw-button-color jw-reset jw-icon-fullscreen jw-fullscreen-ima"
+                              role="button"
+                              tabindex="0"
+                              aria-label="Fullscreen"
+                              style=""
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="jw-svg-icon jw-svg-icon-fullscreen-off"
+                                viewBox="0 0 240 240"
+                                focusable="false"
+                              >
+                                <path
+                                  d="M109.2,134.9l-8.4,50.1c-0.4,2.7-2.4,3.3-4.4,1.4L82,172l-27.9,27.9l-14.2-14.2l27.9-27.9l-14.4-14.4c-1.9-1.9-1.3-3.9,1.4-4.4l50.1-8.4c1.8-0.5,3.6,0.6,4.1,2.4C109.4,133.7,109.4,134.3,109.2,134.9L109.2,134.9z M172.1,82.1L200,54.2L185.8,40l-27.9,27.9l-14.4-14.4c-1.9-1.9-3.9-1.3-4.4,1.4l-8.4,50.1c-0.5,1.8,0.6,3.6,2.4,4.1c0.5,0.2,1.2,0.2,1.7,0l50.1-8.4c2.7-0.4,3.3-2.4,1.4-4.4L172.1,82.1z"
+                                ></path></svg
+                              ><svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="jw-svg-icon jw-svg-icon-fullscreen-on"
+                                viewBox="0 0 240 240"
+                                focusable="false"
+                              >
+                                <path
+                                  d="M96.3,186.1c1.9,1.9,1.3,4-1.4,4.4l-50.6,8.4c-1.8,0.5-3.7-0.6-4.2-2.4c-0.2-0.6-0.2-1.2,0-1.7l8.4-50.6c0.4-2.7,2.4-3.4,4.4-1.4l14.5,14.5l28.2-28.2l14.3,14.3l-28.2,28.2L96.3,186.1z M195.8,39.1l-50.6,8.4c-2.7,0.4-3.4,2.4-1.4,4.4l14.5,14.5l-28.2,28.2l14.3,14.3l28.2-28.2l14.5,14.5c1.9,1.9,4,1.3,4.4-1.4l8.4-50.6c0.5-1.8-0.6-3.6-2.4-4.2C197,39,196.4,39,195.8,39.1L195.8,39.1z"
+                                ></path>
+                              </svg>
+                              <div
+                                class="jw-reset-text jw-tooltip jw-tooltip-undefined"
+                                dir="auto"
+                              >
+                                <div class="jw-text"></div>
+                              </div>
+                            </div>
+                            <span
+                              class="jw-text jw-reset-text jw-text-alt"
+                              role="status"
+                              dir="auto"
+                            ></span>
+                            <div
+                              class="jw-icon jw-icon-inline jw-button-color jw-reset jw-text-live"
+                              role="button"
+                              tabindex="0"
+                              aria-label="Live"
+                              style="display: none"
+                            >
+                              Live
+                            </div>
+                            <div
+                              class="jw-icon jw-icon-inline jw-text jw-reset jw-text-elapsed"
+                              role="timer"
+                            >
+                              01:14
+                            </div>
+                            <div
+                              class="jw-icon jw-icon-inline jw-text jw-reset jw-text-countdown"
+                              role="timer"
+                            >
+                              11:52
+                            </div>
+                            <div
+                              class="jw-icon jw-icon-inline jw-text jw-reset jw-text-duration"
+                              role="timer"
+                            >
+                              13:06
+                            </div>
+                            <div class="jw-reset jw-spacer"></div>
+                            <div
+                              class="jw-icon jw-icon-inline jw-button-color jw-reset jw-icon-cc jw-settings-submenu-button jw-off"
+                              role="button"
+                              tabindex="0"
+                              aria-label="Closed Captions"
+                              aria-controls="jw-jwExperienceDiv_1s32s6wmd2x0-settings-submenu-captions"
+                              aria-expanded="false"
+                              style="display: none"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="jw-svg-icon jw-svg-icon-cc-on"
+                                viewBox="0 0 240 240"
+                                focusable="false"
+                              >
+                                <path
+                                  d="M215,40H25c-2.7,0-5,2.2-5,5v150c0,2.7,2.2,5,5,5h190c2.7,0,5-2.2,5-5V45C220,42.2,217.8,40,215,40z M108.1,137.7c0.7-0.7,1.5-1.5,2.4-2.3l6.6,7.8c-2.2,2.4-5,4.4-8,5.8c-8,3.5-17.3,2.4-24.3-2.9c-3.9-3.6-5.9-8.7-5.5-14v-25.6c0-2.7,0.5-5.3,1.5-7.8c0.9-2.2,2.4-4.3,4.2-5.9c5.7-4.5,13.2-6.2,20.3-4.6c3.3,0.5,6.3,2,8.7,4.3c1.3,1.3,2.5,2.6,3.5,4.2l-7.1,6.9c-2.4-3.7-6.5-5.9-10.9-5.9c-2.4-0.2-4.8,0.7-6.6,2.3c-1.7,1.7-2.5,4.1-2.4,6.5v25.6C90.4,141.7,102,143.5,108.1,137.7z M152.9,137.7c0.7-0.7,1.5-1.5,2.4-2.3l6.6,7.8c-2.2,2.4-5,4.4-8,5.8c-8,3.5-17.3,2.4-24.3-2.9c-3.9-3.6-5.9-8.7-5.5-14v-25.6c0-2.7,0.5-5.3,1.5-7.8c0.9-2.2,2.4-4.3,4.2-5.9c5.7-4.5,13.2-6.2,20.3-4.6c3.3,0.5,6.3,2,8.7,4.3c1.3,1.3,2.5,2.6,3.5,4.2l-7.1,6.9c-2.4-3.7-6.5-5.9-10.9-5.9c-2.4-0.2-4.8,0.7-6.6,2.3c-1.7,1.7-2.5,4.1-2.4,6.5v25.6C135.2,141.7,146.8,143.5,152.9,137.7z"
+                                ></path></svg
+                              ><svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="jw-svg-icon jw-svg-icon-cc-off"
+                                viewBox="0 0 240 240"
+                                focusable="false"
+                              >
+                                <path
+                                  d="M99.4,97.8c-2.4-0.2-4.8,0.7-6.6,2.3c-1.7,1.7-2.5,4.1-2.4,6.5v25.6c0,9.6,11.6,11.4,17.7,5.5c0.7-0.7,1.5-1.5,2.4-2.3l6.6,7.8c-2.2,2.4-5,4.4-8,5.8c-8,3.5-17.3,2.4-24.3-2.9c-3.9-3.6-5.9-8.7-5.5-14v-25.6c0-2.7,0.5-5.3,1.5-7.8c0.9-2.2,2.4-4.3,4.2-5.9c5.7-4.5,13.2-6.2,20.3-4.6c3.3,0.5,6.3,2,8.7,4.3c1.3,1.3,2.5,2.6,3.5,4.2l-7.1,6.9C107.9,100,103.8,97.8,99.4,97.8z M144.1,97.8c-2.4-0.2-4.8,0.7-6.6,2.3c-1.7,1.7-2.5,4.1-2.4,6.5v25.6c0,9.6,11.6,11.4,17.7,5.5c0.7-0.7,1.5-1.5,2.4-2.3l6.6,7.8c-2.2,2.4-5,4.4-8,5.8c-8,3.5-17.3,2.4-24.3-2.9c-3.9-3.6-5.9-8.7-5.5-14v-25.6c0-2.7,0.5-5.3,1.5-7.8c0.9-2.2,2.4-4.3,4.2-5.9c5.7-4.5,13.2-6.2,20.3-4.6c3.3,0.5,6.3,2,8.7,4.3c1.3,1.3,2.5,2.6,3.5,4.2l-7.1,6.9C152.6,100,148.5,97.8,144.1,97.8L144.1,97.8z M200,60v120H40V60H200 M215,40H25c-2.7,0-5,2.2-5,5v150c0,2.7,2.2,5,5,5h190c2.7,0,5-2.2,5-5V45C220,42.2,217.8,40,215,40z"
+                                ></path>
+                              </svg>
+                              <div
+                                class="jw-reset-text jw-tooltip jw-tooltip-captions"
+                                dir="auto"
+                              >
+                                <div class="jw-text"></div>
+                              </div>
+                            </div>
+                            <div
+                              class="jw-icon jw-icon-inline jw-button-color jw-reset jw-related-btn"
+                              button="related"
+                              role="button"
+                              tabindex="0"
+                              aria-label="More Videos"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="jw-svg-icon jw-svg-icon-more-videos"
+                                viewBox="0 0 240 240"
+                                focusable="false"
+                              >
+                                <path
+                                  d="M0,30h60v75H0V30z M0,135h60v75H0V135z M90,135h60v75H90V135z M180,135h60v75h-60V135z M90,30h60v75H90V30z M180,30h60v75h-60V30z"
+                                ></path>
+                              </svg>
+                              <div
+                                class="jw-reset-text jw-tooltip jw-tooltip-related"
+                                dir="auto"
+                              >
+                                <div class="jw-text"></div>
+                              </div>
+                            </div>
+                            <div
+                              class="jw-icon jw-icon-inline jw-button-color jw-reset jw-icon-settings jw-settings-submenu-button"
+                              role="button"
+                              tabindex="0"
+                              aria-label="Settings"
+                              aria-controls="jw-jwExperienceDiv_1s32s6wmd2x0-settings-menu"
+                              aria-expanded="false"
+                              style=""
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="jw-svg-icon jw-svg-icon-settings"
+                                viewBox="0 0 240 240"
+                                focusable="false"
+                              >
+                                <path
+                                  d="M204,145l-25-14c0.8-3.6,1.2-7.3,1-11c0.2-3.7-0.2-7.4-1-11l25-14c2.2-1.6,3.1-4.5,2-7l-16-26c-1.2-2.1-3.8-2.9-6-2l-25,14c-6-4.2-12.3-7.9-19-11V35c0.2-2.6-1.8-4.8-4.4-5c-0.2,0-0.4,0-0.6,0h-30c-2.6-0.2-4.8,1.8-5,4.4c0,0.2,0,0.4,0,0.6v28c-6.7,3.1-13,6.7-19,11L56,60c-2.2-0.9-4.8-0.1-6,2L35,88c-1.6,2.2-1.3,5.3,0.9,6.9c0,0,0.1,0,0.1,0.1l25,14c-0.8,3.6-1.2,7.3-1,11c-0.2,3.7,0.2,7.4,1,11l-25,14c-2.2,1.6-3.1,4.5-2,7l16,26c1.2,2.1,3.8,2.9,6,2l25-14c5.7,4.6,12.2,8.3,19,11v28c-0.2,2.6,1.8,4.8,4.4,5c0.2,0,0.4,0,0.6,0h30c2.6,0.2,4.8-1.8,5-4.4c0-0.2,0-0.4,0-0.6v-28c7-2.3,13.5-6,19-11l25,14c2.5,1.3,5.6,0.4,7-2l15-26C206.7,149.4,206,146.7,204,145z M120,149.9c-16.5,0-30-13.4-30-30s13.4-30,30-30s30,13.4,30,30c0.3,16.3-12.6,29.7-28.9,30C120.7,149.9,120.4,149.9,120,149.9z"
+                                ></path>
+                              </svg>
+                              <div
+                                class="jw-reset-text jw-tooltip jw-tooltip-settings"
+                                dir="auto"
+                              >
+                                <div class="jw-text"></div>
+                              </div>
+                            </div>
+                            <div
+                              class="jw-icon jw-icon-inline jw-button-color jw-reset jw-icon-pip"
+                              role="button"
+                              tabindex="0"
+                              aria-label="Picture in Picture (PiP)"
+                              style=""
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="jw-svg-icon jw-svg-icon-pip-on"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill-rule="evenodd"
+                                  clip-rule="evenodd"
+                                  d="M20 5.125V9.125H22V4.155C22 3.58616 21.5389 3.125 20.97 3.125H2.03C1.46116 3.125 1 3.58613 1 4.155V17.095C1 17.6639 1.46119 18.125 2.03 18.125H12V16.125H3V5.125H20ZM14 11.875C14 11.3227 14.4477 10.875 15 10.875H22C22.5523 10.875 23 11.3227 23 11.875V17.875C23 18.4273 22.5523 18.875 22 18.875H15C14.4477 18.875 14 18.4273 14 17.875V11.875ZM6 12.375L7.79289 10.5821L5.29288 8.0821L6.7071 6.66788L9.20711 9.16789L11 7.375V12.375H6Z"
+                                ></path></svg
+                              ><svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="jw-svg-icon jw-svg-icon-pip-off"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill-rule="evenodd"
+                                  clip-rule="evenodd"
+                                  d="M20 5.75V9.75H22V4.78C22 4.21116 21.5389 3.75 20.97 3.75H2.03C1.46116 3.75 1 4.21113 1 4.78V17.72C1 18.2889 1.46119 18.75 2.03 18.75H12V16.75H3V5.75H20ZM14 13.25C14 12.6977 14.4477 12.25 15 12.25H22C22.5523 12.25 23 12.6977 23 13.25V19.25C23 19.8023 22.5523 20.25 22 20.25H15C14.4477 20.25 14 19.8023 14 19.25V13.25ZM10 9.25L8.20711 11.0429L10.7071 13.5429L9.29289 14.9571L6.79289 12.4571L5 14.25V9.25H10Z"
+                                ></path>
+                              </svg>
+                              <div
+                                class="jw-reset-text jw-tooltip jw-tooltip-pip"
+                                dir="auto"
+                              >
+                                <div class="jw-text"></div>
+                              </div>
+                            </div>
+                            <div
+                              class="jw-icon jw-icon-inline jw-button-color jw-reset jw-icon-fullscreen"
+                              role="button"
+                              tabindex="0"
+                              aria-label="Fullscreen"
+                              style=""
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="jw-svg-icon jw-svg-icon-fullscreen-off"
+                                viewBox="0 0 240 240"
+                                focusable="false"
+                              >
+                                <path
+                                  d="M109.2,134.9l-8.4,50.1c-0.4,2.7-2.4,3.3-4.4,1.4L82,172l-27.9,27.9l-14.2-14.2l27.9-27.9l-14.4-14.4c-1.9-1.9-1.3-3.9,1.4-4.4l50.1-8.4c1.8-0.5,3.6,0.6,4.1,2.4C109.4,133.7,109.4,134.3,109.2,134.9L109.2,134.9z M172.1,82.1L200,54.2L185.8,40l-27.9,27.9l-14.4-14.4c-1.9-1.9-3.9-1.3-4.4,1.4l-8.4,50.1c-0.5,1.8,0.6,3.6,2.4,4.1c0.5,0.2,1.2,0.2,1.7,0l50.1-8.4c2.7-0.4,3.3-2.4,1.4-4.4L172.1,82.1z"
+                                ></path></svg
+                              ><svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="jw-svg-icon jw-svg-icon-fullscreen-on"
+                                viewBox="0 0 240 240"
+                                focusable="false"
+                              >
+                                <path
+                                  d="M96.3,186.1c1.9,1.9,1.3,4-1.4,4.4l-50.6,8.4c-1.8,0.5-3.7-0.6-4.2-2.4c-0.2-0.6-0.2-1.2,0-1.7l8.4-50.6c0.4-2.7,2.4-3.4,4.4-1.4l14.5,14.5l28.2-28.2l14.3,14.3l-28.2,28.2L96.3,186.1z M195.8,39.1l-50.6,8.4c-2.7,0.4-3.4,2.4-1.4,4.4l14.5,14.5l-28.2,28.2l14.3,14.3l28.2-28.2l14.5,14.5c1.9,1.9,4,1.3,4.4-1.4l8.4-50.6c0.5-1.8-0.6-3.6-2.4-4.2C197,39,196.4,39,195.8,39.1L195.8,39.1z"
+                                ></path>
+                              </svg>
+                              <div
+                                class="jw-reset-text jw-tooltip jw-tooltip-fullscreen"
+                                dir="auto"
+                              >
+                                <div class="jw-text"></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="afs_ads ad-placement"
+                      style="
+                        width: 1px;
+                        height: 1px;
+                        position: absolute;
+                        background: transparent;
+                      "
+                    >
+                      &nbsp;
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="aspect-video w-full"></div>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-col gap-2">
+          <div class="flex justify-center gap-4">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
+              <mask
+                id="mask0_2495_4451"
+                maskUnits="userSpaceOnUse"
+                x="0"
+                y="0"
+                width="16"
+                height="16"
+                style="mask-type: alpha"
+              >
+                <rect
+                  x="0.5"
+                  y="0.000610352"
+                  width="16"
+                  height="16"
+                  fill="var(--border-default)"
+                ></rect>
+              </mask>
+              <g mask="url(#mask0_2495_4451)">
+                <path
+                  d="M8.50005 14.0005L4.26929 9.76972L4.72825 9.31074L8.16672 12.7454V1.98767H8.83339V12.7325L12.2719 9.29407L12.7308 9.76972L8.50005 14.0005Z"
+                  fill="var(--text-subtle)"
+                ></path>
+              </g></svg
+            ><span class="font-body-sm text-subtle">STORY CONTINUES BELOW</span
+            ><svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
+              <mask
+                id="mask0_2495_4451"
+                maskUnits="userSpaceOnUse"
+                x="0"
+                y="0"
+                width="16"
+                height="16"
+                style="mask-type: alpha"
+              >
+                <rect
+                  x="0.5"
+                  y="0.000610352"
+                  width="16"
+                  height="16"
+                  fill="var(--border-default)"
+                ></rect>
+              </mask>
+              <g mask="url(#mask0_2495_4451)">
+                <path
+                  d="M8.50005 14.0005L4.26929 9.76972L4.72825 9.31074L8.16672 12.7454V1.98767H8.83339V12.7325L12.2719 9.29407L12.7308 9.76972L8.50005 14.0005Z"
+                  fill="var(--text-subtle)"
+                ></path>
+              </g>
+            </svg>
+          </div>
+          <div
+            data-module-name="newsletter-article-sign-up-module"
+            data-module-version="1.0.0"
+            data-module-instance="default"
+            class="border p-6 md:p-10 lg:p-6"
+          >
+            <span class="text-default font-headline-xs font-medium text-strong"
+              >Don't miss another story.</span
+            ><span class="block font-headline-3xs font-normal text-strong"
+              >Subscribe to the State of Crypto Newsletter today.
+              <a class="font-medium" href="/newsletters"
+                >See all newsletters</a
+              ></span
+            >
+            <div
+              class="flex flex-col md:flex-row gap-4 justify-start items-center pt-2"
+            >
+              <div
+                class="group flex flex-col data-[hidden=true]:hidden w-full relative justify-end data-[has-label=true]:mt-[calc(theme(fontSize.small)_+_10px)]"
+                data-slot="base"
+                data-filled="true"
+                data-filled-within="true"
+              >
+                <div data-slot="main-wrapper" class="h-full flex flex-col">
+                  <div
+                    data-slot="input-wrapper"
+                    class="relative w-full inline-flex tap-highlight-transparent flex-row items-center shadow-sm px-3 gap-3 data-[hover=true]:border-default-400 group-data-[focus=true]:border-default-foreground min-h-10 transition-background !duration-150 transition-colors motion-reduce:transition-none h-12 text-subtle rounded border border-default bg-surface-subtle"
+                    style="cursor: text"
+                  >
+                    <div
+                      data-slot="inner-wrapper"
+                      class="inline-flex w-full items-center h-full box-border"
+                    >
+                      <input
+                        data-slot="input"
+                        data-type="email"
+                        class="w-full font-normal bg-transparent !outline-none focus-visible:outline-none data-[has-start-content=true]:ps-1.5 data-[has-end-content=true]:pe-1.5 file:cursor-pointer file:bg-transparent file:border-0 autofill:bg-transparent bg-clip-text text-small focus:outline-none !font-label text-default focus:ring-0 decoration-subtle placeholder:text-subtle"
+                        aria-label="Enter your Email"
+                        placeholder="Enter your Email"
+                        tabindex="0"
+                        id="react-aria6324542892-_r_e_"
+                        type="email"
+                        value=""
+                        title=""
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                data-react-aria-pressable="true"
+                class="z-0 group relative inline-flex items-center justify-center box-border appearance-none select-none whitespace-nowrap font-normal subpixel-antialiased overflow-hidden tap-highlight-transparent data-[pressed=true]:scale-[0.97] outline-none data-[focus-visible=true]:z-10 data-[focus-visible=true]:outline-2 data-[focus-visible=true]:outline-focus data-[focus-visible=true]:outline-offset-2 px-6 min-w-24 h-12 text-medium gap-3 rounded-large opacity-disabled pointer-events-none [&amp;&gt;svg]:max-w-[theme(spacing.8)] transition-transform-colors-opacity motion-reduce:transition-none text-default-foreground data-[hover=true]:opacity-hover w-full md:w-auto bg-surface-brand-fixed"
+                data-disabled="true"
+                disabled=""
+              >
+                <div class="flex gap-2 p-4 pl-6 items-center">
+                  <span class="font-label font-medium">Sign me up</span
+                  ><svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                  >
+                    <mask
+                      id="mask0_2411_93"
+                      maskUnits="userSpaceOnUse"
+                      x="0"
+                      y="0"
+                      width="16"
+                      height="16"
+                      style="mask-type: alpha"
+                    >
+                      <rect
+                        x="0.5"
+                        y="0.50061"
+                        width="16"
+                        height="16"
+                        fill="var(--text-black-fixed)"
+                      ></rect>
+                    </mask>
+                    <g mask="url(#mask0_2411_93)">
+                      <path
+                        d="M3.16669 12.834V4.1673L13.4487 8.50063L3.16669 12.834ZM3.83335 11.834L11.7334 8.50063L3.83335 5.1673V7.75696L7.06419 8.50063L3.83335 9.2443V11.834Z"
+                        fill="var(--text-black-fixed)"
+                      ></path>
+                    </g>
+                  </svg>
+                </div>
+              </button>
+            </div>
+            <span class="block font-metadata text-subtle pt-4"
+              ><span
+                >By signing up, you will receive emails about CoinDesk products
+                and you agree to our </span
+              ><a
+                class="border-b-[1px] border-strong !no-underline"
+                href="/terms"
+                ><span>terms &amp; conditions</span></a
+              ><span> and </span
+              ><a
+                class="border-b-[1px] border-strong !no-underline"
+                href="/privacy"
+                ><span>privacy policy</span></a
+              ><span class="font-metadata text-subtle">.</span></span
+            >
+          </div>
+        </div>
+        <p>
+          It argued that it is for the government to determine whether these new
+          products or services should be brought under the regulatory purview,
+          while warning that some entities may actively look to remain
+          unlicensed, adding to the "perceived regulatory uncertainty."
+        </p>
+        <p>
+          This behavior of some firms mandates that ASIC remains focused on
+          watching regulatory boundaries and keeping licensing rules clear in
+          2026, the regulator said.
+        </p>
+        <p>
+          ASIC's warning comes weeks after Australia introduced amends to the
+          Corporations Act 2001 and Australian Securities and Investments
+          Commission Act 2001 to carve out rules for companies handling
+          customers' digital assets.
+        </p>
+        <p></p>
+      </div>
+    </div>
+    <div
+      data-module-name="article-tags"
+      data-module-version="1.0.0"
+      data-module-instance="default"
+      class="article-content-wrapper"
+    >
+      <div class="flex gap-2 flex-wrap mb-4">
+        <a
+          class="px-4 py-2 rounded border border-strong hover:bg-surface-subtle focus:border-default font-metadata text-xs text-subtle hover:text-strong focus:text-strong leading-4 tracking-wide transition-background whitespace-nowrap capitalize max-w-[38ch] inline-block overflow-hidden text-ellipsis"
+          href="/tag/australia"
+          >Australia</a
+        >
+      </div>
+    </div>
+    <div class="article-content-wrapper mt-4">
+      <div class="font-sans text-xs leading-4 text-subtle">
+        <span class=""
+          >AI Disclaimer: Parts of this article were generated with the
+          assistance from AI tools and reviewed by our editorial team to ensure
+          accuracy and adherence to </span
+        ><a
+          rel="noopener noreferrer"
+          class="text-subtle underline"
+          href="/ethics"
+          >our standards</a
+        >. <span class="">For more information, see </span
+        ><a
+          rel="noopener noreferrer"
+          class="text-subtle underline"
+          href="/coindesk-news/2023/04/14/how-coindesk-will-use-generative-ai-tools"
+          >CoinDesk's full AI Policy</a
+        >.
+      </div>
+    </div>
+    <div
+      data-module-name="promotional-article"
+      data-module-version="1.0.0"
+      data-module-instance="default"
+      class="article-content-wrapper relative mt-8 border-t border-strong pt-8 pb-3"
+    >
+      <p
+        class="absolute top-[-17px] left-[30%] md:left-[38%] font-sans font-title bg-surface-default px-5"
+      >
+        More For You
+      </p>
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-2">
+          <p class="font-headline font-medium">
+            Pudgy Penguins: A New Blueprint for Tokenized Culture
+          </p>
+          <div class="flex flex-col sm:flex-row sm:items-center gap-2 py-3">
+            <div class="font-metadata-lg font-normal">
+              By
+              <a
+                class="underline underline-offset-2 decoration-1"
+                href="/author/coindesk-research"
+                >CoinDesk Research</a
+              >
+            </div>
+            <div class="font-sans text-subtle font-metadata-lg font-normal">
+              Dec 30, 2025
+            </div>
+          </div>
+          <div
+            class="rounded-md p-2 pr-4 inline-flex gap-2 items-center font-metadata border w-fit h-10 border-default"
+          >
+            <img
+              alt="  logo"
+              loading="lazy"
+              width="96"
+              height="32"
+              decoding="async"
+              data-nimg="1"
+              class="w-auto h-[25px]"
+              srcset="
+                /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F1c2877d64123b41371d79a5d858332ed7b973a95-400x225.png%3Fw%3D192%26h%3D64&amp;w=96&amp;q=75  1x,
+                /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F1c2877d64123b41371d79a5d858332ed7b973a95-400x225.png%3Fw%3D192%26h%3D64&amp;w=256&amp;q=75 2x
+              "
+              src="/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F1c2877d64123b41371d79a5d858332ed7b973a95-400x225.png%3Fw%3D192%26h%3D64&amp;w=256&amp;q=75"
+              style="color: transparent"
+            />
+            <div>
+              <span class="inline-block mr-1">Commissioned by</span
+              ><a
+                class="font-medium hover:underline"
+                target="_blank"
+                href="https://pudgypenguins.com/"
+                >Pudgy Penguins</a
+              >
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-col">
+          <figure class="pb-6">
+            <img
+              alt="Pudgy Title Image"
+              loading="lazy"
+              width="1920"
+              height="1080"
+              decoding="async"
+              data-nimg="1"
+              class="rounded-md aspect-video object-cover"
+              srcset="
+                /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fc4ff6544bb25319209f48c843c05145cb5a0d216-1920x1080.png%3Fauto%3Dformat&amp;w=1920&amp;q=75 1x,
+                /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fc4ff6544bb25319209f48c843c05145cb5a0d216-1920x1080.png%3Fauto%3Dformat&amp;w=3840&amp;q=75 2x
+              "
+              src="/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fc4ff6544bb25319209f48c843c05145cb5a0d216-1920x1080.png%3Fauto%3Dformat&amp;w=3840&amp;q=75"
+              style="color: transparent"
+            />
+          </figure>
+          <p class="font-body text-strong pb-6">
+            Pudgy Penguins is building a multi-vertical consumer IP platform —
+            combining phygital products, games, NFTs and PENGU to monetize
+            culture at scale.
+          </p>
+          <div class="pb-6">
+            <p class="flex font-sans font-title text-strong">What to know:</p>
+            <div
+              class="document-body font-body-lg font-body [&amp;_ol_li::before]:text-medium [&amp;_ol_li::before]:leading-9 [&amp;_ol_li::before]:content-[counter(ol-counter)]"
+            >
+              <p>
+                Pudgy Penguins is emerging as one of the strongest NFT-native
+                brands of this cycle, shifting from speculative “digital luxury
+                goods” into a multi-vertical consumer IP platform. Its strategy
+                is to acquire users through mainstream channels first; toys,
+                retail partnerships and viral media, then onboard them into Web3
+                through games, NFTs and the PENGU token.
+              </p>
+              <p>
+                The ecosystem now spans phygital products (&gt; $13M retail
+                sales and &gt;1M units sold), games and experiences (Pudgy Party
+                surpassed 500k downloads in two weeks), and a widely distributed
+                token (airdropped to 6M+ wallets). While the market is currently
+                pricing Pudgy at a premium relative to traditional IP peers,
+                sustained success depends on execution across retail expansion,
+                gaming adoption and deeper token utility.
+              </p>
+            </div>
+          </div>
+          <div class="w-full flex justify-center">
+            <a
+              class="flex justify-center items-center font-medium py-2 pl-4 pr-[9px] border border-strong-alt hover:bg-surface-subtle focus:border-default font-sans text-xs text-default hover:text-strong focus:text-strong leading-4 tracking-wide transition-all whitespace-nowrap capitalize w-auto inline-block overflow-hidden text-ellipsis"
+              href="/research/pudgy-penguins-a-new-blueprint-for-tokenized-culture"
+              >View Full Report<svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="21"
+                height="21"
+                viewBox="0 0 21 21"
+                fill="none"
+              >
+                <mask
+                  id="mask0_2473_9121"
+                  maskUnits="userSpaceOnUse"
+                  x="0"
+                  y="0"
+                  width="21"
+                  height="21"
+                  style="mask-type: alpha"
+                >
+                  <rect
+                    x="0.5"
+                    y="0.500366"
+                    width="20"
+                    height="20"
+                    fill="var(--border-default)"
+                  ></rect>
+                </mask>
+                <g mask="url(#mask0_2473_9121)">
+                  <path
+                    d="M12.0385 15.2119L11.1602 14.3081L14.3429 11.1254H4.25V9.8754H14.3429L11.1602 6.69269L12.0385 5.78894L16.75 10.5004L12.0385 15.2119Z"
+                    fill="var(--text-default)"
+                  ></path>
+                </g></svg
+            ></a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      data-module-name="read-next"
+      data-module-version="1.0.0"
+      data-module-instance="default"
+      class="article-content-wrapper relative mt-8 border-t border-strong pt-8 pb-3"
+    >
+      <p
+        class="absolute top-[-17px] left-[30%] md:left-[38%] font-sans font-title bg-surface-default px-5"
+      ></p>
+      <div class="flex flex-col">
+        <p class="font-headline font-medium">
+          WH advisor Patrick Witt: Davos 2026 was ‘turning point’ for global
+          crypto normalization
+        </p>
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2 py-3">
+          <div class="font-metadata-lg font-normal">
+            By
+            <a
+              class="underline underline-offset-2 decoration-1"
+              href="/author/sam-ewen"
+              >Sam Ewen</a
+            >,
+            <a
+              class="underline underline-offset-2 decoration-1"
+              href="/author/ai-boost"
+              >AI Boost</a
+            ><span class="mx-1">|</span><span>Edited by </span
+            ><a
+              class="underline underline-offset-2 decoration-1"
+              href="/author/jennifer-sanasie"
+              >Jennifer Sanasie</a
+            >
+          </div>
+          <div class="font-sans text-subtle font-metadata-lg font-normal">
+            1 hour ago
+          </div>
+        </div>
+        <figure class="pb-6">
+          <img
+            alt="Executive Director Patrick Witt, White House Crypto Advisor"
+            loading="lazy"
+            width="1920"
+            height="1080"
+            decoding="async"
+            data-nimg="1"
+            class="rounded-md aspect-video object-cover"
+            srcset="
+              /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F9d7d242bbbdd0ec9195c2dca098f326232b1667e-1386x772.png%3Fauto%3Dformat&amp;w=1920&amp;q=75 1x,
+              /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F9d7d242bbbdd0ec9195c2dca098f326232b1667e-1386x772.png%3Fauto%3Dformat&amp;w=3840&amp;q=75 2x
+            "
+            src="/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F9d7d242bbbdd0ec9195c2dca098f326232b1667e-1386x772.png%3Fauto%3Dformat&amp;w=3840&amp;q=75"
+            style="color: transparent"
+          />
+        </figure>
+        <p class="font-body text-strong pb-6">
+          White House crypto advisor Patrick Witt said stablecoins are the
+          “gateway drug” for global finance and that Washington is racing to
+          deliver regulatory clarity.
+        </p>
+        <div class="pb-6">
+          <p class="flex font-sans font-title text-strong">What to know:</p>
+          <div
+            class="document-body font-body-lg font-body [&amp;_ol_li::before]:text-medium [&amp;_ol_li::before]:leading-9 [&amp;_ol_li::before]:content-[counter(ol-counter)]"
+          >
+            <p>
+              <strong>The Context:</strong> The Executive Director of the
+              President’s Council for Advisors for Digital Assets sat down for
+              an interview with CoinDesk where he said the recent World Economic
+              Forum in Davos served as a stage for the Trump administration to
+              signal its commitment to normalizing digital assets as a permanent
+              asset class. He said:
+            </p>
+            <ul class="unordered-list">
+              <li>
+                The administration aims to strike a balance between traditional
+                financial incumbents and new crypto entrants through a
+                "symbiosis" where they can coexist and compete.
+              </li>
+              <li>
+                Consumers benefit from this competition, positioning the current
+                administration as firmly on the side of technological
+                innovation.
+              </li>
+              <li>
+                The President renewed a pledge at the event to establish the
+                United States as the undisputed "crypto capital of the world".
+              </li>
+            </ul>
+            <p></p>
+            <p>
+              <strong>Latest Developments:</strong> Regulatory movement is
+              accelerating in Washington with key committee markups scheduled
+              for major digital asset legislation.
+            </p>
+            <ul class="unordered-list">
+              <li>
+                The Senate Agriculture Committee is set to mark up its portion
+                of the market structure bill on Thursday, January 29th at 10:30
+                AM.
+              </li>
+              <li>
+                The Senate Banking Committee has postponed its markup, requiring
+                further mediation on issues like stablecoin rewards and ethics.
+              </li>
+              <li>
+                Witt expressed confidence that despite these delays, the
+                legislation will eventually be reconciled and brought to the
+                Senate floor.
+              </li>
+            </ul>
+            <p></p>
+            <p>
+              <strong>Reading Between the Lines:</strong> Stablecoins are acting
+              as a "gateway drug" for global business leaders who are beginning
+              to grasp the technology's potential—and its threat.
+            </p>
+            <ul class="unordered-list">
+              <li>
+                Witt observed a cycle where traditional players move from a lack
+                of understanding to fear, and finally to incorporating crypto
+                into their own product offerings.
+              </li>
+              <li>
+                While some Senate Republicans worry about stablecoins causing
+                deposit flight from community banks, Witt believes a "smooth
+                glide path" into these future technologies is possible with
+                patience and cooperation.
+              </li>
+              <li>
+                “Consumers win when there’s choice,” he said, while also
+                acknowledging concerns from Senate Republicans about community
+                banks and financial stability. The administration, he suggested,
+                sees convergence between crypto and traditional finance as
+                inevitable but wants the transition to be smooth rather than
+                destabilizing to all parties.
+              </li>
+              <li>
+                U.S. regulators intend to lead the global regulatory
+                conversation, even if the domestic legislative process results
+                in imperfect "directionally accurate" rules.
+              </li>
+            </ul>
+            <p></p>
+            <p>
+              <strong>What Comes Next:</strong> Once the primary market
+              structure bill passes, the administration plans to pivot toward a
+              major crypto tax package.
+            </p>
+            <ul class="unordered-list">
+              <li>
+                Witt suggested there is still a window of opportunity to pass
+                additional digital asset legislation this year before midterms
+                dominate the congressional calendar.
+              </li>
+              <li>
+                The administration is also monitoring "developing situations"
+                regarding digital assets potentially seized in national security
+                actions abroad, such as in Venezuela.
+              </li>
+              <li>
+                Finally, Witt declined to specifically comment on speculation
+                that Venezuelan enforcement actions may have involved seized
+                digital assets, citing national security sensitivities and an
+                evolving situation, but did add, “There’s a number of folks in
+                the national security apparatus engaged,” in regards to how the
+                Maduro regime was financed.
+              </li>
+            </ul>
+            <p></p>
+            <p><br /></p>
+          </div>
+        </div>
+        <div class="w-full flex justify-center">
+          <a
+            class="flex justify-center items-center font-medium text-strong py-2 pl-4 pr-[9px] border border-strong-alt hover:bg-surface-subtle focus:border-default font-sans text-xs text-default hover:text-strong focus:text-strong leading-4 tracking-wide transition-all whitespace-nowrap capitalize w-auto inline-block overflow-hidden text-ellipsis"
+            href="/policy/2026/01/27/white-house-advisor-davos-2026-was-turning-point-for-global-crypto-normalization"
+            >Read full story<svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="21"
+              height="21"
+              viewBox="0 0 21 21"
+              fill="none"
+            >
+              <mask
+                id="mask0_2473_9121"
+                maskUnits="userSpaceOnUse"
+                x="0"
+                y="0"
+                width="21"
+                height="21"
+                style="mask-type: alpha"
+              >
+                <rect
+                  x="0.5"
+                  y="0.500366"
+                  width="20"
+                  height="20"
+                  fill="var(--border-default)"
+                ></rect>
+              </mask>
+              <g mask="url(#mask0_2473_9121)">
+                <path
+                  d="M12.0385 15.2119L11.1602 14.3081L14.3429 11.1254H4.25V9.8754H14.3429L11.1602 6.69269L12.0385 5.78894L16.75 10.5004L12.0385 15.2119Z"
+                  fill="var(--text-default)"
+                ></path>
+              </g></svg
+          ></a>
+        </div>
+      </div>
+    </div>
+    <div
+      class="article-content-wrapper"
+      style="content-visibility: auto; contain-intrinsic-size: 0px 200px"
+    >
+      <div class="article-content-wrapper mt-4">
+        <div
+          data-module-name="article-latest-news"
+          data-module-version="1.0.0"
+          data-module-instance="default"
+          data-module-position="article-latest-news"
+        >
+          <div class="border-t border-strong py-6">
+            <div class="pb-3">
+              <a
+                class="inline-flex items-center gap-1 font-title text-default hover:underline"
+                href="/latest-crypto-news"
+                >Latest Crypto News
+                <svg
+                  class="w-[24px] h-[24px] p-0.5"
+                  fill="none"
+                  height="24"
+                  viewBox="0 0 25 24"
+                  width="25"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M5.5 13H16.67L11.79 17.88C11.4 18.27 11.4 18.91 11.79 19.3C12.18 19.69 12.81 19.69 13.2 19.3L19.79 12.71C20.18 12.32 20.18 11.69 19.79 11.3L13.21 4.69997C12.82 4.30997 12.19 4.30997 11.8 4.69997C11.41 5.08997 11.41 5.71997 11.8 6.10997L16.67 11H5.5C4.95 11 4.5 11.45 4.5 12C4.5 12.55 4.95 13 5.5 13Z"
+                    fill="var(--text-default)"
+                  ></path></svg
+              ></a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+              <div class="h-full pb-4 mdmax:border-b-1 mdmax:last:border-none">
+                <a
+                  class="flex flex-row-reverse gap-2 md:flex-col h-full"
+                  href="/news-analysis/2026/01/27/rick-rieder-a-rising-favorite-for-trump-s-fed-chair-pick-sees-bitcoin-as-new-gold"
+                  ><picture
+                    ><source
+                      media="(min-width: 728px)"
+                      sizes="100vw"
+                      srcset="
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fce4286f6b99438c769a267a5dc9782f33bab2e7b-1920x1080.jpg%3Fauto%3Dformat&amp;w=640&amp;q=65   640w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fce4286f6b99438c769a267a5dc9782f33bab2e7b-1920x1080.jpg%3Fauto%3Dformat&amp;w=750&amp;q=65   750w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fce4286f6b99438c769a267a5dc9782f33bab2e7b-1920x1080.jpg%3Fauto%3Dformat&amp;w=828&amp;q=65   828w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fce4286f6b99438c769a267a5dc9782f33bab2e7b-1920x1080.jpg%3Fauto%3Dformat&amp;w=1080&amp;q=65 1080w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fce4286f6b99438c769a267a5dc9782f33bab2e7b-1920x1080.jpg%3Fauto%3Dformat&amp;w=1200&amp;q=65 1200w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fce4286f6b99438c769a267a5dc9782f33bab2e7b-1920x1080.jpg%3Fauto%3Dformat&amp;w=1920&amp;q=65 1920w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fce4286f6b99438c769a267a5dc9782f33bab2e7b-1920x1080.jpg%3Fauto%3Dformat&amp;w=2048&amp;q=65 2048w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fce4286f6b99438c769a267a5dc9782f33bab2e7b-1920x1080.jpg%3Fauto%3Dformat&amp;w=3840&amp;q=65 3840w
+                      " />
+                    <img
+                      alt="Rick Rieder of BlackRock (Cindy Ord/Getty Images for Yahoo)"
+                      class="min-w-[80px] max-w-[80px] h-[80px] md:max-w-none md:w-full md:h-auto rounded-md md:aspect-video object-cover"
+                      loading="lazy"
+                      decoding="async"
+                      srcset="
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fa13d1234a09f4f83d3c9270c7df6cdcf070d4550-1080x1080.jpg%3Fauto%3Dformat&amp;w=640&amp;q=65   640w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fa13d1234a09f4f83d3c9270c7df6cdcf070d4550-1080x1080.jpg%3Fauto%3Dformat&amp;w=750&amp;q=65   750w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fa13d1234a09f4f83d3c9270c7df6cdcf070d4550-1080x1080.jpg%3Fauto%3Dformat&amp;w=828&amp;q=65   828w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fa13d1234a09f4f83d3c9270c7df6cdcf070d4550-1080x1080.jpg%3Fauto%3Dformat&amp;w=1080&amp;q=65 1080w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fa13d1234a09f4f83d3c9270c7df6cdcf070d4550-1080x1080.jpg%3Fauto%3Dformat&amp;w=1200&amp;q=65 1200w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fa13d1234a09f4f83d3c9270c7df6cdcf070d4550-1080x1080.jpg%3Fauto%3Dformat&amp;w=1920&amp;q=65 1920w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fa13d1234a09f4f83d3c9270c7df6cdcf070d4550-1080x1080.jpg%3Fauto%3Dformat&amp;w=2048&amp;q=65 2048w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fa13d1234a09f4f83d3c9270c7df6cdcf070d4550-1080x1080.jpg%3Fauto%3Dformat&amp;w=3840&amp;q=65 3840w
+                      "
+                  /></picture>
+                  <div class="w-full h-full flex flex-col">
+                    <h4
+                      class="font-headline-2xs font-medium hover:underline mb-2"
+                    >
+                      Rick Rieder, a rising favorite for Trump's Fed chair pick,
+                      sees bitcoin as new gold
+                    </h4>
+                    <span class="font-metadata text-subtle"
+                      >43 minutes ago</span
+                    >
+                  </div></a
+                >
+              </div>
+              <div class="h-full pb-4 mdmax:border-b-1 mdmax:last:border-none">
+                <a
+                  class="flex flex-row-reverse gap-2 md:flex-col h-full"
+                  href="/markets/2026/01/27/hype-token-surges-24-as-silver-futures-volume-soars-on-hyperliquid-exchange"
+                  ><img
+                    alt="CoinDesk"
+                    loading="lazy"
+                    width="416"
+                    height="234"
+                    decoding="async"
+                    data-nimg="1"
+                    class="w-[80px] h-[80px] md:w-full md:h-auto rounded-md aspect-video object-cover mb-2"
+                    srcset="
+                      /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F5a80f6b3272277beda18c9e034c05d9867bd7db2-7993x5128.jpg%3Fauto%3Dformat&amp;w=640&amp;q=75  1x,
+                      /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F5a80f6b3272277beda18c9e034c05d9867bd7db2-7993x5128.jpg%3Fauto%3Dformat&amp;w=1080&amp;q=75 2x
+                    "
+                    src="/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F5a80f6b3272277beda18c9e034c05d9867bd7db2-7993x5128.jpg%3Fauto%3Dformat&amp;w=1080&amp;q=75"
+                    style="color: transparent"
+                  />
+                  <div class="w-full h-full flex flex-col">
+                    <h4
+                      class="font-headline-2xs font-medium hover:underline mb-2"
+                    >
+                      HYPE token surges 24% as silver futures volume soars on
+                      Hyperliquid exchange
+                    </h4>
+                    <span class="font-metadata text-subtle">1 hour ago</span>
+                  </div></a
+                >
+              </div>
+              <div class="h-full pb-4 mdmax:border-b-1 mdmax:last:border-none">
+                <a
+                  class="flex flex-row-reverse gap-2 md:flex-col h-full"
+                  href="/policy/2026/01/27/white-house-advisor-davos-2026-was-turning-point-for-global-crypto-normalization"
+                  ><img
+                    alt="Executive Director Patrick Witt, White House Crypto Advisor"
+                    loading="lazy"
+                    width="416"
+                    height="234"
+                    decoding="async"
+                    data-nimg="1"
+                    class="w-[80px] h-[80px] md:w-full md:h-auto rounded-md aspect-video object-cover mb-2"
+                    srcset="
+                      /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F9d7d242bbbdd0ec9195c2dca098f326232b1667e-1386x772.png%3Fauto%3Dformat&amp;w=640&amp;q=75  1x,
+                      /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F9d7d242bbbdd0ec9195c2dca098f326232b1667e-1386x772.png%3Fauto%3Dformat&amp;w=1080&amp;q=75 2x
+                    "
+                    src="/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F9d7d242bbbdd0ec9195c2dca098f326232b1667e-1386x772.png%3Fauto%3Dformat&amp;w=1080&amp;q=75"
+                    style="color: transparent"
+                  />
+                  <div class="w-full h-full flex flex-col">
+                    <h4
+                      class="font-headline-2xs font-medium hover:underline mb-2"
+                    >
+                      WH advisor Patrick Witt: Davos 2026 was ‘turning point’
+                      for global crypto normalization
+                    </h4>
+                    <span class="font-metadata text-subtle">1 hour ago</span>
+                  </div></a
+                >
+              </div>
+              <div class="h-full pb-4 mdmax:border-b-1 mdmax:last:border-none">
+                <a
+                  class="flex flex-row-reverse gap-2 md:flex-col h-full"
+                  href="/business/2026/01/27/standard-chartered-says-u-s-regional-banks-most-at-risk-in-usd500-billion-stablecoin-shift"
+                  ><img
+                    alt="Stablecoin networks (Unsplash, modified by CoinDesk)"
+                    loading="lazy"
+                    width="416"
+                    height="234"
+                    decoding="async"
+                    data-nimg="1"
+                    class="w-[80px] h-[80px] md:w-full md:h-auto rounded-md aspect-video object-cover mb-2"
+                    srcset="
+                      /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F8917180f34ea9b0c2901371bca93bb3421ba3f36-1920x1080.jpg%3Fauto%3Dformat&amp;w=640&amp;q=75  1x,
+                      /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F8917180f34ea9b0c2901371bca93bb3421ba3f36-1920x1080.jpg%3Fauto%3Dformat&amp;w=1080&amp;q=75 2x
+                    "
+                    src="/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F8917180f34ea9b0c2901371bca93bb3421ba3f36-1920x1080.jpg%3Fauto%3Dformat&amp;w=1080&amp;q=75"
+                    style="color: transparent"
+                  />
+                  <div class="w-full h-full flex flex-col">
+                    <h4
+                      class="font-headline-2xs font-medium hover:underline mb-2"
+                    >
+                      Standard Chartered says U.S. regional banks most at risk
+                      in $500 billion stablecoin shift
+                    </h4>
+                    <span class="font-metadata text-subtle">1 hour ago</span>
+                  </div></a
+                >
+              </div>
+              <div class="h-full pb-4 mdmax:border-b-1 mdmax:last:border-none">
+                <a
+                  class="flex flex-row-reverse gap-2 md:flex-col h-full"
+                  href="/coindesk-indices/2026/01/27/coindesk-20-performance-update-bitcoin-cash-bch-gains-2-while-index-declines"
+                  ><img
+                    alt="CoinDesk"
+                    loading="lazy"
+                    width="416"
+                    height="234"
+                    decoding="async"
+                    data-nimg="1"
+                    class="w-[80px] h-[80px] md:w-full md:h-auto rounded-md aspect-video object-cover mb-2"
+                    srcset="
+                      /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fc0d143006c07e07d0b4d00e1c51c12f487f35d93-480x360.png%3Fauto%3Dformat&amp;w=640&amp;q=75  1x,
+                      /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fc0d143006c07e07d0b4d00e1c51c12f487f35d93-480x360.png%3Fauto%3Dformat&amp;w=1080&amp;q=75 2x
+                    "
+                    src="/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fc0d143006c07e07d0b4d00e1c51c12f487f35d93-480x360.png%3Fauto%3Dformat&amp;w=1080&amp;q=75"
+                    style="color: transparent"
+                  />
+                  <div class="w-full h-full flex flex-col">
+                    <h4
+                      class="font-headline-2xs font-medium hover:underline mb-2"
+                    >
+                      CoinDesk 20 Performance Update: Bitcoin Cash (BCH) Gains
+                      2% While Index Declines
+                    </h4>
+                    <span class="font-metadata text-subtle">1 hour ago</span>
+                  </div></a
+                >
+              </div>
+              <div class="h-full pb-4 mdmax:border-b-1 mdmax:last:border-none">
+                <a
+                  class="flex flex-row-reverse gap-2 md:flex-col h-full"
+                  href="/business/2026/01/27/privacy-focused-miden-korea-digital-asset-agree-to-build-crypto-infrastructure-for-institutional-adoption"
+                  ><img
+                    alt="South Korea (Photo by Daniel Bernard on Unsplash/Modified by CoinDesk)"
+                    loading="lazy"
+                    width="416"
+                    height="234"
+                    decoding="async"
+                    data-nimg="1"
+                    class="w-[80px] h-[80px] md:w-full md:h-auto rounded-md aspect-video object-cover mb-2"
+                    srcset="
+                      /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fa67b233975ce2aa1fe5f0f08988cc6ba7796bb0c-1920x1080.jpg%3Fauto%3Dformat&amp;w=640&amp;q=75  1x,
+                      /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fa67b233975ce2aa1fe5f0f08988cc6ba7796bb0c-1920x1080.jpg%3Fauto%3Dformat&amp;w=1080&amp;q=75 2x
+                    "
+                    src="/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fa67b233975ce2aa1fe5f0f08988cc6ba7796bb0c-1920x1080.jpg%3Fauto%3Dformat&amp;w=1080&amp;q=75"
+                    style="color: transparent"
+                  />
+                  <div class="w-full h-full flex flex-col">
+                    <h4
+                      class="font-headline-2xs font-medium hover:underline mb-2"
+                    >
+                      Privacy-focused Miden, Korea Digital Asset agree to build
+                      crypto infrastructure for institutional adoption
+                    </h4>
+                    <span class="font-metadata text-subtle">1 hour ago</span>
+                  </div></a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          data-module-name="article-latest-news"
+          data-module-version="1.0.0"
+          data-module-instance="default"
+          data-module-position="article-latest-news"
+        >
+          <div class="border-t border-strong py-6">
+            <div class="pb-6 font-title text-default">Top Stories</div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+              <div class="h-full pb-4 mdmax:border-b-1 mdmax:last:border-none">
+                <a
+                  class="flex flex-row-reverse gap-2 md:flex-col h-full"
+                  href="/business/2026/01/27/tether-debuts-federally-regulated-usat-stablecoin-via-anchorage-digital"
+                  ><img
+                    alt="Tether CEO Paolo Ardoino at White House"
+                    loading="lazy"
+                    width="1000"
+                    height="1000"
+                    decoding="async"
+                    data-nimg="1"
+                    class="w-[80px] h-[80px] md:w-full md:h-auto rounded-md aspect-video object-cover mb-2"
+                    srcset="
+                      /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F0cd75863c809a717caa362db065f5858a1ed55ca-1919x1080.jpg%3Fauto%3Dformat&amp;w=1080&amp;q=75 1x,
+                      /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F0cd75863c809a717caa362db065f5858a1ed55ca-1919x1080.jpg%3Fauto%3Dformat&amp;w=2048&amp;q=75 2x
+                    "
+                    src="/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F0cd75863c809a717caa362db065f5858a1ed55ca-1919x1080.jpg%3Fauto%3Dformat&amp;w=2048&amp;q=75"
+                    style="color: transparent"
+                  />
+                  <div class="w-full h-full flex flex-col">
+                    <h4
+                      class="font-headline-2xs font-medium hover:underline mb-2"
+                    >
+                      Tether takes the fight to Circle with a new 'made in
+                      America' stablecoin
+                    </h4>
+                    <span class="font-metadata text-subtle">2 hours ago</span>
+                  </div></a
+                >
+              </div>
+              <div class="h-full pb-4 mdmax:border-b-1 mdmax:last:border-none">
+                <a
+                  class="flex flex-row-reverse gap-2 md:flex-col h-full"
+                  href="/markets/2026/01/27/trump-family-backed-american-bitcoin-lifts-holdings-to-nearly-5-900-btc"
+                  ><img
+                    alt="Eric Trump speaks at Consensus 2025 in Toronto (CoinDesk)"
+                    loading="lazy"
+                    width="1000"
+                    height="1000"
+                    decoding="async"
+                    data-nimg="1"
+                    class="w-[80px] h-[80px] md:w-full md:h-auto rounded-md aspect-video object-cover mb-2"
+                    srcset="
+                      /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fd256c78e171d7b06816ed1319a0cc43c77cfb7bb-1920x1080.png%3Fauto%3Dformat&amp;w=1080&amp;q=75 1x,
+                      /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fd256c78e171d7b06816ed1319a0cc43c77cfb7bb-1920x1080.png%3Fauto%3Dformat&amp;w=2048&amp;q=75 2x
+                    "
+                    src="/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fd256c78e171d7b06816ed1319a0cc43c77cfb7bb-1920x1080.png%3Fauto%3Dformat&amp;w=2048&amp;q=75"
+                    style="color: transparent"
+                  />
+                  <div class="w-full h-full flex flex-col">
+                    <h4
+                      class="font-headline-2xs font-medium hover:underline mb-2"
+                    >
+                      Trump family-backed American Bitcoin lifts bitcoin
+                      holdings to nearly 5,900 coins
+                    </h4>
+                    <span class="font-metadata text-subtle">2 hours ago</span>
+                  </div></a
+                >
+              </div>
+              <div class="h-full pb-4 mdmax:border-b-1 mdmax:last:border-none">
+                <a
+                  class="flex flex-row-reverse gap-2 md:flex-col h-full"
+                  href="/markets/2026/01/27/bitcoin-ether-stall-as-metals-steal-spotlight-in-low-liquidity-trade-crypto-markets-today"
+                  ><picture
+                    ><source
+                      media="(min-width: 728px)"
+                      sizes="100vw"
+                      srcset="
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F65a197eba6193a133fe273941a8dad37b8aa0666-1920x1079.jpg%3Fauto%3Dformat&amp;w=640&amp;q=65   640w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F65a197eba6193a133fe273941a8dad37b8aa0666-1920x1079.jpg%3Fauto%3Dformat&amp;w=750&amp;q=65   750w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F65a197eba6193a133fe273941a8dad37b8aa0666-1920x1079.jpg%3Fauto%3Dformat&amp;w=828&amp;q=65   828w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F65a197eba6193a133fe273941a8dad37b8aa0666-1920x1079.jpg%3Fauto%3Dformat&amp;w=1080&amp;q=65 1080w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F65a197eba6193a133fe273941a8dad37b8aa0666-1920x1079.jpg%3Fauto%3Dformat&amp;w=1200&amp;q=65 1200w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F65a197eba6193a133fe273941a8dad37b8aa0666-1920x1079.jpg%3Fauto%3Dformat&amp;w=1920&amp;q=65 1920w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F65a197eba6193a133fe273941a8dad37b8aa0666-1920x1079.jpg%3Fauto%3Dformat&amp;w=2048&amp;q=65 2048w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F65a197eba6193a133fe273941a8dad37b8aa0666-1920x1079.jpg%3Fauto%3Dformat&amp;w=3840&amp;q=65 3840w
+                      " />
+                    <img
+                      alt="Silver bars (Scottsdale Mint/Unsplash)"
+                      class="min-w-[80px] max-w-[80px] h-[80px] md:max-w-none md:w-full md:h-auto rounded-md md:aspect-video object-cover"
+                      loading="lazy"
+                      decoding="async"
+                      srcset="
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fd410b9ca235872af3b905a2bda7e2f6a7852f128-1079x1079.jpg%3Fauto%3Dformat&amp;w=640&amp;q=65   640w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fd410b9ca235872af3b905a2bda7e2f6a7852f128-1079x1079.jpg%3Fauto%3Dformat&amp;w=750&amp;q=65   750w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fd410b9ca235872af3b905a2bda7e2f6a7852f128-1079x1079.jpg%3Fauto%3Dformat&amp;w=828&amp;q=65   828w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fd410b9ca235872af3b905a2bda7e2f6a7852f128-1079x1079.jpg%3Fauto%3Dformat&amp;w=1080&amp;q=65 1080w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fd410b9ca235872af3b905a2bda7e2f6a7852f128-1079x1079.jpg%3Fauto%3Dformat&amp;w=1200&amp;q=65 1200w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fd410b9ca235872af3b905a2bda7e2f6a7852f128-1079x1079.jpg%3Fauto%3Dformat&amp;w=1920&amp;q=65 1920w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fd410b9ca235872af3b905a2bda7e2f6a7852f128-1079x1079.jpg%3Fauto%3Dformat&amp;w=2048&amp;q=65 2048w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Fd410b9ca235872af3b905a2bda7e2f6a7852f128-1079x1079.jpg%3Fauto%3Dformat&amp;w=3840&amp;q=65 3840w
+                      "
+                  /></picture>
+                  <div class="w-full h-full flex flex-col">
+                    <h4
+                      class="font-headline-2xs font-medium hover:underline mb-2"
+                    >
+                      Bitcoin, ether stall as metals steal spotlight in
+                      low-liquidity trade: Crypto Markets Today
+                    </h4>
+                    <span class="font-metadata text-subtle">4 hours ago</span>
+                  </div></a
+                >
+              </div>
+              <div class="h-full pb-4 mdmax:border-b-1 mdmax:last:border-none">
+                <a
+                  class="flex flex-row-reverse gap-2 md:flex-col h-full"
+                  href="/markets/2026/01/27/bitcoin-and-ether-volatility-trading-gets-easier-with-polymarket-s-new-volmex-contracts"
+                  ><img
+                    alt="Poker chips (AidanHowe/Pixabay)"
+                    loading="lazy"
+                    width="1000"
+                    height="1000"
+                    decoding="async"
+                    data-nimg="1"
+                    class="w-[80px] h-[80px] md:w-full md:h-auto rounded-md aspect-video object-cover mb-2"
+                    srcset="
+                      /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F92381be5b7acd607bc065b24a71d59c26202a7a8-1280x720.jpg%3Fauto%3Dformat&amp;w=1080&amp;q=75 1x,
+                      /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F92381be5b7acd607bc065b24a71d59c26202a7a8-1280x720.jpg%3Fauto%3Dformat&amp;w=2048&amp;q=75 2x
+                    "
+                    src="/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F92381be5b7acd607bc065b24a71d59c26202a7a8-1280x720.jpg%3Fauto%3Dformat&amp;w=2048&amp;q=75"
+                    style="color: transparent"
+                  />
+                  <div class="w-full h-full flex flex-col">
+                    <h4
+                      class="font-headline-2xs font-medium hover:underline mb-2"
+                    >
+                      Polymarket's Volmex contracts open a new path to trading
+                      bitcoin, ether volatility
+                    </h4>
+                    <span class="font-metadata text-subtle">10 hours ago</span>
+                  </div></a
+                >
+              </div>
+              <div class="h-full pb-4 mdmax:border-b-1 mdmax:last:border-none">
+                <a
+                  class="flex flex-row-reverse gap-2 md:flex-col h-full"
+                  href="/business/2026/01/26/millions-in-crypto-wealth-at-risk-of-vanishing-when-holders-die-here-s-how-to-protect-them"
+                  ><img
+                    alt="my-will-death-estate"
+                    loading="lazy"
+                    width="1000"
+                    height="1000"
+                    decoding="async"
+                    data-nimg="1"
+                    class="w-[80px] h-[80px] md:w-full md:h-auto rounded-md aspect-video object-cover mb-2"
+                    srcset="
+                      /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F83989ab73960427899fc87143120bfb431a8910d-1050x700.jpg%3Fauto%3Dformat&amp;w=1080&amp;q=75 1x,
+                      /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F83989ab73960427899fc87143120bfb431a8910d-1050x700.jpg%3Fauto%3Dformat&amp;w=2048&amp;q=75 2x
+                    "
+                    src="/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F83989ab73960427899fc87143120bfb431a8910d-1050x700.jpg%3Fauto%3Dformat&amp;w=2048&amp;q=75"
+                    style="color: transparent"
+                  />
+                  <div class="w-full h-full flex flex-col">
+                    <h4
+                      class="font-headline-2xs font-medium hover:underline mb-2"
+                    >
+                      Millions in crypto wealth at risk of vanishing when
+                      holders die. Here's how to protect it
+                    </h4>
+                    <span class="font-metadata text-subtle">21 hours ago</span>
+                  </div></a
+                >
+              </div>
+              <div class="h-full pb-4 mdmax:border-b-1 mdmax:last:border-none">
+                <a
+                  class="flex flex-row-reverse gap-2 md:flex-col h-full"
+                  href="/daybook-us/2026/01/27/bitcoin-bullish-bets-now-a-bargain-as-7-weekly-loss-underlines-bearish-trend"
+                  ><picture
+                    ><source
+                      media="(min-width: 728px)"
+                      sizes="100vw"
+                      srcset="
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F03a6d59f72257d6c6580450372bf8e75a42f0685-1919x1080.jpg%3Fauto%3Dformat&amp;w=640&amp;q=65   640w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F03a6d59f72257d6c6580450372bf8e75a42f0685-1919x1080.jpg%3Fauto%3Dformat&amp;w=750&amp;q=65   750w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F03a6d59f72257d6c6580450372bf8e75a42f0685-1919x1080.jpg%3Fauto%3Dformat&amp;w=828&amp;q=65   828w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F03a6d59f72257d6c6580450372bf8e75a42f0685-1919x1080.jpg%3Fauto%3Dformat&amp;w=1080&amp;q=65 1080w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F03a6d59f72257d6c6580450372bf8e75a42f0685-1919x1080.jpg%3Fauto%3Dformat&amp;w=1200&amp;q=65 1200w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F03a6d59f72257d6c6580450372bf8e75a42f0685-1919x1080.jpg%3Fauto%3Dformat&amp;w=1920&amp;q=65 1920w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F03a6d59f72257d6c6580450372bf8e75a42f0685-1919x1080.jpg%3Fauto%3Dformat&amp;w=2048&amp;q=65 2048w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2F03a6d59f72257d6c6580450372bf8e75a42f0685-1919x1080.jpg%3Fauto%3Dformat&amp;w=3840&amp;q=65 3840w
+                      " />
+                    <img
+                      alt="A poker player pushes his chips onto the table."
+                      class="min-w-[80px] max-w-[80px] h-[80px] md:max-w-none md:w-full md:h-auto rounded-md md:aspect-video object-cover"
+                      loading="lazy"
+                      decoding="async"
+                      srcset="
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Ff5cf8293cda3663f83fc06962b85a6aaf80c3cc3-1080x1080.jpg%3Fauto%3Dformat&amp;w=640&amp;q=65   640w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Ff5cf8293cda3663f83fc06962b85a6aaf80c3cc3-1080x1080.jpg%3Fauto%3Dformat&amp;w=750&amp;q=65   750w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Ff5cf8293cda3663f83fc06962b85a6aaf80c3cc3-1080x1080.jpg%3Fauto%3Dformat&amp;w=828&amp;q=65   828w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Ff5cf8293cda3663f83fc06962b85a6aaf80c3cc3-1080x1080.jpg%3Fauto%3Dformat&amp;w=1080&amp;q=65 1080w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Ff5cf8293cda3663f83fc06962b85a6aaf80c3cc3-1080x1080.jpg%3Fauto%3Dformat&amp;w=1200&amp;q=65 1200w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Ff5cf8293cda3663f83fc06962b85a6aaf80c3cc3-1080x1080.jpg%3Fauto%3Dformat&amp;w=1920&amp;q=65 1920w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Ff5cf8293cda3663f83fc06962b85a6aaf80c3cc3-1080x1080.jpg%3Fauto%3Dformat&amp;w=2048&amp;q=65 2048w,
+                        /_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fs3y3vcno%2Fproduction%2Ff5cf8293cda3663f83fc06962b85a6aaf80c3cc3-1080x1080.jpg%3Fauto%3Dformat&amp;w=3840&amp;q=65 3840w
+                      "
+                  /></picture>
+                  <div class="w-full h-full flex flex-col">
+                    <h4
+                      class="font-headline-2xs font-medium hover:underline mb-2"
+                    >
+                      Bitcoin bullish bets now a bargain as 7% weekly loss
+                      underlines bearish trend
+                    </h4>
+                    <span class="font-metadata text-subtle">3 hours ago</span>
+                  </div></a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="col-span-4 px-6 flex-col h-full row-start-2 row-end-5 justify-between hidden lg:flex lg:col-start-9 xl:col-start-13 [&amp;_[id^='google\_ads\_']:first-of-type]:sticky [&amp;_[id^='google\_ads\_']:first-of-type]:top-[72px] [&amp;_.stickyad]:!top-[72px]"
+    >
+      <div class="relative">
+        <div
+          class="color-black relative flex items-start justify-center stickyad top-0 h-[var(--ad-height)]"
+          style="--ad-width: 336px; --ad-height: 600px"
+        >
+          <div
+            id="right_rail"
+            class="transition-box duration-250 align-center background-repeat relative flex justify-center ease-in [&amp;&gt;iframe]:m-auto bg-inherit opacity-100 items-start w-[var(--ad-width)] h-[var(--ad-height)]"
+            data-google-query-id="COjt6KSLrJIDFdic2AUd9ZUmuA"
+          >
+            <div
+              id="google_ads_iframe_/22031491390/cddesktop/article_10__container__"
+              style="
+                border: 0pt none;
+                display: inline-block;
+                width: 300px;
+                height: 600px;
+              "
+            >
+              <iframe
+                frameborder="0"
+                src="https://f6e53cbcb87c12bd7d4b5e18466583aa.safeframe.googlesyndication.com/safeframe/1-0-45/html/container.html"
+                id="google_ads_iframe_/22031491390/cddesktop/article_10"
+                title="3rd party ad content"
+                name=""
+                scrolling="no"
+                marginwidth="0"
+                marginheight="0"
+                width="300"
+                height="600"
+                data-is-safeframe="true"
+                sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
+                allow="private-state-token-redemption; attribution-reporting"
+                aria-label="Advertisement"
+                tabindex="0"
+                data-google-container-id="5"
+                style="border: 0px; vertical-align: bottom"
+                data-load-complete="true"
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mt-6 mb-auto"></div>
+      <div
+        class="color-black relative flex items-start justify-center stickyad top-0 h-[var(--ad-height)]"
+        style="--ad-width: 336px; --ad-height: 600px"
+      >
+        <div
+          id="right_rail_1"
+          class="transition-box duration-250 align-center background-repeat relative flex justify-center ease-in [&amp;&gt;iframe]:m-auto bg-inherit opacity-100 items-start w-[var(--ad-width)] h-[var(--ad-height)]"
+          data-google-query-id="CPDd6KSLrJIDFQCp2AUdMiY4kg"
+        >
+          <div
+            id="google_ads_iframe_/22031491390/cddesktop/article_11__container__"
+            style="
+              border: 0pt none;
+              display: inline-block;
+              width: 300px;
+              height: 250px;
+            "
+          >
+            <iframe
+              frameborder="0"
+              src="https://f6e53cbcb87c12bd7d4b5e18466583aa.safeframe.googlesyndication.com/safeframe/1-0-45/html/container.html"
+              id="google_ads_iframe_/22031491390/cddesktop/article_11"
+              title="3rd party ad content"
+              name=""
+              scrolling="no"
+              marginwidth="0"
+              marginheight="0"
+              width="300"
+              height="250"
+              data-is-safeframe="true"
+              sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
+              allow="private-state-token-redemption; attribution-reporting"
+              aria-label="Advertisement"
+              tabindex="0"
+              data-google-container-id="6"
+              style="border: 0px; vertical-align: bottom"
+              data-load-complete="true"
+            ></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script id="schema" type="application/ld+json" data-ot-ignore="true">
+    {
+      "@context": "http://schema.org",
+      "@type": "NewsArticle",
+      "inLanguage": "en",
+      "url": "https://www.coindesk.com/policy/2026/01/27/australia-s-corporate-regulator-flags-risks-from-rapid-innovation-in-digital-assets",
+      "identifier": "67c905c4-b666-4aa1-83d8-7fabe7b9605e",
+      "publisher": {
+        "@type": "NewsMediaOrganization",
+        "name": "CoinDesk",
+        "logo": "",
+        "url": "https://www.coindesk.com"
+      },
+      "headline": "Australia's corporate regulator flags risks from rapid innovation in digital assets",
+      "abstract": "The Australian Securities and Investments Commission has flagged digital assets and AI risks in its annual report. ",
+      "mainEntityOfPage": "https://www.coindesk.com/policy/2026/01/27/australia-s-corporate-regulator-flags-risks-from-rapid-innovation-in-digital-assets",
+      "thumbnailUrl": "https://cdn.sanity.io/images/s3y3vcno/production/b46953e482ab39655f365f72531dc0ab649a151e-1919x1080.jpg?auto=format&fm=jpg",
+      "image": {
+        "@type": "ImageObject",
+        "url": "https://cdn.sanity.io/images/s3y3vcno/production/b46953e482ab39655f365f72531dc0ab649a151e-1919x1080.jpg?auto=format&fm=jpg"
+      },
+      "datePublished": "2026-01-27T07:15:47.365Z",
+      "dateModified": "",
+      "articleSection": "Policy",
+      "author": [
+        {
+          "@type": "Person",
+          "name": "Omkar Godbole",
+          "jobTitle": "Managing Editor, Markets",
+          "worksFor": { "@type": "Organization", "name": "CoinDesk" },
+          "description": [
+            {
+              "_key": "9e3c82097f2a",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "ece9cad618db",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "Omkar Godbole is a Co-Managing Editor and analyst on CoinDesk's Markets team. He has been covering crypto options and futures, as well as macro and cross-asset activity, since 2019, leveraging his prior experience in directional and non-directional derivative strategies at brokerage firms. His extensive background also encompasses the FX markets, having served as a fundamental analyst at currency and commodities desks for Mumbai-based brokerages and FXStreet. Omkar holds small amounts of bitcoin, ether, BitTorrent, tron and dot.\n\nOmkar holds a Master's degree in Finance and a Chartered Market Technician (CMT) designation. "
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            }
+          ],
+          "url": "https://www.coindesk.com/author/omkar-godbole",
+          "image": {
+            "@type": "ImageObject",
+            "url": "https://cdn.sanity.io/images/s3y3vcno/production/870d388b294f7b16cc73e1f292cbbc3b7b2d463d-683x683.png?w=64&h=64&fit=crop&crop=focalpoint&auto=format"
+          },
+          "sameAs": ["godbole17", "omkar@coindesk.com"]
+        },
+        {
+          "@type": "Person",
+          "name": "AI Boost",
+          "jobTitle": "Author",
+          "worksFor": { "@type": "Organization", "name": "CoinDesk" },
+          "description": [
+            {
+              "_key": "0",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "“AI Boost” indicates a generative text tool, typically an AI chatbot, contributed to the article. In each and every case, the article was edited, fact-checked and published by a human. "
+                },
+                {
+                  "_key": "7e122db7d794",
+                  "_type": "span",
+                  "marks": ["aac456a48708"],
+                  "text": "Read more about CoinDesk's AI Policy"
+                },
+                {
+                  "_key": "0a15e66d8a59",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "."
+                }
+              ],
+              "markDefs": [
+                {
+                  "_key": "aac456a48708",
+                  "_type": "link",
+                  "href": "https://www.coindesk.com/coindesk-news/2023/04/14/how-coindesk-will-use-generative-ai-tools"
+                }
+              ],
+              "style": "normal"
+            }
+          ],
+          "url": "https://www.coindesk.com/author/ai-boost",
+          "image": {
+            "@type": "ImageObject",
+            "url": "https://cdn.sanity.io/images/s3y3vcno/production/6ab18162f62bf60f099bac9f3b6007da2f368b79-333x333.png?w=64&h=64&fit=crop&crop=focalpoint&auto=format"
+          },
+          "sameAs": [""]
+        }
+      ],
+      "keywords": ["australia"]
+    }
+  </script>
+</section>
