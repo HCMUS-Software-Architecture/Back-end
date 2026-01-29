@@ -1,9 +1,11 @@
 package org.example.priceservice.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.priceservice.client.BinanceApiClient;
 import org.example.priceservice.dto.BinanceKlineEvent;
 import org.example.priceservice.dto.CandleDto;
 import org.example.priceservice.entity.PriceCandle;
@@ -14,6 +16,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.mongodb.core.BulkOperations;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -24,10 +31,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +40,6 @@ import java.util.concurrent.TimeUnit;
 public class PriceCollectorService {
     private final ObjectMapper objectMapper;
     private final SimpMessagingTemplate simpMessagingTemplate;
-    private final PriceCandleRepository priceCandleRepository;
     private final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1);
     private final String[] supportedInterval = {"1m", "3m", "5m", "15m", "30m", "1h"};
     private final Map<String, WebSocketClient> webSocketClientMap = new ConcurrentHashMap<>();
@@ -158,26 +161,26 @@ public class PriceCollectorService {
     }
 
     private void saveClosedCandle(BinanceKlineEvent.BinanceKlineData kline, String symbol) {
-        try {
-            PriceCandle entity = PriceCandle.builder()
-                    .symbol(symbol.toUpperCase())
-                    .interval(kline.getInterval())
-                    .openTime(Instant.ofEpochMilli(kline.getOpenTime()))
-                    .closeTime(Instant.ofEpochMilli(kline.getCloseTime()))
-                    .open(new BigDecimal(kline.getOpen()))
-                    .high(new BigDecimal(kline.getHigh()))
-                    .low(new BigDecimal(kline.getLow()))
-                    .close(new BigDecimal(kline.getClose()))
-                    .volume(new BigDecimal(kline.getVolume()))
-                    .trades(kline.getTrades())
-                    .createdAt(LocalDateTime.now())
-                    .build();
-
-            priceCandleRepository.save(entity);
-            log.info("Saved closed candle: {} {}", symbol, kline.getInterval());
-        } catch (Exception e) {
-            log.error("Failed to save candle: {}", e.getMessage());
-        }
+//        try {
+//            PriceCandle entity = PriceCandle.builder()
+//                    .symbol(symbol.toUpperCase())
+//                    .interval(kline.getInterval())
+//                    .openTime(Instant.ofEpochMilli(kline.getOpenTime()))
+//                    .closeTime(Instant.ofEpochMilli(kline.getCloseTime()))
+//                    .open(new BigDecimal(kline.getOpen()))
+//                    .high(new BigDecimal(kline.getHigh()))
+//                    .low(new BigDecimal(kline.getLow()))
+//                    .close(new BigDecimal(kline.getClose()))
+//                    .volume(new BigDecimal(kline.getVolume()))
+//                    .trades(kline.getTrades())
+//                    .createdAt(LocalDateTime.now())
+//                    .build();
+//
+//            priceCandleRepository.save(entity);
+//            log.info("Saved closed candle: {} {}", symbol, kline.getInterval());
+//        } catch (Exception e) {
+//            log.error("Failed to save candle: {}", e.getMessage());
+//        }
     }
 
     private void scheduleReconnect(String symbol) {
