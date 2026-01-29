@@ -200,6 +200,8 @@ services:
     environment:
       - DISCOVERY_SERVER=http://discovery-server:8761/eureka
       - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://frontend:3000}
+      - NEWS_SERVICE_URL=http://news-service:9091
+      - CRAWLER_SERVICE_URL=http://crawler-service:8084
     container_name: api-gateway
     ports:
       - '8081:8081'
@@ -252,24 +254,24 @@ services:
   # Frontend
   # ==========================================
 
-  frontend:
-    build:
-      context: ../Front-end
-      dockerfile: Dockerfile
-      args:
-        - NEXT_PUBLIC_LOCAL_URL=http://localhost:8081/api
-        - NEXT_PUBLIC_PRODUCT_URL=http://localhost:8081/api
-        - NEXT_PUBLIC_WS_URL=ws://localhost:8081/ws
-        - NEXT_PUBLIC_GOOGLE_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID:-}
-    container_name: frontend
-    environment:
-      - NODE_ENV=production
-    ports:
-      - '3000:3000'
-    depends_on:
-      - api-gateway
-    networks:
-      - trading-network
+#  frontend:
+#    build:
+#      context: ../Front-end
+#      dockerfile: Dockerfile
+#      args:
+#        - NEXT_PUBLIC_LOCAL_URL=http://localhost:8081/api
+#        - NEXT_PUBLIC_PRODUCT_URL=http://localhost:8081/api
+#        - NEXT_PUBLIC_WS_URL=ws://localhost:8081/ws
+#        - NEXT_PUBLIC_GOOGLE_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID:-}
+#    container_name: frontend
+#    environment:
+#      - NODE_ENV=production
+#    ports:
+#      - '3000:3000'
+#    depends_on:
+#      - api-gateway
+#    networks:
+#      - trading-network
 
 # ==========================================
 # Networks

@@ -2,7 +2,7 @@ spring:
   application:
     name: user-service
   mongodb:
-    uri: ${MONGODB_URI}
+    uri: ${USER_SERVICE_MONGODB}
     database: ${MONGODB_DATABASE:trading}
   data:
     redis:
