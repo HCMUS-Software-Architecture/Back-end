@@ -220,9 +220,8 @@ services:
       context: ./news-service
       dockerfile: Dockerfile
     container_name: news-service
-    environment:
-      - PORT=8085
-      - MONGODB_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME:-admin}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/?authSource=admin
+    env_file:
+      - ./news-service/.env
     ports:
       - '8085:8085'
     depends_on:
@@ -236,10 +235,8 @@ services:
       context: ./crawler-service
       dockerfile: Dockerfile
     container_name: crawler-service
-    environment:
-      - PORT=8084
-      - MONGODB_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME:-admin}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/?authSource=admin
-      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+    env_file:
+      - ./crawler-service/.env
     ports:
       - '8084:8084'
     depends_on:
