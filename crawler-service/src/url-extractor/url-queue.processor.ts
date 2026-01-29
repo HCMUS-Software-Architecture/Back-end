@@ -4,6 +4,7 @@ import { Job } from 'bullmq';
 import { URL_QUEUE_NAME } from './url-extractor.service';
 import { NewsExtractorService } from '../news-extractor/news-extractor.service';
 import { NewsDatabaseService } from '../database/news-database.service';
+import { RabbitMQService } from '../messaging/rabbitmq.service';
 import { NewsArticle } from 'src/types';
 
 export interface UrlJobData {
@@ -18,6 +19,7 @@ export class UrlQueueProcessor extends WorkerHost {
   constructor(
     private readonly newsExtractorService: NewsExtractorService,
     private readonly newsDatabaseService: NewsDatabaseService,
+    private readonly rabbitMQService: RabbitMQService,
   ) {
     super();
   }
@@ -37,6 +39,12 @@ export class UrlQueueProcessor extends WorkerHost {
       );
 
       await this.newsDatabaseService.saveArticle(article);
+
+      await this.rabbitMQService.publishNewsForAnalysis(article);
+      this.logger.log(
+        `Published article for sentiment analysis: "${article.header}"`,
+      );
+
       return article;
     } catch (error) {
       this.logger.error(
