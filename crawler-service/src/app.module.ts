@@ -5,6 +5,7 @@ import { UrlExtractorModule } from './url-extractor/url-extractor.module';
 import { NewsExtractorModule } from './news-extractor/news-extractor.module';
 import { NewsDatabaseModule } from './database/news-database.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
+import { RabbitMQModule } from './messaging/rabbitmq.module';
 import { CoindeskNewsExtractorService } from './news-extractor/coindesk-news-extractor.service';
 import { CointelegraphNewsExtractorService } from './news-extractor/cointelegraph-news-extractor.service';
 
@@ -16,6 +17,7 @@ import { CointelegraphNewsExtractorService } from './news-extractor/cointelegrap
     NewsExtractorModule,
     NewsDatabaseModule,
     SchedulerModule,
+    RabbitMQModule,
   ],
   providers: [CoindeskNewsExtractorService, CointelegraphNewsExtractorService],
 })
