@@ -1,0 +1,12 @@
+# Test configuration for API Gateway
+token:
+  secret: TestJWTSecretKeyForTestingPurposesOnlyThisKeyIs64Chars
+
+# Eureka client disabled for tests
+eureka:
+  client:
+    enabled: false
+
+# Server config for tests
+server:
+  port: 0

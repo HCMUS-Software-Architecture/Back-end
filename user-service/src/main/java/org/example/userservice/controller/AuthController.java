@@ -1,5 +1,6 @@
 package org.example.userservice.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.userservice.dto.*;
 import org.example.userservice.service.AuthService;
+import org.example.userservice.service.GoogleOAuthService;
 import org.example.userservice.service.JwtService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +27,7 @@ import java.util.Map;
 public class AuthController {
     private final AuthService authService;
     private final JwtService jwtService;
+    private final GoogleOAuthService googleOAuthService;
 
     @PostMapping("/register")
     public ResponseEntity<UserDto> registerUser(@RequestBody RegisterRequest request) {
@@ -67,5 +70,36 @@ public class AuthController {
         String refreshToken = request.getRefreshToken();
         authService.logout(refreshToken);
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "User has been logged out"));
+    }
+
+    @PostMapping("/google")
+    @Operation(summary = "Google OAuth Login", description = "Authenticate user via Google ID token. Creates new user if doesn't exist, or links Google to existing account.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Google OAuth login successful", content = @Content(schema = @Schema(implementation = TokenResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid Google ID token", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
+            @ApiResponse(responseCode = "503", description = "Google OAuth is not configured", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
+    })
+    public ResponseEntity<?> googleOAuth(@RequestBody GoogleOAuthRequest request) {
+        // Check if Google OAuth is enabled
+        if (!googleOAuthService.isGoogleOAuthEnabled()) {
+            log.warn("Google OAuth attempted but not configured");
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(Map.of("error", "Google OAuth is not configured on this server"));
+        }
+
+        // Verify the Google ID token
+        var googleUserInfoOpt = googleOAuthService.verifyIdToken(request.getIdToken());
+        if (googleUserInfoOpt.isEmpty()) {
+            log.warn("Invalid Google ID token received");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Invalid Google ID token"));
+        }
+
+        GoogleUserInfo googleUserInfo = googleUserInfoOpt.get();
+        log.info("Google OAuth verified for email: {}", googleUserInfo.getEmail());
+
+        // Authenticate or create user
+        TokenResponse tokenResponse = authService.authenticateWithGoogle(googleUserInfo);
+        return ResponseEntity.ok(tokenResponse);
     }
 }

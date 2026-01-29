@@ -33,6 +33,7 @@ public class JwtAuthFilter implements GlobalFilter {
             "/api/auth/login",
             "/api/auth/register",
             "/api/auth/refresh",
+            "/api/auth/google",
             "/api/health",
             "/v3",
             "/ws",
