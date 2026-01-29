@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     MONGODB_URI: str = ""
     MONGODB_DATABASE: str = "analysis_service"
 
+    RABBITMQ_URL: str = ""
+
     APP_NAME: str = "Analysis Service"
     DEBUG: bool = False
     

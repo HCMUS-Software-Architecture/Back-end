@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import FastAPI, HTTPException, Depends
 from contextlib import asynccontextmanager
 import logging
@@ -7,6 +8,7 @@ from services import SentimentAnalysisService
 from config import get_settings
 from database import MongoDB
 from repositories import NewsRepository, SentimentRepository
+from messaging import get_consumer, RabbitMQConsumer
 
 logging.basicConfig(
     level=logging.INFO,
@@ -15,6 +17,40 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 sentiment_service: SentimentAnalysisService | None = None
+
+
+async def process_news_message(news: NewsDetail) -> None:
+    """Process a news article received from the message queue."""
+    global sentiment_service
+    
+    if not sentiment_service:
+        logger.error("Sentiment service not initialized, cannot process message")
+        return
+    
+    try:
+        logger.info(f'Processing news article from queue: "{news.header}"')
+        
+        logger.info('Saving news article to database.')
+        news_id = await NewsRepository.insert(news)
+        logger.info(f'Saved news article with ID: {news_id}')
+        
+        logger.info('Performing sentiment analysis.')
+        sentiments = sentiment_service.analyze(news)
+        logger.info(f'Completed sentiment analysis, found {len(sentiments)} symbols.')
+        
+        if sentiments:
+            logger.info('Saving sentiment results to database.')
+            sentiment_ids = await SentimentRepository.insert_many(
+                sentiments=sentiments,
+                news_id=news_id
+            )
+            logger.info(f'Saved {len(sentiment_ids)} sentiment results.')
+        
+        logger.info(f'Successfully processed news article: "{news.header}"')
+        
+    except Exception as e:
+        logger.error(f"Failed to process news article: {e}")
+        raise
 
 
 @asynccontextmanager
@@ -31,8 +67,19 @@ async def lifespan(app: FastAPI):
         sentiment_service = SentimentAnalysisService()
         logger.info(f"Sentiment Analysis Service initialized with model: {settings.GEMINI_MODEL}")
     
+    consumer = get_consumer()
+    consumer.set_message_handler(process_news_message)
+    
+    try:
+        await consumer.connect()
+        asyncio.create_task(consumer.start_consuming())
+        logger.info("RabbitMQ consumer started")
+    except Exception as e:
+        logger.warning(f"Failed to start RabbitMQ consumer: {e}")
+    
     yield
     
+    await consumer.disconnect()
     await MongoDB.disconnect()
     logger.info("Shutting down Analysis Service")
 
