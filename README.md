@@ -176,13 +176,46 @@ docker compose up -d
 
 The following services will be started:
 
-| Service     | Port  | Purpose                      |
-| ----------- | ----- | ---------------------------- |
-| PostgreSQL  | 5432  | Relational database          |
-| MongoDB     | 27017 | Document database (articles) |
-| Redis       | 6379  | Cache & session storage      |
-| RabbitMQ    | 5672  | Message broker (STOMP)       |
-| RabbitMQ UI | 15672 | RabbitMQ management console  |
+| Service                  | Port  | Purpose                            |
+| ------------------------ | ----- | ---------------------------------- |
+| **Infrastructure**       |       |                                    |
+| PostgreSQL               | 5432  | Relational database (prices)       |
+| MongoDB                  | 27017 | Document database (articles/users) |
+| Redis                    | 6379  | Cache & session storage            |
+| RabbitMQ                 | 5672  | Message broker (AMQP)              |
+| RabbitMQ UI              | 15672 | RabbitMQ management console        |
+| RabbitMQ STOMP           | 3001  | STOMP WebSocket relay              |
+| **Spring Boot Services** |       |                                    |
+| Discovery Server         | 8761  | Eureka service registry            |
+| API Gateway              | 8081  | Single entry point, routing        |
+| User Service             | 8082  | Authentication, subscriptions      |
+| Price Service            | 8083  | Price API (multiple replicas)      |
+| Price Collector          | 8086  | Binance WebSocket collector        |
+| **NestJS Services**      |       |                                    |
+| News Service             | 8085  | Article retrieval API              |
+| Crawler Service          | 8084  | Multi-source news crawler          |
+| **Frontend**             |       |                                    |
+| Next.js Frontend         | 3000  | React-based trading UI             |
+
+### Full Stack Docker Deployment
+
+```powershell
+# Build and start all services (first time may take 10-15 minutes)
+docker compose up -d --build
+
+# Watch the logs
+docker compose logs -f
+
+# Check service health
+docker compose ps
+
+# Access the application
+# - Frontend: http://localhost:3000
+# - API Gateway: http://localhost:8081
+# - Eureka Dashboard: http://localhost:8761
+# - RabbitMQ UI: http://localhost:15672 (guest/guest)
+# - API Documentation: http://localhost:8081/swagger-ui.html
+```
 
 ---
 
