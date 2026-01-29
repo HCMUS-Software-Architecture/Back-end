@@ -9,7 +9,10 @@ class Settings(BaseSettings):
     
     GEMINI_API_KEY: str = ""
     GEMINI_MODEL: str = "gemini-3-flash-preview"
-    
+
+    MONGODB_URI: str = ""
+    MONGODB_DATABASE: str = "analysis_service"
+
     APP_NAME: str = "Analysis Service"
     DEBUG: bool = False
     

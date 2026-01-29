@@ -5,6 +5,8 @@ import logging
 from models import NewsDetail, SymbolSentiment
 from services import SentimentAnalysisService
 from config import get_settings
+from database import MongoDB
+from repositories import NewsRepository, SentimentRepository
 
 logging.basicConfig(
     level=logging.INFO,
@@ -20,6 +22,8 @@ async def lifespan(app: FastAPI):
     """Application lifespan handler for startup/shutdown."""
     global sentiment_service
     
+    await MongoDB.connect()
+    
     settings = get_settings()
     if not settings.GEMINI_API_KEY:
         logger.warning("GEMINI_API_KEY not set. Sentiment analysis will not work.")
@@ -29,6 +33,7 @@ async def lifespan(app: FastAPI):
     
     yield
     
+    await MongoDB.disconnect()
     logger.info("Shutting down Analysis Service")
 
 
@@ -41,7 +46,7 @@ app = FastAPI(
 
 
 @app.post("/api/sentiment/analyze", response_model=list[SymbolSentiment])
-def analyze_sentiment(
+async def analyze_sentiment(
     news: NewsDetail,
     service: SentimentAnalysisService = Depends(sentiment_service)
 ):
@@ -55,10 +60,22 @@ def analyze_sentiment(
     - Rationale: Brief explanation of expected price impact
     """
     try:
+        logger.info('Start saving news article to database.')
+        news_id = await NewsRepository.insert(news)
+        logger.info(f'Finish saving news article with ID: {news_id}')
+
         logger.info('Start analysing sentiment for news article.')
-        result = service.analyze(news)
+        sentiments = service.analyze(news)
         logger.info('Finish analysing sentiment for news article.')
-        return result
+
+        logger.info('Start saving sentiment analysis results to database.')
+        sentiment_ids = await SentimentRepository.insert_many(
+            sentiments=sentiments,
+            news_id=news_id
+        )
+        logger.info(f'Finish saving {len(sentiment_ids)} sentiment results to database.')
+
+        return sentiments
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:

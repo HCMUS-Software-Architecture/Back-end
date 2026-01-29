@@ -1,11 +1,15 @@
 from .schemas import (
     NewsDetail,
+    NewsDetailInDB,
     SymbolSentiment,
+    SymbolSentimentInDB,
     SentimentAnalysisResponse,
 )
 
 __all__ = [
     "NewsDetail",
-    "SymbolSentiment", 
+    "NewsDetailInDB",
+    "SymbolSentiment",
+    "SymbolSentimentInDB",
     "SentimentAnalysisResponse",
 ]
