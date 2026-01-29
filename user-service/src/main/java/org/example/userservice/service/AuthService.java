@@ -1,11 +1,13 @@
 package org.example.userservice.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.userservice.dto.GoogleUserInfo;
 import org.example.userservice.dto.TokenResponse;
 import org.example.userservice.dto.UserDto;
 import org.example.userservice.exception.RefreshTokenNotExist;
 import org.example.userservice.exception.UserAlreadyExistsException;
 import org.example.userservice.model.RefreshToken;
+import org.example.userservice.model.SubscriptionType;
 import org.example.userservice.model.User;
 import org.example.userservice.repository.RefreshTokenRepository;
 import org.example.userservice.repository.UserRepository;
@@ -16,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -28,31 +31,52 @@ public class AuthService {
 
     @Autowired
     public AuthService(JwtService jwtService, PasswordEncoder passwordEncoder,
-                       RefreshTokenRepository refreshTokenMongoRepository,
-                       UserRepository userMongoRepository) {
+            RefreshTokenRepository refreshTokenMongoRepository,
+            UserRepository userMongoRepository) {
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
         this.refreshTokenMongoRepository = refreshTokenMongoRepository;
         this.userMongoRepository = userMongoRepository;
     }
 
-    public UserDto registerUser(String email, String password, String fullName) throws UserAlreadyExistsException {
+    public UserDto registerUser(String email, String password, String fullName, SubscriptionType subscriptionType)
+            throws UserAlreadyExistsException {
         Optional<User> userOption = userMongoRepository.findByEmail(email);
         if (userOption.isPresent()) {
             throw new UserAlreadyExistsException("Email already exists");
         }
 
+        // Default to REGULAR if not specified
+        SubscriptionType effectiveType = subscriptionType != null ? subscriptionType : SubscriptionType.REGULAR;
+
         User newUser = User.builder()
                 .email(email)
                 .fullName(fullName)
                 .password(passwordEncoder.encode(password))
+                .subscriptionType(effectiveType)
+                .emailVerified(false)
+                .isActive(true)
+                .createdAt(LocalDateTime.now())
                 .build();
+
+        // For VIP registration, set indefinite subscription (no end date)
+        if (effectiveType == SubscriptionType.VIP) {
+            newUser.setSubscriptionStartDate(LocalDateTime.now());
+            // If need end date
+            // newUser.setSubscriptionEndDate(LocalDateTime.now().getMonth().plus(1));
+        }
+
+        // Sync roles with subscription (adds USER role, and VIP if applicable)
+        newUser.syncRolesWithSubscription();
         userMongoRepository.save(newUser);
 
         UserDto userDto = new UserDto();
         userDto.setEmail(email);
         userDto.setFullName(fullName);
         userDto.setId(newUser.getId());
+        userDto.setSubscriptionType(newUser.getSubscriptionType());
+        userDto.setEmailVerified(newUser.getEmailVerified());
+        userDto.setCreatedAt(newUser.getCreatedAt());
         return userDto;
     }
 
@@ -109,5 +133,77 @@ public class AuthService {
     @Transactional
     public void deleteTokenPeriodic() throws Exception {
         refreshTokenMongoRepository.removeByIsRevoked(true);
+    }
+
+    /**
+     * Authenticate user via Google OAuth.
+     * If user exists with same email and Google OAuth, return tokens.
+     * If user exists with password (no OAuth), link Google account.
+     * If user doesn't exist, create new user with Google OAuth.
+     *
+     * @param googleUserInfo User info extracted from Google ID token
+     * @return TokenResponse with access and refresh tokens
+     */
+    public TokenResponse authenticateWithGoogle(GoogleUserInfo googleUserInfo) {
+        String email = googleUserInfo.getEmail();
+        Optional<User> existingUser = userMongoRepository.findByEmail(email);
+
+        User user;
+        if (existingUser.isPresent()) {
+            user = existingUser.get();
+            // If user exists but registered with password, link Google account
+            if (user.getOauthProvider() == null) {
+                log.info("Linking Google OAuth to existing user: {}", email);
+                user.setOauthProvider("google");
+                user.setEmailVerified(true); // Google emails are verified
+                userMongoRepository.save(user);
+            }
+            log.info("Google OAuth login for existing user: {}", email);
+        } else {
+            // Create new user with Google OAuth
+            log.info("Creating new user via Google OAuth: {}", email);
+            user = User.builder()
+                    .email(email)
+                    .fullName(googleUserInfo.getFullName())
+                    .oauthProvider("google")
+                    .subscriptionType(SubscriptionType.REGULAR)
+                    .emailVerified(true) // Google emails are verified
+                    .isActive(true)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+            user.syncRolesWithSubscription();
+            user = userMongoRepository.save(user);
+        }
+
+        // Generate tokens
+        String accessToken = jwtService.generateAccessToken(user.getId());
+        String refreshToken = jwtService.generateRefreshToken(user.getId());
+
+        return TokenResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    /**
+     * Get user info for OAuth response (used after Google OAuth)
+     *
+     * @param userId User ID
+     * @return UserDto with user information
+     */
+    public UserDto getUserById(String userId) {
+        Optional<User> userOpt = userMongoRepository.findById(userId);
+        if (userOpt.isEmpty()) {
+            return null;
+        }
+        User user = userOpt.get();
+        UserDto userDto = new UserDto();
+        userDto.setId(user.getId());
+        userDto.setEmail(user.getEmail());
+        userDto.setFullName(user.getFullName());
+        userDto.setSubscriptionType(user.getSubscriptionType());
+        userDto.setEmailVerified(user.getEmailVerified());
+        userDto.setCreatedAt(user.getCreatedAt());
+        return userDto;
     }
 }

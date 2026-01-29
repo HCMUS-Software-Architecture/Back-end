@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: user-service-test
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/test
+      database: trading-test
+      auto-index-creation: false
+  # Disable email for tests
+  mail:
+    enabled: false
+  # Disable auto-configuration that requires running databases
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
+
+# Disable health checks for tests
+management:
+  health:
+    mongodb:
+      enabled: false
+
+server:
+  port: 0
+
+eureka:
+  client:
+    enabled: false
+
+token:
+  secret: test-secret-key-for-unit-testing-min-32-chars
+
+app:
+  frontend:
+    url: http://localhost:3000

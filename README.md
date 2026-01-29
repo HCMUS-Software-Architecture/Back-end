@@ -25,9 +25,61 @@ This platform provides:
 - **Financial News Crawler**: Multi-source article collection with adaptive HTML parsing
 - **Real-time Price Charts**: WebSocket-based TradingView-style charts
 - **AI/NLP Analysis**: Sentiment analysis and trend prediction
-- **Account Management**: User authentication and preferences
+- **Account Management**: User authentication and preferences with Google OAuth
 
 See [Architecture Overview](./docs/core/Architecture.md) for detailed design.
+
+### Architecture Overview
+
+```
+┌──────────────┐
+│   Frontend   │  Next.js (Port 3000)
+│  (Next.js)   │
+└──────┬───────┘
+       │
+       ▼
+┌──────────────────────────────────────────────────────────────┐
+│                      API Gateway                              │
+│                      Port: 8081                               │
+│  • JWT Authentication  • Request Routing  • CORS              │
+└───────┬──────────────────────────────────────────────────────┘
+        │
+        ├─────────────────┬──────────────────┬──────────────────┐
+        ▼                 ▼                  ▼                  ▼
+┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
+│    Eureka    │  │User Service  │  │Price Service │  │Price Collector│
+│  Discovery   │  │  Port: 8082  │  │  Port: 8083  │  │  Port: 8084  │
+│ Port: 8761   │  │              │  │              │  │              │
+│              │  │• Auth/OAuth  │  │• Price API   │  │• Binance API │
+│              │  │• JWT Tokens  │  │• WebSocket   │  │• Price Feeds │
+└──────────────┘  │• User CRUD   │  │• Candles     │  └──────────────┘
+                  └──────┬───────┘  └──────┬───────┘
+                         │                 │
+                         ▼                 ▼
+                  ┌──────────────┐  ┌──────────────┐
+                  │   MongoDB    │  │  PostgreSQL  │
+                  │  Port: 27017 │  │  Port: 5432  │
+                  │              │  │              │
+                  │• users       │  │• price data  │
+                  │• tokens      │  │• candles     │
+                  └──────────────┘  └──────────────┘
+```
+
+### Service Ports
+
+| Service          | Port  | Purpose                         |
+| ---------------- | ----- | ------------------------------- |
+| Frontend         | 3000  | Next.js web application         |
+| API Gateway      | 8081  | Entry point, routing, JWT auth  |
+| Discovery Server | 8761  | Eureka service registry         |
+| User Service     | 8082  | Authentication, user management |
+| Price Service    | 8083  | Price data, WebSocket, candles  |
+| Price Collector  | 8084  | Binance API integration         |
+| PostgreSQL       | 5432  | Price and historical data       |
+| MongoDB          | 27017 | User data and documents         |
+| Redis            | 6379  | Cache and session storage       |
+| RabbitMQ         | 5672  | Message broker (STOMP)          |
+| RabbitMQ UI      | 15672 | Management console              |
 
 ### Related Projects
 
