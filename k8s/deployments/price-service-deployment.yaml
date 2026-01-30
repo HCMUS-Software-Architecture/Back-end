@@ -1,0 +1,132 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: price-service
+  namespace: trading-system
+  labels:
+    app: price-service
+    tier: backend
+spec:
+  # Start with 1 replica, HPA will scale to 2 @ 50% CPU, max 3
+  replicas: 1
+  selector:
+    matchLabels:
+      app: price-service
+  template:
+    metadata:
+      labels:
+        app: price-service
+        tier: backend
+    spec:
+      containers:
+        - name: price-service
+          image: trading-application-price-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8083
+              name: http
+              protocol: TCP
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: 'user'
+            - name: SERVER_PORT
+              value: '8083'
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              value: 'http://host.docker.internal:8761/eureka/'
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: trading-secrets
+                  key: MONGODB_URI
+            - name: MONGODB_DATABASE
+              value: 'trading'
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: trading-secrets
+                  key: POSTGRES_URL
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: trading-secrets
+                  key: POSTGRES_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: trading-secrets
+                  key: POSTGRES_PASSWORD
+            - name: SPRING_DATA_REDIS_HOST
+              value: 'host.docker.internal'
+            - name: SPRING_DATA_REDIS_PORT
+              value: '6379'
+            - name: SPRING_RABBITMQ_HOST
+              value: 'host.docker.internal'
+            - name: SPRING_RABBITMQ_PORT
+              value: '5672'
+            - name: SPRING_RABBITMQ_STOMP_PORT
+              value: '3001' # STOMP port exposed by Docker Compose
+            - name: SPRING_RABBITMQ_USERNAME
+              value: 'guest'
+            - name: SPRING_RABBITMQ_PASSWORD
+              value: 'guest'
+            - name: PRICE_SYMBOLS
+              value: 'btcusdt,ethusdt,bnbusdt'
+            # WebSocket configuration
+            - name: WEBSOCKET_ENABLED
+              value: 'true'
+            - name: WEBSOCKET_MAX_SESSIONS
+              value: '100'
+
+          # Resource requests & limits (critical for HPA)
+          resources:
+            requests:
+              cpu: '500m' # 0.5 CPU cores minimum
+              memory: '512Mi' # 512 MB minimum
+            limits:
+              cpu: '1000m' # 1 CPU core maximum
+              memory: '1Gi' # 1 GB maximum
+
+          # Health checks
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8083
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8083
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          # Graceful shutdown for WebSocket connections
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - sleep 30 # Wait 30s to allow WebSocket connections to close gracefully
+
+      # Spread pods across nodes for availability
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - price-service
+                topologyKey: kubernetes.io/hostname
+
+      # Grace period for pod termination (important for WebSocket)
+      terminationGracePeriodSeconds: 45

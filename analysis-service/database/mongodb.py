@@ -54,3 +54,8 @@ def get_news_collection():
 
 def get_sentiment_collection():
     return MongoDB.get_collection(SENTIMENT_COLLECTION)
+
+
+def get_database():
+    """Get MongoDB database instance."""
+    return MongoDB.get_database()

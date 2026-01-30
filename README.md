@@ -9,12 +9,15 @@ A full-stack trading platform with financial news aggregation, real-time price c
 1. [Overview](#overview)
 2. [Prerequisites](#prerequisites)
 3. [Quick Start](#quick-start)
-4. [Project Structure](#project-structure)
-5. [Development Setup](#development-setup)
-6. [Configuration](#configuration)
-7. [Running the Application](#running-the-application)
-8. [Documentation](#documentation)
-9. [Technology Stack](#technology-stack)
+4. [Deployment Options](#deployment-options)
+   - [Docker Compose (Development)](#docker-compose-development)
+   - [Kubernetes (Production)](#kubernetes-production)
+5. [Project Structure](#project-structure)
+6. [Development Setup](#development-setup)
+7. [Configuration](#configuration)
+8. [Running the Application](#running-the-application)
+9. [Documentation](#documentation)
+10. [Technology Stack](#technology-stack)
 
 ---
 
@@ -92,14 +95,15 @@ See [Architecture Overview](./docs/core/Architecture.md) for detailed design.
 
 ### Required Software
 
-| Software       | Version | Purpose                        |
-| -------------- | ------- | ------------------------------ |
-| Java           | 21      | Backend runtime                |
-| Maven          | 3.8+    | Build tool                     |
-| Docker         | 20.10+  | Containerization               |
-| Docker Compose | 2.0+    | Multi-container orchestration  |
-| Node.js        | 18+     | Frontend runtime (for Next.js) |
-| Git            | 2.30+   | Version control                |
+| Software       | Version | Purpose                                     |
+| -------------- | ------- | ------------------------------------------- |
+| Java           | 21      | Backend runtime                             |
+| Maven          | 3.8+    | Build tool                                  |
+| Docker Desktop | 20.10+  | Containerization + Kubernetes               |
+| Docker Compose | 2.0+    | Multi-container orchestration               |
+| kubectl        | 1.28+   | Kubernetes CLI (included in Docker Desktop) |
+| Node.js        | 18+     | Frontend runtime (for Next.js)              |
+| Git            | 2.30+   | Version control                             |
 
 ### Required Environment Files
 
@@ -148,41 +152,218 @@ docker compose version
 # Check Node.js (optional, for frontend)
 node --version
 # Expected: v18.x.x or higher
+
+# Check kubectl (Kubernetes CLI)
+kubectl version --client
+# Expected: Client Version: v1.28.x or higher
 ```
 
 ---
 
-## Docker Compose Setup (Recommended)
+## Deployment Options
 
-Use Docker Compose for running the application with all required services (PostgreSQL, MongoDB, Redis, RabbitMQ):
+### 🚀 Hybrid Approach (Recommended)
+
+**Infrastructure (Docker Compose) + Application Services (Kubernetes)**
+
+This approach gives you:
+
+- ✅ Easy database management with Docker Compose
+- ✅ Production-ready autoscaling with Kubernetes
+- ✅ Realistic production environment locally
+
+**Quick Start:**
 
 ```powershell
-# Start all services in detached mode
+# 1. Start infrastructure
+docker compose up -d postgres mongodb redis rabbitmq
+
+# 2. Build images
+docker compose build discovery-server api-gateway user-service price-service analysis-service
+
+# 3. Deploy to Kubernetes
+kubectl apply -f k8s/namespace.yaml
+.\scripts\create-k8s-secrets.ps1
+kubectl apply -f k8s/deployments/
+kubectl apply -f k8s/services/
+kubectl apply -f k8s/autoscaling/
+
+# 4. Port-forward services (after verifying pods are ready: kubectl get pods -n trading-system)
+kubectl port-forward -n trading-system svc/price-service 8083:8083
+kubectl port-forward -n trading-system svc/analysis-service 8000:8000
+```
+
+> **⚠️ Important**: Wait 1-2 minutes after step 3 for pods to become ready. Check with `kubectl get pods -n trading-system` - wait for READY column to show `1/1`.
+
+📖 **[Full Hybrid Deployment Guide](./docs/HYBRID_DEPLOYMENT_GUIDE.md)**  
+📖 **[Troubleshooting Guide](#-troubleshooting-kubernetes-deployment)**
+
+---
+
+### 🐳 Docker Compose Only
+
+**All services in Docker Compose (fastest setup)**
+
+**Best for**: Quick testing, no Kubernetes needed.
+
+```powershell
+# Start all services
 docker compose up -d
 
 # View logs
 docker compose logs -f
 
-# Stop all services
+# Stop all
 docker compose down
-
-# Rebuild and restart services
-docker compose down
-docker compose build --no-cache
-docker compose up -d
 ```
 
-### Docker Services
+**Services:**
 
-The following services will be started:
+| Service          | Port  | Container          |
+| ---------------- | ----- | ------------------ |
+| API Gateway      | 8081  | api-gateway        |
+| Discovery Server | 8761  | discovery-server   |
+| User Service     | 8082  | user-service       |
+| Price Service    | 8083  | price-service (2x) |
+| Analysis Service | 8000  | analysis-service   |
+| PostgreSQL       | 5432  | trading-postgres   |
+| MongoDB          | 27017 | trading-mongodb    |
+| Redis            | 6379  | trading-redis      |
+| RabbitMQ         | 5672  | trading-rabbitmq   |
+| RabbitMQ UI      | 15672 | trading-rabbitmq   |
 
-| Service     | Port  | Purpose                      |
-| ----------- | ----- | ---------------------------- |
-| PostgreSQL  | 5432  | Relational database          |
-| MongoDB     | 27017 | Document database (articles) |
-| Redis       | 6379  | Cache & session storage      |
-| RabbitMQ    | 5672  | Message broker (STOMP)       |
-| RabbitMQ UI | 15672 | RabbitMQ management console  |
+---
+
+### ☸️ Kubernetes Monitoring & Management
+
+Once deployed with hybrid or K8s approach:
+
+```powershell
+# Watch pods scale
+kubectl get pods -n trading-system -w
+
+# View HPA status
+kubectl get hpa -n trading-system
+
+# Check resource usage
+kubectl top pods -n trading-system
+
+# View logs
+kubectl logs -n trading-system -l app=price-service -f
+kubectl logs -n trading-system -l app=analysis-service -f
+
+# Stop deployment
+kubectl delete namespace trading-system
+docker compose down
+```
+
+📖 **[Kubernetes Autoscaling Documentation](./docs/KUBERNETES_DEPLOYMENT_SUMMARY.md)**
+
+---
+
+### � Troubleshooting Kubernetes Deployment
+
+Common issues and solutions when deploying to Kubernetes:
+
+#### **Pods in ImagePullBackOff**
+
+**Problem**: Kubernetes can't find the Docker images
+
+```powershell
+# Check images exist
+docker images | Select-String "trading-application"
+```
+
+**Solution**: Ensure `imagePullPolicy: Never` in deployments and images built with correct names:
+
+```powershell
+# Build images with Docker Compose (creates trading-application-* prefix)
+docker compose build discovery-server api-gateway user-service price-service analysis-service
+```
+
+#### **Pods in CrashLoopBackOff**
+
+**Problem**: Application fails to start
+
+```powershell
+# Check pod logs
+kubectl logs -n trading-system -l app=price-service --tail=50
+kubectl logs -n trading-system -l app=analysis-service --tail=50
+```
+
+**Common causes:**
+
+1. **MongoDB connection error**: Check `MONGODB_URI` env var is correct (not `SPRING_DATA_MONGODB_URI`)
+2. **Missing environment variables**: Verify secret exists and is mounted correctly
+3. **Infrastructure not running**: Start Docker Compose services first
+
+```powershell
+# Verify secret
+kubectl get secret trading-secrets -n trading-system -o yaml
+
+# Check decoded values
+kubectl get secret trading-secrets -n trading-system -o jsonpath='{.data.MONGODB_URI}' | %{[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($_))}
+```
+
+#### **Health Check Failures**
+
+**Problem**: Readiness probe returns 404
+
+**Solutions:**
+
+- **Price Service**: Ensure `/actuator/health` endpoint exists (Spring Boot Actuator dependency)
+- **Analysis Service**: Ensure `/health` endpoint implemented in FastAPI
+
+#### **Port-Forward Fails**
+
+**Problem**: `kubectl port-forward` returns "error forwarding port"
+
+```powershell
+# Check pods are ready
+kubectl get pods -n trading-system
+
+# Wait for READY column to show 1/1
+Start-Sleep -Seconds 30
+kubectl get pods -n trading-system
+
+# Then try port-forward
+kubectl port-forward -n trading-system svc/price-service 8083:8083
+```
+
+#### **Services Can't Connect to Docker Compose Infrastructure**
+
+**Problem**: K8s pods can't reach PostgreSQL, MongoDB, Redis, RabbitMQ
+
+**Solution**: Ensure host references use `host.docker.internal` in deployments:
+
+```yaml
+- name: SPRING_RABBITMQ_HOST
+  value: 'host.docker.internal' # NOT 'rabbitmq' or 'localhost'
+```
+
+#### **Quick Health Check**
+
+```powershell
+# Check all resources
+kubectl get all -n trading-system
+
+# Test endpoints (after port-forward)
+curl http://localhost:8083/actuator/health
+curl http://localhost:8000/health
+```
+
+---
+
+### �📊 Deployment Comparison
+
+| Feature          | Docker Compose | Hybrid (Recommended) | K8s Full      |
+| ---------------- | -------------- | -------------------- | ------------- |
+| Setup Time       | ⭐ 5 min       | ⭐⭐ 15 min          | ⭐⭐⭐ 30 min |
+| Autoscaling      | ❌             | ✅ Apps only         | ✅ All        |
+| Load Balancing   | ⚠️ Basic       | ✅ Apps              | ✅ All        |
+| Database Backups | ✅ Easy        | ✅ Easy              | ⚠️ Complex    |
+| Resource Limits  | ⚠️ Manual      | ✅ Apps              | ✅ All        |
+| Best For         | Quick dev      | Production-like dev  | Production    |
 
 ---
 

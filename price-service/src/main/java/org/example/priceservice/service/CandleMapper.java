@@ -1,6 +1,7 @@
 package org.example.priceservice.service;
 
 import org.example.priceservice.entity.PriceCandle;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Profile("collector")
 public class CandleMapper {
     public PriceCandle map(List<Object> rawData, String symbol, String interval) {
         PriceCandle candle = new PriceCandle();

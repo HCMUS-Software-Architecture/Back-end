@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analysis-service
+  namespace: trading-system
+  labels:
+    app: analysis-service
+    tier: backend
+spec:
+  selector:
+    matchLabels:
+      app: analysis-service
+  template:
+    metadata:
+      labels:
+        app: analysis-service
+        tier: backend
+    spec:
+      containers:
+        - name: analysis-service
+          image: trading-application-analysis-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8000
+              name: http
+              protocol: TCP
+          env:
+            - name: GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: trading-secrets
+                  key: GEMINI_API_KEY
+            - name: GEMINI_MODEL
+              value: 'gemini-2.0-flash'
+            - name: OPENROUTER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: trading-secrets
+                  key: OPENROUTER_API_KEY
+                  optional: true
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: trading-secrets
+                  key: MONGODB_URI
+            - name: MONGODB_DATABASE
+              value: 'trading'
+            - name: RABBITMQ_URL
+              valueFrom:
+                secretKeyRef:
+                  name: trading-secrets
+                  key: RABBITMQ_URL
+            - name: DEBUG
+              value: 'false'
+
+          # Resource requests & limits
+          resources:
+            requests:
+              cpu: '250m'
+              memory: '512Mi'
+            limits:
+              cpu: '500m'
+              memory: '1Gi'
+
+          # Health checks
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+      # Affinity for better distribution
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - analysis-service
+                topologyKey: kubernetes.io/hostname
+
+      terminationGracePeriodSeconds: 30

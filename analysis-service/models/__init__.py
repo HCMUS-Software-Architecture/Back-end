@@ -4,6 +4,10 @@ from .schemas import (
     SymbolSentiment,
     SymbolSentimentInDB,
     SentimentAnalysisResponse,
+    TechnicalIndicators,
+    SentimentSummary,
+    PricePredictionRequest,
+    PricePredictionResponse,
 )
 
 __all__ = [
@@ -12,4 +16,8 @@ __all__ = [
     "SymbolSentiment",
     "SymbolSentimentInDB",
     "SentimentAnalysisResponse",
+    "TechnicalIndicators",
+    "SentimentSummary",
+    "PricePredictionRequest",
+    "PricePredictionResponse",
 ]

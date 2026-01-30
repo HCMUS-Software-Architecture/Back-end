@@ -4,7 +4,8 @@ from .mongodb import (
     NEWS_COLLECTION,
     SENTIMENT_COLLECTION,
     get_news_collection,
-    get_sentiment_collection
+    get_sentiment_collection,
+    get_database
 )
 
 __all__ = [
@@ -12,5 +13,6 @@ __all__ = [
     "NEWS_COLLECTION",
     "SENTIMENT_COLLECTION",
     "get_news_collection",
-    "get_sentiment_collection"
+    "get_sentiment_collection",
+    "get_database"
 ]

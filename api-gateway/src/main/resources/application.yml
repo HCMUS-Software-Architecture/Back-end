@@ -55,6 +55,16 @@ spring:
               filters:
                 - RewritePath=/v3/api-docs/price-service, /v3/api-docs
 
+            - id: news-service
+              uri: http://news-service:8085
+              predicates:
+                - Path=/api/news/**
+
+            - id: crawler-service
+              uri: http://crawler-service:8084
+              predicates:
+                - Path=/api/crawler/**
+
 eureka:
   client:
     service-url:
