@@ -6,9 +6,13 @@ export class AIUrlExtractorService {
   private readonly logger = new Logger(AIUrlExtractorService.name);
   private readonly modelName = process.env.GEMINI_MODEL!;
   private readonly apiKey = process.env.GEMINI_API_KEY!;
+  private genAI: GoogleGenAI | null = null;
 
   private getClient(): GoogleGenAI {
-    return new GoogleGenAI({ apiKey: this.apiKey });
+    if (!this.genAI) {
+      this.genAI = new GoogleGenAI({ apiKey: this.apiKey });
+    }
+    return this.genAI;
   }
 
   async extractUrlsFromHtml(
