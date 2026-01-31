@@ -162,153 +162,354 @@ kubectl version --client
 
 ## Deployment Options
 
-### 🚀 Hybrid Approach (Recommended for Production-Like Testing)
+Có 2 cách chạy dự án:
 
-**Infrastructure + Most Services (Docker Compose) + Price Service Only (Kubernetes with HPA)**
+---
 
-This approach gives you:
+### **🎯 Option 1: Docker Compose (Recommended cho Development)**
 
-- ✅ Easy database management with Docker Compose
-- ✅ Production-ready autoscaling for price-service with Kubernetes HPA
-- ✅ Realistic production environment locally
-- ✅ Backwards compatible - can run full Docker Compose standalone
+**Chạy tất cả services bằng Docker Compose**
+
+**Ưu điểm:**
+- ✅ Setup nhanh nhất (1 lệnh)
+- ✅ Không cần cấu hình Kubernetes
+- ✅ Phù hợp cho local development và testing
+- ✅ Tự động service discovery qua Eureka
+
+**Bước 1: Setup Environment**
+```powershell
+# Tạo file .env từ template
+Copy-Item .env.example .env
+
+# Chỉnh sửa .env với credentials của bạn
+notepad .env
+```
+
+**Bước 2: Chạy Tất Cả Services**
+```powershell
+# Di chuyển vào thư mục back-end
+cd Back-end
+
+# Start tất cả services
+docker compose up -d
+
+# Kiểm tra trạng thái
+docker compose ps
+
+# Xem logs
+docker compose logs -f
+
+# Xem logs của một service cụ thể
+docker compose logs -f price-service
+docker compose logs -f api-gateway
+```
+
+**Bước 3: Verify Deployment**
+```powershell
+# Health check
+Invoke-WebRequest http://localhost:8081/actuator/health
+
+# Test price API
+Invoke-WebRequest http://localhost:8081/api/prices/candles/BTCUSDT/1m?limit=5
+
+# Truy cập Swagger UI
+Start-Process "http://localhost:8081/swagger-ui.html"
+
+# Eureka Dashboard
+Start-Process "http://localhost:8761"
+```
+
+**Services đang chạy:**
+
+| Service          | Port  | Container          | URL |
+| ---------------- | ----- | ------------------ | --- |
+| API Gateway      | 8081  | api-gateway        | http://localhost:8081 |
+| Discovery Server | 8761  | discovery-server   | http://localhost:8761 |
+| User Service     | 8082  | user-service       | http://localhost:8082 |
+| Price Service    | 8083  | price-service      | http://localhost:8083 |
+| Crawler Service  | 8084  | crawler-service    | http://localhost:8084 |
+| News Service     | 8085  | news-service       | http://localhost:8085 |
+| Analysis Service | 8000  | analysis-service   | http://localhost:8000 |
+| MongoDB          | 27017 | trading-mongodb    | mongodb://localhost:27017 |
+| Redis            | 6379  | trading-redis      | redis://localhost:6379 |
+| RabbitMQ         | 5672  | trading-rabbitmq   | amqp://localhost:5672 |
+| RabbitMQ UI      | 15672 | trading-rabbitmq   | http://localhost:15672 |
+
+**Stop Services:**
+```powershell
+# Stop tất cả
+docker compose down
+
+# Stop và xóa volumes (reset database)
+docker compose down -v
+
+# Rebuild và restart
+docker compose up -d --build
+```
+
+---
+
+### **🚀 Option 2: Hybrid (Docker Compose + Kubernetes)**
+
+**Docker Compose cho infrastructure + Kubernetes cho Price Service với HPA**
+
+**Ưu điểm:**
+- ✅ Test autoscaling thực tế (Kubernetes HPA)
+- ✅ Production-like environment
+- ✅ Infrastructure management dễ dàng (Docker)
+- ✅ Price service có thể scale 1-3 replicas tự động
+
+**Use case:** Khi cần test load balancing và autoscaling của price service
 
 **Architecture:**
-
 ```
-Docker Compose:  postgres, mongodb, redis, rabbitmq, discovery-server, api-gateway, user-service, analysis-service
+Docker Compose:  mongodb, redis, rabbitmq, discovery-server, api-gateway, 
+                 user-service, crawler-service, news-service, analysis-service
+                 
 Kubernetes:      price-service (1-3 replicas @ 70% CPU, NodePort 30083)
 ```
 
-**Quick Start:**
-
+**Bước 1: Setup Environment**
 ```powershell
-# 1. Start infrastructure + backend services in Docker Compose
-cd Back-end
-docker compose up -d --build postgres mongodb redis rabbitmq discovery-server api-gateway user-service analysis-service
+# Tạo .env file
+Copy-Item .env.example .env
+notepad .env
 
-# 2. Build price-service image
+# Thêm config cho hybrid mode vào .env:
+PRICE_SERVICE_URI=http://host.docker.internal:30083
+PRICE_SERVICE_WS_URI=ws://host.docker.internal:30083
+```
+
+**Bước 2: Start Infrastructure & Backend Services (Docker)**
+```powershell
+cd Back-end
+
+# Start tất cả TRỪ price-service
+docker compose up -d mongodb redis rabbitmq discovery-server api-gateway user-service crawler-service news-service analysis-service
+
+# Verify Docker services đang chạy
+docker compose ps
+# Expected: 9 containers running (không có price-service)
+```
+
+**Bước 3: Deploy Price Service to Kubernetes**
+```powershell
+# Build price-service image
 docker compose build price-service
 
-# 3. Create Kubernetes secrets (REQUIRED - first time only)
+# Create Kubernetes secrets (first time only)
 powershell -ExecutionPolicy Bypass -File scripts/create-k8s-secrets.ps1
 
-# 4. Deploy price-service to Kubernetes
+# Create namespace
 kubectl create namespace trading-system
+
+# Deploy price-service
 kubectl apply -f k8s/deployments/price-service-deployment.yaml
 kubectl apply -f k8s/services/price-service-service.yaml
 kubectl apply -f k8s/autoscaling/price-service-hpa.yaml
 
-# 4. Configure API Gateway for hybrid mode (add to your .env file)
-# Add these lines to .env:
-PRICE_SERVICE_URI=http://host.docker.internal:30083
-PRICE_SERVICE_WS_URI=ws://host.docker.internal:30083
-
-# 5. Restart API Gateway to pick up hybrid configuration
-docker compose restart api-gateway
-
-# 6. Verify deployment
-kubectl get pods -n trading-system       # Wait for price-service pod to be 1/1 Running
-kubectl get hpa -n trading-system        # Check HPA status (should show <70% CPU)
-kubectl exec -n trading-system -it $(kubectl get pod -n trading-system -l app=price-service -o jsonpath='{.items[0].metadata.name}') -- curl -s http://localhost:8083/actuator/health  # Test from inside pod
-```
-
-**Verify Hybrid Setup:**
-
-```powershell
-# Check Docker services (should see 8 containers)
-docker compose ps
-
-# Check K8s (should see 1 price-service pod)
+# Verify Kubernetes deployment
 kubectl get all -n trading-system
 
-# Test health endpoint from inside the pod (NodePort may not work on Windows/Docker Desktop)
+# Wait for pod to be Ready (1/1)
+kubectl get pods -n trading-system -w
+```
+
+**Bước 4: Configure API Gateway để kết nối với K8s Price Service**
+```powershell
+# Đảm bảo .env có 2 dòng này:
+# PRICE_SERVICE_URI=http://host.docker.internal:30083
+# PRICE_SERVICE_WS_URI=ws://host.docker.internal:30083
+
+# Restart API Gateway để load config mới
+docker compose restart api-gateway
+
+# Kiểm tra logs
+docker compose logs -f api-gateway
+```
+
+**Bước 5: Verify Hybrid Setup**
+```powershell
+# 1. Check Docker services (9 containers)
+docker compose ps
+
+# 2. Check Kubernetes (1 price-service pod)
+kubectl get pods -n trading-system
+kubectl get hpa -n trading-system
+
+# 3. Test price-service health từ bên trong pod
 kubectl exec -n trading-system -it $(kubectl get pod -n trading-system -l app=price-service -o jsonpath='{.items[0].metadata.name}') -- curl -s http://localhost:8083/actuator/health
-# Expected: {"groups":["liveness","readiness"],"status":"UP"}
+# Expected: {"status":"UP"}
 
-# Test API endpoint through API Gateway (this works because Docker can reach K8s NodePort)
+# 4. Test qua API Gateway (end-to-end)
 Invoke-WebRequest http://localhost:8081/api/prices/candles/BTCUSDT/1m?limit=5
+# Expected: HTTP 200 với candle data
+
+# 5. Test WebSocket connection
+# Mở browser console tại http://localhost:3000 (Frontend)
+# Check WebSocket connection status
+
+# 6. Monitor HPA autoscaling
+kubectl get hpa -n trading-system -w
+# NAME            REFERENCE                  TARGETS   MINPODS   MAXPODS   REPLICAS
+# price-service   Deployment/price-service   20%/70%   1         3         1
 ```
 
-**To Revert to Docker-Only Mode:**
-
+**Kiểm Tra Network Connectivity:**
 ```powershell
-# Remove hybrid environment variables from .env:
-# PRICE_SERVICE_URI=...
-# PRICE_SERVICE_WS_URI=...
+# Từ API Gateway container → K8s Price Service
+docker exec api-gateway curl http://host.docker.internal:30083/actuator/health
 
-# Delete K8s resources
-kubectl delete namespace trading-system
-
-# Start full Docker Compose stack
-docker compose up -d
+# Từ K8s pod → Docker MongoDB (nếu cần)
+kubectl exec -n trading-system -it $(kubectl get pod -n trading-system -l app=price-service -o jsonpath='{.items[0].metadata.name}') -- curl -s http://host.docker.internal:27017
 ```
 
-> **⚠️ Important**: The API Gateway automatically uses Eureka service discovery (Docker Compose mode) unless you explicitly set `PRICE_SERVICE_URI` and `PRICE_SERVICE_WS_URI` environment variables for hybrid mode.
-
-📖 **[CPU Metrics & HPA Explained](./docs/todo8.md#2-cpu-metrics-explained)**  
-📖 **[Hybrid Architecture Details](./docs/todo8.md#1-architecture-issues--solutions)**  
-📖 **[Troubleshooting Guide](#-troubleshooting-kubernetes-deployment)**
-
----
-
-### 🐳 Docker Compose Only (Fastest for Development)
-
-**All services in Docker Compose (no Kubernetes needed)**
-
-**Best for**: Quick testing, development, no autoscaling requirements.
-
+**Monitor Kubernetes:**
 ```powershell
-# Start all services
-docker compose up -d
-
-# View logs
-docker compose logs -f price-service
-
-# Stop all
-docker compose down
-```
-
-**Services:**
-
-| Service          | Port  | Container          |
-| ---------------- | ----- | ------------------ |
-| API Gateway      | 8081  | api-gateway        |
-| Discovery Server | 8761  | discovery-server   |
-| User Service     | 8082  | user-service       |
-| Price Service    | 8083  | price-service (2x) |
-| Analysis Service | 8000  | analysis-service   |
-| PostgreSQL       | 5432  | trading-postgres   |
-| MongoDB          | 27017 | trading-mongodb    |
-| Redis            | 6379  | trading-redis      |
-| RabbitMQ         | 5672  | trading-rabbitmq   |
-| RabbitMQ UI      | 15672 | trading-rabbitmq   |
-
----
-
-### ☸️ Kubernetes Monitoring & Management
-
-Once deployed with hybrid or K8s approach:
-
-```powershell
-# Watch pods scale
+# Watch pods scale up/down
 kubectl get pods -n trading-system -w
 
-# View HPA status
-kubectl get hpa -n trading-system
+# View HPA metrics
+kubectl describe hpa price-service -n trading-system
 
 # Check resource usage
 kubectl top pods -n trading-system
 
 # View logs
-kubectl logs -n trading-system -l app=price-service -f
-kubectl logs -n trading-system -l app=analysis-service -f
+kubectl logs -n trading-system -l app=price-service -f --tail=50
+```
 
-# Stop deployment
+**Cleanup/Revert to Docker-Only:**
+```powershell
+# Stop Kubernetes price-service
 kubectl delete namespace trading-system
-docker compose down
-docker compose build --no-cache
-docker compose up -d
+
+# Xóa hybrid config trong .env (comment out hoặc xóa):
+# PRICE_SERVICE_URI=http://host.docker.internal:30083
+# PRICE_SERVICE_WS_URI=ws://host.docker.internal:30083
+
+# Restart API Gateway
+docker compose restart api-gateway
+
+# Start price-service trong Docker
+docker compose up -d price-service
+
+# Verify
+docker compose ps
+# Expected: 10 containers including price-service
+```
+
+---
+
+### **🔧 Network Configuration Explained**
+
+**Cách API Gateway (Docker) giao tiếp với Price Service (Kubernetes):**
+
+1. **Price Service** chạy trong Kubernetes với **NodePort 30083**
+   - Pod internal port: `8083`
+   - Service type: `NodePort`
+   - NodePort: `30083` (exposed trên host machine)
+
+2. **API Gateway** chạy trong Docker container
+   - Sử dụng `host.docker.internal` để truy cập host machine
+   - `host.docker.internal:30083` → K8s NodePort → Price Service Pod
+
+3. **Environment Variables** trong API Gateway (.env):
+   ```env
+   # Khi không set → dùng Eureka service discovery (Docker mode)
+   # Khi set → override và gọi trực tiếp đến K8s (Hybrid mode)
+   PRICE_SERVICE_URI=http://host.docker.internal:30083
+   PRICE_SERVICE_WS_URI=ws://host.docker.internal:30083
+   ```
+
+4. **Luồng request:**
+   ```
+   Frontend (localhost:3000) 
+     → API Gateway (localhost:8081)
+     → host.docker.internal:30083 (Kubernetes NodePort)
+     → Price Service Pod (8083)
+   ```
+
+**Troubleshooting Network Issues:**
+
+| Vấn đề | Nguyên nhân | Giải pháp |
+|--------|-------------|-----------|
+| `Connection refused` | K8s pod chưa ready | `kubectl get pods -n trading-system` - đợi 1/1 Ready |
+| `404 Not Found` | NodePort sai | Verify `kubectl get svc -n trading-system` |
+| `host.docker.internal not found` | Docker Desktop config | Enable "Use Kubernetes" trong Docker Desktop |
+| API Gateway không kết nối được | Env vars chưa set | Kiểm tra `.env` và restart api-gateway |
+| WebSocket disconnect | Port mapping sai | Verify `PRICE_SERVICE_WS_URI` |
+
+---
+
+### **📊 So Sánh 2 Options**
+
+| Feature | Docker Compose Only | Hybrid (Docker + K8s) |
+|---------|---------------------|----------------------|
+| **Setup Time** | ⚡ 2 phút | 🕐 5-10 phút |
+| **Complexity** | 🟢 Đơn giản | 🟡 Trung bình |
+| **Autoscaling** | ❌ Không có | ✅ HPA (1-3 replicas) |
+| **Resource Usage** | 🟢 Thấp | 🟡 Cao hơn |
+| **Production-like** | 🟡 Cơ bản | 🟢 Giống production |
+| **Debugging** | 🟢 Dễ | 🟡 Phức tạp hơn |
+| **Use Case** | Local dev, testing | Load testing, demo autoscaling |
+
+**Khuyến nghị:**
+- **Development daily:** Dùng **Option 1** (Docker Compose only)
+- **Demo autoscaling:** Dùng **Option 2** (Hybrid)
+- **Production:** Deploy tất cả services lên Kubernetes với HPA
+
+---
+
+### ☸️ Kubernetes Monitoring & Management
+
+### ☸️ Kubernetes Monitoring & Management
+
+**Sử dụng khi chạy Option 2 (Hybrid mode):**
+
+```powershell
+# Watch pods scaling (realtime)
+kubectl get pods -n trading-system -w
+
+# View HPA status và metrics
+kubectl get hpa -n trading-system
+kubectl describe hpa price-service -n trading-system
+
+# Check resource usage (CPU, Memory)
+kubectl top pods -n trading-system
+kubectl top nodes
+
+# View logs
+kubectl logs -n trading-system -l app=price-service -f --tail=100
+
+# Stream logs từ tất cả replicas
+kubectl logs -n trading-system -l app=price-service -f --prefix=true
+
+# Exec vào pod để debug
+kubectl exec -n trading-system -it $(kubectl get pod -n trading-system -l app=price-service -o jsonpath='{.items[0].metadata.name}') -- /bin/sh
+
+# Port forward để test trực tiếp
+kubectl port-forward -n trading-system svc/price-service 8083:8083
+
+# Restart pod
+kubectl rollout restart deployment/price-service -n trading-system
+
+# Scale manually (override HPA temporarily)
+kubectl scale deployment price-service -n trading-system --replicas=3
+
+# View events
+kubectl get events -n trading-system --sort-by='.lastTimestamp'
+```
+
+**Cleanup Kubernetes:**
+```powershell
+# Delete tất cả resources trong namespace
+kubectl delete namespace trading-system
+
+# Hoặc delete từng resource
+kubectl delete -f k8s/autoscaling/price-service-hpa.yaml
+kubectl delete -f k8s/services/price-service-service.yaml
+kubectl delete -f k8s/deployments/price-service-deployment.yaml
 ```
 
 ### Docker Services
@@ -348,7 +549,7 @@ Invoke-WebRequest http://localhost:8081/api/prices/candles/BTCUSDT/1m?limit=5
 
 ---
 
-## Quick Start Local
+## 🏃 Quick Start - Chạy Dự Án
 
 ### 1. Clone the Repository
 

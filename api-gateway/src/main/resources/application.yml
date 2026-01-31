@@ -91,6 +91,26 @@ spring:
               filters:
                 - RewritePath=/v3/api-docs/crawler-service, /api
 
+            # ==========================================
+            # Analysis Service Routes (Python FastAPI - Direct HTTP)
+            # ==========================================
+            - id: analysis-service
+              uri: ${ANALYSIS_SERVICE_URL:http://analysis-service:8000}
+              predicates:
+                - Path=/api/analysis/**, /api/sentiment/**, /api/predict/**
+
+            - id: analysis-service-health
+              uri: ${ANALYSIS_SERVICE_URL:http://analysis-service:8000}
+              predicates:
+                - Path=/health
+
+            - id: analysis-service-doc
+              uri: ${ANALYSIS_SERVICE_URL:http://analysis-service:8086}
+              predicates:
+                - Path=/v3/api-docs/analysis-service
+              filters:
+                - RewritePath=/v3/api-docs/analysis-service, /docs
+
 eureka:
   client:
     service-url:
@@ -110,6 +130,8 @@ springdoc:
         url: /v3/api-docs/news-service
       - name: Crawler service
         url: /v3/api-docs/crawler-service
+      - name: Analysis service
+        url: /v3/api-docs/analysis-service
 
 logging:
   level:

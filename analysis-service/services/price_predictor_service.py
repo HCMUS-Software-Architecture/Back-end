@@ -1,5 +1,5 @@
 """
-Price Prediction Service using OpenRouter AI.
+Price Prediction Service using Google Gemini AI.
 
 This service combines historical price data and news sentiment
 to predict short-term price direction (UP/DOWN/NEUTRAL).
@@ -10,7 +10,8 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
-from openai import OpenAI
+from google import genai
+from google.genai import types
 
 from config.settings import get_settings
 from models.schemas import (
@@ -46,12 +47,9 @@ IMPORTANT: Respond ONLY with valid JSON in this exact format:
     
     def __init__(self):
         settings = get_settings()
-        self.client = OpenAI(
-            base_url=settings.OPENROUTER_BASE_URL,
-            api_key=settings.OPENROUTER_API_KEY
-        )
-        self.primary_model = settings.PRIMARY_MODEL
-        self.fallback_model = settings.FALLBACK_MODEL
+        self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        self.primary_model = settings.GEMINI_MODEL
+        self.fallback_model = settings.GEMINI_FALLBACK_MODEL
     
     def calculate_technical_indicators(self, candles: List[Dict]) -> TechnicalIndicators:
         """
@@ -269,37 +267,36 @@ Trend: {sentiment.sentiment_trend.capitalize()}
         # Step 3: Build prompt
         user_prompt = self.build_prediction_prompt(symbol, technical, sentiment)
         
-        # Step 4: Call OpenRouter AI
+        # Step 4: Call Gemini AI
         try:
-            logger.info(f"Calling OpenRouter AI with model: {self.primary_model}")
-            response = self.client.chat.completions.create(
+            logger.info(f"Calling Gemini AI with model: {self.primary_model}")
+            response = self.client.models.generate_content(
                 model=self.primary_model,
-                messages=[
-                    {"role": "system", "content": self.SYSTEM_PROMPT},
-                    {"role": "user", "content": user_prompt}
-                ],
-                temperature=0.3,
-                max_tokens=800,
-                response_format={"type": "json_object"}
+                contents=user_prompt,
+                config=types.GenerateContentConfig(
+                    system_instruction=self.SYSTEM_PROMPT,
+                    temperature=0.3,
+                    max_output_tokens=800,
+                    response_mime_type="application/json"
+                )
             )
-            
-            result_text = response.choices[0].message.content
-            logger.info("Received response from AI")
+            result_text = response.text
+            logger.info("Received response from Gemini AI")
             
         except Exception as e:
             logger.warning(f"Primary model failed: {e}. Trying fallback model...")
             try:
-                response = self.client.chat.completions.create(
+                response = self.client.models.generate_content(
                     model=self.fallback_model,
-                    messages=[
-                        {"role": "system", "content": self.SYSTEM_PROMPT},
-                        {"role": "user", "content": user_prompt}
-                    ],
-                    temperature=0.3,
-                    max_tokens=800,
-                    response_format={"type": "json_object"}
+                    contents=user_prompt,
+                    config=types.GenerateContentConfig(
+                        system_instruction=self.SYSTEM_PROMPT,
+                        temperature=0.3,
+                        max_output_tokens=800,
+                        response_mime_type="application/json"
+                    )
                 )
-                result_text = response.choices[0].message.content
+                result_text = response.text
                 logger.info("Fallback model succeeded")
             except Exception as fallback_error:
                 logger.error(f"Both models failed: {fallback_error}")

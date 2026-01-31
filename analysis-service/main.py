@@ -70,9 +70,12 @@ async def lifespan(app: FastAPI):
         sentiment_service = SentimentAnalysisService()
         logger.info(f"Sentiment Analysis Service initialized with model: {settings.GEMINI_MODEL}")
     
-    # Initialize price predictor service
-    predictor_service = PricePredictorService()
-    logger.info(f"Price Predictor Service initialized with model: {settings.PRIMARY_MODEL}")
+    # Initialize price predictor service (also requires GEMINI_API_KEY now)
+    if not settings.GEMINI_API_KEY:
+        logger.warning("GEMINI_API_KEY not set. Price prediction will not work.")
+    else:
+        predictor_service = PricePredictorService()
+        logger.info(f"Price Predictor Service initialized with model: {settings.GEMINI_MODEL}")
     
     consumer = get_consumer()
     consumer.set_message_handler(process_news_message)

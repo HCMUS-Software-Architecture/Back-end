@@ -4,6 +4,7 @@ Repository for fetching historical price data from MongoDB.
 
 from datetime import datetime
 from typing import List, Dict
+from bson.decimal128 import Decimal128
 from database import get_database
 
 
@@ -45,6 +46,12 @@ class PriceRepository:
         ).sort("openTime", -1).limit(limit)
         
         candles = await cursor.to_list(length=limit)
+        
+        # Convert Decimal128 to float for pandas compatibility
+        for candle in candles:
+            for key in ['open', 'high', 'low', 'close', 'volume']:
+                if key in candle and isinstance(candle[key], Decimal128):
+                    candle[key] = float(candle[key].to_decimal())
         
         # Reverse to get oldest first (required for technical indicators)
         candles.reverse()

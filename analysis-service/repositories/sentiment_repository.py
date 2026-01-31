@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from typing import List, Dict
 
+from bson.decimal128 import Decimal128
 from database import get_sentiment_collection, get_database
 from models.schemas import (
     SymbolSentiment
@@ -67,5 +68,10 @@ class SentimentRepository:
         ).sort("analyzed_at", -1)
         
         sentiments = await cursor.to_list(length=None)
+        
+        # Convert Decimal128 to float for compatibility
+        for sentiment in sentiments:
+            if 'score' in sentiment and isinstance(sentiment['score'], Decimal128):
+                sentiment['score'] = float(sentiment['score'].to_decimal())
         
         return sentiments
