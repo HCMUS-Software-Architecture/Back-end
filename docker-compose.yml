@@ -181,6 +181,8 @@ services:
       - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS:-guest}
       - MONGODB_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME:-admin}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/?authSource=admin
       - MONGODB_DATABASE=${MONGODB_DATABASE:-trading}
+    # Remove fixed port mapping to avoid conflict with price-service
+    # price-collector doesn't need external access
     ports:
       - '8086:8083'
     depends_on:
@@ -201,7 +203,7 @@ services:
       - DISCOVERY_SERVER=http://discovery-server:8761/eureka
       - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://frontend:3000}
       - NEWS_SERVICE_URL=http://news-service:9091
-      - CRAWLER_SERVICE_URL=http://crawler-service:8084
+      - CRAWLER_SERVICE_URL=http://crawler-service:9090
     container_name: api-gateway
     ports:
       - '8081:8081'
@@ -223,7 +225,7 @@ services:
     env_file:
       - ./news-service/.env
     ports:
-      - '8085:8085'
+      - '9091:9091'
     depends_on:
       mongodb:
         condition: service_healthy
@@ -238,14 +240,45 @@ services:
     env_file:
       - ./crawler-service/.env
     ports:
-      - '8084:8084'
+      - '9090:9090'
     depends_on:
-      mongodb:
-        condition: service_healthy
-      redis:
+      rabbitmq:
         condition: service_healthy
     networks:
       - trading-network
+
+  analysis-service:
+    build:
+      context: ./analysis-service
+      dockerfile: Dockerfile
+    container_name: analysis-service
+    env_file:
+      - ./analysis-service/.env
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.0-flash}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-sk-or-v1-free}
+      - MONGODB_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME:-admin}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/?authSource=admin
+      - MONGODB_DATABASE=${MONGODB_DATABASE:-trading}
+      - RABBITMQ_URL=amqp://${RABBITMQ_DEFAULT_USER:-guest}:${RABBITMQ_DEFAULT_PASS:-guest}@rabbitmq:5672
+      - DEBUG=false
+    ports:
+      - '8000:8000'
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'python -c "import urllib.request; urllib.request.urlopen(\"http://localhost:8000/health\").read()"',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   # ==========================================
   # Frontend
@@ -280,6 +313,7 @@ networks:
 # ==========================================
 # Volumes
 # ==========================================
+
 volumes:
   postgres_data:
   mongodb_data:

@@ -40,8 +40,9 @@ import java.util.concurrent.*;
 public class PriceCollectorService {
     private final ObjectMapper objectMapper;
     private final SimpMessagingTemplate simpMessagingTemplate;
+    private final PriceCandleRepository priceCandleRepository;
     private final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1);
-    private final String[] supportedInterval = {"1m", "3m", "5m", "15m", "30m", "1h"};
+    private final String[] supportedInterval = { "1m", "3m", "5m", "15m", "30m", "1h" };
     private final Map<String, WebSocketClient> webSocketClientMap = new ConcurrentHashMap<>();
 
     // Dùng Combined Stream URL
@@ -60,7 +61,7 @@ public class PriceCollectorService {
     @PreDestroy
     private void cleanup() {
         webSocketClientMap.forEach((symbol, client) -> {
-            if(client != null && client.isOpen()) {
+            if (client != null && client.isOpen()) {
                 client.close();
             }
         });
@@ -70,14 +71,14 @@ public class PriceCollectorService {
     private void connectToBinanceStream(String symbol) {
         log.info("Collector service is activated due to profile's name of the service is collector-service");
 
-        if(webSocketClientMap.containsKey(symbol)) {
+        if (webSocketClientMap.containsKey(symbol)) {
             log.info("An existing WebSocket Client has been opened");
             return;
         }
 
         List<String> streamParams = new ArrayList<>();
 
-        for(String interval : supportedInterval) {
+        for (String interval : supportedInterval) {
             streamParams.add(symbol.toLowerCase() + "@kline_" + interval);
         }
 
@@ -161,26 +162,26 @@ public class PriceCollectorService {
     }
 
     private void saveClosedCandle(BinanceKlineEvent.BinanceKlineData kline, String symbol) {
-//        try {
-//            PriceCandle entity = PriceCandle.builder()
-//                    .symbol(symbol.toUpperCase())
-//                    .interval(kline.getInterval())
-//                    .openTime(Instant.ofEpochMilli(kline.getOpenTime()))
-//                    .closeTime(Instant.ofEpochMilli(kline.getCloseTime()))
-//                    .open(new BigDecimal(kline.getOpen()))
-//                    .high(new BigDecimal(kline.getHigh()))
-//                    .low(new BigDecimal(kline.getLow()))
-//                    .close(new BigDecimal(kline.getClose()))
-//                    .volume(new BigDecimal(kline.getVolume()))
-//                    .trades(kline.getTrades())
-//                    .createdAt(LocalDateTime.now())
-//                    .build();
-//
-//            priceCandleRepository.save(entity);
-//            log.info("Saved closed candle: {} {}", symbol, kline.getInterval());
-//        } catch (Exception e) {
-//            log.error("Failed to save candle: {}", e.getMessage());
-//        }
+        // try {
+        //     PriceCandle entity = PriceCandle.builder()
+        //             .symbol(symbol.toUpperCase())
+        //             .interval(kline.getInterval())
+        //             .openTime(Instant.ofEpochMilli(kline.getOpenTime()))
+        //             .closeTime(Instant.ofEpochMilli(kline.getCloseTime()))
+        //             .open(new BigDecimal(kline.getOpen()))
+        //             .high(new BigDecimal(kline.getHigh()))
+        //             .low(new BigDecimal(kline.getLow()))
+        //             .close(new BigDecimal(kline.getClose()))
+        //             .volume(new BigDecimal(kline.getVolume()))
+        //             .trades(kline.getTrades())
+        //             .createdAt(LocalDateTime.now())
+        //             .build();
+
+        //     priceCandleRepository.save(entity);
+        //     log.info("Saved closed candle: {} {}", symbol, kline.getInterval());
+        // } catch (Exception e) {
+        //     log.error("Failed to save candle: {}", e.getMessage());
+        // }
     }
 
     private void scheduleReconnect(String symbol) {

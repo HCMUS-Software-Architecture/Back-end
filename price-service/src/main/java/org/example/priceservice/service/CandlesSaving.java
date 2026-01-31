@@ -7,6 +7,7 @@ import org.example.priceservice.entity.PriceCandle;
 import org.example.priceservice.repository.PriceCandleRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -24,6 +25,7 @@ import java.util.concurrent.Executor;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Profile("collector")
 public class CandlesSaving {
     private final PriceCandleRepository priceCandleRepository;
     private final BinanceApiClient binanceApiClient;
@@ -33,7 +35,7 @@ public class CandlesSaving {
 
     @Value("${price.symbols:btcusdt,ethusdt}")
     private String symbolsConfig;
-    private final String[] supportedInterval = {"1m", "3m", "5m", "15m", "30m", "1h"};
+    private final String[] supportedInterval = { "1m", "3m", "5m", "15m", "30m", "1h" };
 
     @EventListener(ApplicationReadyEvent.class)
     public void onApplicationReady() {
@@ -63,10 +65,14 @@ public class CandlesSaving {
     // Hàm xử lý logic cho 1 cặp duy nhất
     private void processSymbolInterval(String symbol, String interval) {
         try {
-            List<List<Object>> rawObjects = binanceApiClient.getAllCandles(symbol.toUpperCase(), interval, 100);
-            System.out.println(rawObjects.size());
+            log.info("Fetching candles for {} {} - limit: 1000", symbol, interval);
+            List<List<Object>> rawObjects = binanceApiClient.getAllCandles(symbol.toUpperCase(), interval, 1000);
+            log.info("Received {} candles for {} {}", rawObjects.size(), symbol, interval);
 
-            if (rawObjects == null || rawObjects.isEmpty()) return;
+            if (rawObjects == null || rawObjects.isEmpty()) {
+                log.warn("No candles received for {} {}", symbol, interval);
+                return;
+            }
 
             // 2. Map dữ liệu
             List<PriceCandle> candles = new ArrayList<>();
@@ -76,15 +82,17 @@ public class CandlesSaving {
 
             // 3. Bulk Upsert vào MongoDB (Hiệu năng cao + Chống trùng lặp)
             bulkUpsert(candles);
+            log.info("Successfully saved {} candles for {} {}", candles.size(), symbol, interval);
 
         } catch (Exception e) {
             // Log lỗi để không ảnh hưởng các luồng khác
-            System.err.println("Error fetching " + symbol + " " + interval + ": " + e.getMessage());
+            log.error("Error fetching {} {}: {}", symbol, interval, e.getMessage(), e);
         }
     }
 
     private void bulkUpsert(List<PriceCandle> candles) {
-        if (candles.isEmpty()) return;
+        if (candles.isEmpty())
+            return;
 
         // BulkOperations giúp gom nhiều lệnh lại gửi 1 lần xuống Mongo
         BulkOperations bulkOps = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, PriceCandle.class);

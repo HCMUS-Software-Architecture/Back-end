@@ -35,6 +35,9 @@ public class JwtAuthFilter implements GlobalFilter {
             "/api/auth/refresh",
             "/api/auth/google",
             "/api/health",
+            "/api/prices",
+            "/api/news",
+            "/api/crawler",
             "/v3",
             "/ws",
             "/swagger-ui");
@@ -50,10 +53,15 @@ public class JwtAuthFilter implements GlobalFilter {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
 
+        // Debug: Log all requests
+        String path = request.getURI().getPath();
+        boolean secured = this.isSecured.test(request);
+        System.out.println("[JwtAuthFilter] Path: " + path + " | Secured: " + secured);
+
         // 1. Kiểm tra xem đây có phải route cần bảo vệ không
-        if (this.isSecured.test(request)) {
+        if (secured) {
             String authHeader = request.getHeaders().getFirst("Authorization");
-            System.out.println(authHeader);
+            System.out.println("[JwtAuthFilter] Auth Header: " + authHeader);
 
             // 2a. Nếu là route private nhưng không có token
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
