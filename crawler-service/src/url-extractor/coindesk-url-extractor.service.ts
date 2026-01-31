@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { chromium, Browser, Page } from 'playwright';
 import { IUrlExtractorService } from 'src/types';
+import { AIUrlExtractorService } from './ai-url-extractor.service';
 
 @Injectable()
 export class CoindeskUrlExtractorService implements IUrlExtractorService {
@@ -8,8 +9,12 @@ export class CoindeskUrlExtractorService implements IUrlExtractorService {
   private readonly baseUrl = 'https://www.coindesk.com';
   private readonly newsListUrl = 'https://www.coindesk.com/latest-crypto-news';
 
+  constructor(private readonly aiUrlExtractor: AIUrlExtractorService) {}
+
   async extractUrls(): Promise<string[]> {
     let browser: Browser | null = null;
+    let page: Page | null = null;
+    let htmlContent = '';
 
     try {
       this.logger.log(
@@ -21,12 +26,14 @@ export class CoindeskUrlExtractorService implements IUrlExtractorService {
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       });
-      const page: Page = await context.newPage();
+      page = await context.newPage();
 
       await page.goto(this.newsListUrl, {
         waitUntil: 'domcontentloaded',
         timeout: 30000,
       });
+
+      htmlContent = await page.content();
 
       await page.waitForSelector('a.content-card-title', {
         timeout: 10000,
@@ -54,8 +61,32 @@ export class CoindeskUrlExtractorService implements IUrlExtractorService {
       );
       return urls;
     } catch (error) {
-      this.logger.error(`Failed to crawl Coindesk: ${error.message}`);
-      throw error;
+      this.logger.error(
+        `Failed to crawl Coindesk using DOM-based extraction: ${error.message}`,
+      );
+
+      if (htmlContent) {
+        this.logger.log('Starting fallback extraction using Gemini AI...');
+
+        try {
+          const fallbackUrls = await this.aiUrlExtractor.extractUrlsFromHtml(
+            htmlContent,
+            'Coindesk',
+          );
+
+          if (fallbackUrls.length > 0) {
+            this.logger.log(
+              `Finished fallback extraction using Gemini AI, found ${fallbackUrls.length} URLs.`,
+            );
+            return fallbackUrls;
+          }
+        } catch (fallbackError) {
+          this.logger.error(
+            `Fallback Gemini extraction also failed: ${fallbackError.message}`,
+          );
+        }
+      }
+      return [];
     } finally {
       if (browser) {
         await browser.close();

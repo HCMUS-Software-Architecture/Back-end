@@ -5,6 +5,7 @@ import Redis from 'ioredis';
 import { CoindeskUrlExtractorService } from './coindesk-url-extractor.service';
 import { CointelegraphUrlExtractorService } from './cointelegraph-url-extractor.service';
 import { IUrlExtractorService } from 'src/types';
+import { AIUrlExtractorService } from './ai-url-extractor.service';
 
 export const URL_QUEUE_NAME = 'url-queue';
 export const REDIS_CLIENT = 'REDIS_CLIENT';
@@ -18,9 +19,14 @@ export class UrlExtractorService {
   constructor(
     @Inject(REDIS_CLIENT) private readonly redis: Redis,
     @InjectQueue(URL_QUEUE_NAME) private readonly urlQueue: Queue,
+    private readonly aiUrlExtractorService: AIUrlExtractorService,
   ) {
-    this.urlExtractorServices.push(new CointelegraphUrlExtractorService());
-    this.urlExtractorServices.push(new CoindeskUrlExtractorService());
+    this.urlExtractorServices.push(
+      new CointelegraphUrlExtractorService(this.aiUrlExtractorService),
+    );
+    this.urlExtractorServices.push(
+      new CoindeskUrlExtractorService(this.aiUrlExtractorService),
+    );
   }
 
   async extractUrls(): Promise<string[]> {
@@ -88,7 +94,7 @@ export class UrlExtractorService {
 
   private async markUrlsAsCrawled(urls: string[]): Promise<void> {
     const pipeline = this.redis.pipeline();
-    const ttl = 60 * 60 * 24 * 7; // 7 days TTL
+    const ttl = 60 * 60 * 24 * 7;
 
     for (const url of urls) {
       pipeline.set(this.getRedisKey(url), Date.now().toString(), 'EX', ttl);

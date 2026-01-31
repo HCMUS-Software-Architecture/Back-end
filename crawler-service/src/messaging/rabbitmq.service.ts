@@ -1,4 +1,9 @@
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import * as amqp from 'amqplib';
 import { NewsArticle } from '../types';
 
@@ -97,9 +102,7 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
         `Published news article to analysis queue: "${article.header}"`,
       );
     } catch (error) {
-      this.logger.error(
-        `Failed to publish news article: ${error.message}`,
-      );
+      this.logger.error(`Failed to publish news article: ${error.message}`);
       throw error;
     }
   }
