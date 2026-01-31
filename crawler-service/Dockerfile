@@ -1,53 +1,52 @@
-# Stage 1: Build
-FROM node:18-alpine AS builder
+# Build stage
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-COPY pnpm-lock.yaml ./
+# Install pnpm
+RUN npm install -g pnpm
 
-# Install pnpm and dependencies
-RUN npm install -g pnpm && \
-    pnpm install --frozen-lockfile
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
+
+RUN pnpm install
 
 # Copy source code
 COPY . .
 
 # Build the application
-RUN pnpm run build
+RUN pnpm build
 
-# Stage 2: Production
-FROM node:18-alpine
+# Production stage
+FROM node:22-alpine AS production
 
 WORKDIR /app
 
-# Install pnpm and required tools for crawling
+# Install pnpm and Playwright dependencies
 RUN npm install -g pnpm && \
-    apk add --no-cache chromium
+    apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
 
-# Set Chrome environment variable for Puppeteer
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+# Set Playwright to use system Chromium
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
-# Copy package files
-COPY package*.json ./
-COPY pnpm-lock.yaml ./
-
-# Install production dependencies only
-RUN pnpm install --prod --frozen-lockfile
-
-# Copy built application from builder
+# Copy built files
 COPY --from=builder /app/dist ./dist
-
-# Copy data directory if exists
-COPY --from=builder /app/data ./data
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./
 
 # Expose port
-EXPOSE 9090
+EXPOSE 8084
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:9090/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:8084/api || exit 1
 
 # Start the application
 CMD ["node", "dist/main"]

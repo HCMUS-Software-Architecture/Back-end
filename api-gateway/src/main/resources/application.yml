@@ -21,6 +21,9 @@ spring:
       server:
         webflux:
           routes:
+            # ==========================================
+            # User Service Routes (Spring Boot - Eureka)
+            # ==========================================
             - id: user-service
               uri: lb://user-service
               predicates:
@@ -38,6 +41,9 @@ spring:
               filters:
                 - RewritePath=/v3/api-docs/user-service, /v3/api-docs
 
+            # ==========================================
+            # Price Service Routes (Spring Boot - Eureka)
+            # ==========================================
             - id: price-service
               uri: ${PRICE_SERVICE_URI:lb://price-service}
               predicates:
@@ -55,15 +61,35 @@ spring:
               filters:
                 - RewritePath=/v3/api-docs/price-service, /v3/api-docs
 
+            # ==========================================
+            # News Service Routes (NestJS - Direct HTTP)
+            # ==========================================
             - id: news-service
-              uri: http://news-service:8085
+              uri: ${NEWS_SERVICE_URL:http://news-service:8085}
               predicates:
                 - Path=/api/news/**
 
+            - id: news-service-doc
+              uri: ${NEWS_SERVICE_URL:http://news-service:8085}
+              predicates:
+                - Path=/v3/api-docs/news-service
+              filters:
+                - RewritePath=/v3/api-docs/news-service, /api
+
+            # ==========================================
+            # Crawler Service Routes (NestJS - Direct HTTP)
+            # ==========================================
             - id: crawler-service
-              uri: http://crawler-service:8084
+              uri: ${CRAWLER_SERVICE_URL:http://crawler-service:8084}
               predicates:
                 - Path=/api/crawler/**
+
+            - id: crawler-service-doc
+              uri: ${CRAWLER_SERVICE_URL:http://crawler-service:8084}
+              predicates:
+                - Path=/v3/api-docs/crawler-service
+              filters:
+                - RewritePath=/v3/api-docs/crawler-service, /api
 
 eureka:
   client:
@@ -80,6 +106,11 @@ springdoc:
         url: /v3/api-docs/user-service
       - name: Price service
         url: /v3/api-docs/price-service
+      - name: News service
+        url: /v3/api-docs/news-service
+      - name: Crawler service
+        url: /v3/api-docs/crawler-service
+
 logging:
   level:
     org.springframework.cloud.gateway: DEBUG
