@@ -45,12 +45,12 @@ spring:
             # Price Service Routes (Spring Boot - Eureka)
             # ==========================================
             - id: price-service
-              uri: ${PRICE_SERVICE_URI:lb://price-service}
+              uri: lb://price-service
               predicates:
                 - Path=/api/prices/**, /ws/prices/**
 
             - id: price-websocket
-              uri: ${PRICE_SERVICE_WS_URI:lb:ws://price-service}
+              uri: lb:ws://price-service
               predicates:
                 - Path=/ws/prices
 
