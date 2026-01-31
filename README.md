@@ -255,115 +255,54 @@ kubectl logs -n trading-system -l app=analysis-service -f
 # Stop deployment
 kubectl delete namespace trading-system
 docker compose down
+docker compose build --no-cache
+docker compose up -d
 ```
 
-📖 **[Kubernetes Autoscaling Documentation](./docs/KUBERNETES_DEPLOYMENT_SUMMARY.md)**
+### Docker Services
 
----
+The following services will be started:
 
-### � Troubleshooting Kubernetes Deployment
+| Service                  | Port  | Purpose                            |
+| ------------------------ | ----- | ---------------------------------- |
+| **Infrastructure**       |       |                                    |
+| PostgreSQL               | 5432  | Relational database (prices)       |
+| MongoDB                  | 27017 | Document database (articles/users) |
+| Redis                    | 6379  | Cache & session storage            |
+| RabbitMQ                 | 5672  | Message broker (AMQP)              |
+| RabbitMQ UI              | 15672 | RabbitMQ management console        |
+| RabbitMQ STOMP           | 3001  | STOMP WebSocket relay              |
+| **Spring Boot Services** |       |                                    |
+| Discovery Server         | 8761  | Eureka service registry            |
+| API Gateway              | 8081  | Single entry point, routing        |
+| User Service             | 8082  | Authentication, subscriptions      |
+| Price Service            | 8083  | Price API (multiple replicas)      |
+| Price Collector          | 8086  | Binance WebSocket collector        |
+| **NestJS Services**      |       |                                    |
+| News Service             | 8085  | Article retrieval API              |
+| Crawler Service          | 8084  | Multi-source news crawler          |
+| **Frontend**             |       |                                    |
+| Next.js Frontend         | 3000  | React-based trading UI             |
 
-Common issues and solutions when deploying to Kubernetes:
-
-#### **Pods in ImagePullBackOff**
-
-**Problem**: Kubernetes can't find the Docker images
+### Full Stack Docker Deployment
 
 ```powershell
-# Check images exist
-docker images | Select-String "trading-application"
+# Build and start all services (first time may take 10-15 minutes)
+docker compose up -d --build
+
+# Watch the logs
+docker compose logs -f
+
+# Check service health
+docker compose ps
+
+# Access the application
+# - Frontend: http://localhost:3000
+# - API Gateway: http://localhost:8081
+# - Eureka Dashboard: http://localhost:8761
+# - RabbitMQ UI: http://localhost:15672 (guest/guest)
+# - API Documentation: http://localhost:8081/swagger-ui.html
 ```
-
-**Solution**: Ensure `imagePullPolicy: Never` in deployments and images built with correct names:
-
-```powershell
-# Build images with Docker Compose (creates trading-application-* prefix)
-docker compose build discovery-server api-gateway user-service price-service analysis-service
-```
-
-#### **Pods in CrashLoopBackOff**
-
-**Problem**: Application fails to start
-
-```powershell
-# Check pod logs
-kubectl logs -n trading-system -l app=price-service --tail=50
-kubectl logs -n trading-system -l app=analysis-service --tail=50
-```
-
-**Common causes:**
-
-1. **MongoDB connection error**: Check `MONGODB_URI` env var is correct (not `SPRING_DATA_MONGODB_URI`)
-2. **Missing environment variables**: Verify secret exists and is mounted correctly
-3. **Infrastructure not running**: Start Docker Compose services first
-
-```powershell
-# Verify secret
-kubectl get secret trading-secrets -n trading-system -o yaml
-
-# Check decoded values
-kubectl get secret trading-secrets -n trading-system -o jsonpath='{.data.MONGODB_URI}' | %{[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($_))}
-```
-
-#### **Health Check Failures**
-
-**Problem**: Readiness probe returns 404
-
-**Solutions:**
-
-- **Price Service**: Ensure `/actuator/health` endpoint exists (Spring Boot Actuator dependency)
-- **Analysis Service**: Ensure `/health` endpoint implemented in FastAPI
-
-#### **Port-Forward Fails**
-
-**Problem**: `kubectl port-forward` returns "error forwarding port"
-
-```powershell
-# Check pods are ready
-kubectl get pods -n trading-system
-
-# Wait for READY column to show 1/1
-Start-Sleep -Seconds 30
-kubectl get pods -n trading-system
-
-# Then try port-forward
-kubectl port-forward -n trading-system svc/price-service 8083:8083
-```
-
-#### **Services Can't Connect to Docker Compose Infrastructure**
-
-**Problem**: K8s pods can't reach PostgreSQL, MongoDB, Redis, RabbitMQ
-
-**Solution**: Ensure host references use `host.docker.internal` in deployments:
-
-```yaml
-- name: SPRING_RABBITMQ_HOST
-  value: 'host.docker.internal' # NOT 'rabbitmq' or 'localhost'
-```
-
-#### **Quick Health Check**
-
-```powershell
-# Check all resources
-kubectl get all -n trading-system
-
-# Test endpoints (after port-forward)
-curl http://localhost:8083/actuator/health
-curl http://localhost:8000/health
-```
-
----
-
-### �📊 Deployment Comparison
-
-| Feature          | Docker Compose | Hybrid (Recommended) | K8s Full      |
-| ---------------- | -------------- | -------------------- | ------------- |
-| Setup Time       | ⭐ 5 min       | ⭐⭐ 15 min          | ⭐⭐⭐ 30 min |
-| Autoscaling      | ❌             | ✅ Apps only         | ✅ All        |
-| Load Balancing   | ⚠️ Basic       | ✅ Apps              | ✅ All        |
-| Database Backups | ✅ Easy        | ✅ Easy              | ⚠️ Complex    |
-| Resource Limits  | ⚠️ Manual      | ✅ Apps              | ✅ All        |
-| Best For         | Quick dev      | Production-like dev  | Production    |
 
 ---
 
