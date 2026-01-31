@@ -8,6 +8,7 @@ import {
 } from './url-extractor.service';
 import { CoindeskUrlExtractorService } from './coindesk-url-extractor.service';
 import { CointelegraphUrlExtractorService } from './cointelegraph-url-extractor.service';
+import { AIUrlExtractorService } from './ai-url-extractor.service';
 import { UrlQueueProcessor } from './url-queue.processor';
 import { NewsExtractorModule } from '../news-extractor/news-extractor.module';
 import { NewsDatabaseModule } from '../database/news-database.module';
@@ -37,12 +38,14 @@ const redisConfig = {
       },
     },
     UrlExtractorService,
+    AIUrlExtractorService,
     CoindeskUrlExtractorService,
     CointelegraphUrlExtractorService,
     UrlQueueProcessor,
   ],
   exports: [
     UrlExtractorService,
+    AIUrlExtractorService,
     CoindeskUrlExtractorService,
     CointelegraphUrlExtractorService,
     REDIS_CLIENT,
