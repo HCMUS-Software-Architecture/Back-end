@@ -5,23 +5,25 @@ services:
   # Infrastructure Services
   # ==========================================
 
-  postgres:
-    image: postgres:15-alpine
-    container_name: trading-postgres
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-trading_db}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - '5432:5432'
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres']
-      interval: 10s
-      timeout: 5s
-    networks:
-      - trading-network
+
+  # ==========================================Deprecated Postgres Service========================
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: trading-postgres
+  #   environment:
+  #     POSTGRES_DB: ${POSTGRES_DB:-trading_db}
+  #     POSTGRES_USER: ${POSTGRES_USER:-postgres}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  #   ports:
+  #     - '5432:5432'
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ['CMD-SHELL', 'pg_isready -U postgres']
+  #     interval: 10s
+  #     timeout: 5s
+  #   networks:
+  #     - trading-network
 
   mongodb:
     image: mongo:7
@@ -152,8 +154,6 @@ services:
     ports:
       - '8083'
     depends_on:
-      postgres:
-        condition: service_healthy
       rabbitmq:
         condition: service_healthy
       discovery-server:
@@ -186,8 +186,6 @@ services:
     ports:
       - '8086:8083'
     depends_on:
-      postgres:
-        condition: service_healthy
       rabbitmq:
         condition: service_healthy
     networks:
