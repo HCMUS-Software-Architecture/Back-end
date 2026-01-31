@@ -31,8 +31,9 @@ spec:
               value: 'user'
             - name: SERVER_PORT
               value: '8083'
-            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
-              value: 'http://host.docker.internal:8761/eureka/'
+            # Disable Eureka for K8s deployment (use K8s service discovery)
+            - name: EUREKA_CLIENT_ENABLED
+              value: 'false'
             - name: MONGODB_URI
               valueFrom:
                 secretKeyRef:
@@ -76,15 +77,20 @@ spec:
               value: 'true'
             - name: WEBSOCKET_MAX_SESSIONS
               value: '100'
+            # Disable RabbitMQ health check to prevent pod restarts
+            - name: SPRING_RABBITMQ_LISTENER_SIMPLE_AUTO_STARTUP
+              value: 'false'
+            - name: MANAGEMENT_HEALTH_RABBIT_ENABLED
+              value: 'false'
 
           # Resource requests & limits (critical for HPA)
           resources:
             requests:
-              cpu: '500m' # 0.5 CPU cores minimum
-              memory: '512Mi' # 512 MB minimum
+              cpu: 100m # Request 100 millicores
+              memory: 256Mi # Request 256MB RAM
             limits:
-              cpu: '1000m' # 1 CPU core maximum
-              memory: '1Gi' # 1 GB maximum
+              cpu: 500m # Limit to 500 millicores
+              memory: 512Mi # Limit to 512MB RAM
 
           # Health checks
           livenessProbe:
@@ -92,16 +98,16 @@ spec:
               path: /actuator/health
               port: 8083
             initialDelaySeconds: 60
-            periodSeconds: 30
+            periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
 
           readinessProbe:
             httpGet:
-              path: /actuator/health/readiness
+              path: /actuator/health
               port: 8083
-            initialDelaySeconds: 30
-            periodSeconds: 10
+            initialDelaySeconds: 45
+            periodSeconds: 5
             timeoutSeconds: 3
             failureThreshold: 3
 

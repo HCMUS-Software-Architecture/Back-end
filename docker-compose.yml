@@ -155,10 +155,21 @@ services:
       - .env
     environment:
       - DISCOVERY_SERVER=http://discovery-server:8761/eureka
+      - RABBITMQ_URL=amqp://${RABBITMQ_DEFAULT_USER:-guest}:${RABBITMQ_DEFAULT_PASS:-guest}@rabbitmq:5672
       # CORS_ALLOWED_ORIGINS and CORS_MAX_AGE are loaded from .env via env_file
+      # For hybrid K8s mode, set these to point to NodePort:
+      # PRICE_SERVICE_URI=http://host.docker.internal:30083
+      # PRICE_SERVICE_WS_URI=ws://host.docker.internal:30083
+      - PRICE_SERVICE_URI=${PRICE_SERVICE_URI:-lb://price-service}
+      - PRICE_SERVICE_WS_URI=${PRICE_SERVICE_WS_URI:-lb:ws://price-service}
     container_name: api-gateway
     ports:
       - '8081:8081'
+    depends_on:
+      discovery-server:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
 
   analysis-service:
     build:
@@ -181,11 +192,51 @@ services:
       rabbitmq:
         condition: service_healthy
     healthcheck:
-      test: ['CMD-SHELL', 'python -c "import urllib.request; urllib.request.urlopen(\"http://localhost:8000/health\").read()"']
+      test:
+        [
+          'CMD-SHELL',
+          'python -c "import urllib.request; urllib.request.urlopen(\"http://localhost:8000/health\").read()"',
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
+
+  # news-service:
+  #   build:
+  #     context: ./news-service
+  #     dockerfile: Dockerfile
+  #   container_name: news-service
+  #   env_file:
+  #     - ./news-service/.env
+  #   environment:
+  #     - NODE_ENV=production
+  #   ports:
+  #     - '9091:9091'
+  #   healthcheck:
+  #     test: ['CMD-SHELL', 'curl -f http://localhost:9091/health || exit 1']
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 20s
+
+  # crawler-service:
+  #   build:
+  #     context: ./crawler-service
+  #     dockerfile: Dockerfile
+  #   container_name: crawler-service
+  #   env_file:
+  #     - ./crawler-service/.env
+  #   environment:
+  #     - NODE_ENV=production
+  #   ports:
+  #     - '9090:9090'
+  #   healthcheck:
+  #     test: ['CMD-SHELL', 'curl -f http://localhost:9090/health || exit 1']
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 20s
 
 volumes:
   postgres_data:

@@ -9,12 +9,13 @@ metadata:
     # Enable topology-aware routing for better load distribution
     service.kubernetes.io/topology-mode: 'auto'
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: price-service
   ports:
     - port: 8083
       targetPort: 8083
+      nodePort: 30083
       protocol: TCP
       name: http
 

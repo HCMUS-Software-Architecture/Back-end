@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     # OpenRouter AI (for price prediction)
     OPENROUTER_API_KEY: str = "sk-or-v1-free"  # Free tier default
     OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"
-    PRIMARY_MODEL: str = "meta-llama/llama-3.2-3b-instruct:free"
+    PRIMARY_MODEL: str = "nvidia/nemotron-nano-12b-v2-vl:free"
     FALLBACK_MODEL: str = "google/gemini-2.0-flash-exp:free"
 
     MONGODB_URI: str = ""
