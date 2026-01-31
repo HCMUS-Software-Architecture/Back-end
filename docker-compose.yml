@@ -203,7 +203,7 @@ services:
       - DISCOVERY_SERVER=http://discovery-server:8761/eureka
       - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://frontend:3000}
       - NEWS_SERVICE_URL=http://news-service:9091
-      - CRAWLER_SERVICE_URL=http://crawler-service:8084
+      - CRAWLER_SERVICE_URL=http://crawler-service:9090
     container_name: api-gateway
     ports:
       - '8081:8081'
@@ -225,7 +225,7 @@ services:
     env_file:
       - ./news-service/.env
     ports:
-      - '8085:8085'
+      - '9091:9091'
     depends_on:
       mongodb:
         condition: service_healthy
@@ -240,11 +240,9 @@ services:
     env_file:
       - ./crawler-service/.env
     ports:
-      - '8084:8084'
+      - '9090:9090'
     depends_on:
-      mongodb:
-        condition: service_healthy
-      redis:
+      rabbitmq:
         condition: service_healthy
     networks:
       - trading-network
@@ -254,6 +252,8 @@ services:
       context: ./analysis-service
       dockerfile: Dockerfile
     container_name: analysis-service
+    env_file:
+      - ./analysis-service/.env
     environment:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.0-flash}
