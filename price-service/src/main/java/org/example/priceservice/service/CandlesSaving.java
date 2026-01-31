@@ -65,11 +65,14 @@ public class CandlesSaving {
     // Hàm xử lý logic cho 1 cặp duy nhất
     private void processSymbolInterval(String symbol, String interval) {
         try {
-            List<List<Object>> rawObjects = binanceApiClient.getAllCandles(symbol.toUpperCase(), interval, 100);
-            System.out.println(rawObjects.size());
+            log.info("Fetching candles for {} {} - limit: 1000", symbol, interval);
+            List<List<Object>> rawObjects = binanceApiClient.getAllCandles(symbol.toUpperCase(), interval, 1000);
+            log.info("Received {} candles for {} {}", rawObjects.size(), symbol, interval);
 
-            if (rawObjects == null || rawObjects.isEmpty())
+            if (rawObjects == null || rawObjects.isEmpty()) {
+                log.warn("No candles received for {} {}", symbol, interval);
                 return;
+            }
 
             // 2. Map dữ liệu
             List<PriceCandle> candles = new ArrayList<>();
@@ -79,10 +82,11 @@ public class CandlesSaving {
 
             // 3. Bulk Upsert vào MongoDB (Hiệu năng cao + Chống trùng lặp)
             bulkUpsert(candles);
+            log.info("Successfully saved {} candles for {} {}", candles.size(), symbol, interval);
 
         } catch (Exception e) {
             // Log lỗi để không ảnh hưởng các luồng khác
-            System.err.println("Error fetching " + symbol + " " + interval + ": " + e.getMessage());
+            log.error("Error fetching {} {}: {}", symbol, interval, e.getMessage(), e);
         }
     }
 

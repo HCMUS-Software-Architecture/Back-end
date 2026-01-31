@@ -162,26 +162,26 @@ public class PriceCollectorService {
     }
 
     private void saveClosedCandle(BinanceKlineEvent.BinanceKlineData kline, String symbol) {
-        try {
-            PriceCandle entity = PriceCandle.builder()
-                    .symbol(symbol.toUpperCase())
-                    .interval(kline.getInterval())
-                    .openTime(Instant.ofEpochMilli(kline.getOpenTime()))
-                    .closeTime(Instant.ofEpochMilli(kline.getCloseTime()))
-                    .open(new BigDecimal(kline.getOpen()))
-                    .high(new BigDecimal(kline.getHigh()))
-                    .low(new BigDecimal(kline.getLow()))
-                    .close(new BigDecimal(kline.getClose()))
-                    .volume(new BigDecimal(kline.getVolume()))
-                    .trades(kline.getTrades())
-                    .createdAt(LocalDateTime.now())
-                    .build();
+        // try {
+        //     PriceCandle entity = PriceCandle.builder()
+        //             .symbol(symbol.toUpperCase())
+        //             .interval(kline.getInterval())
+        //             .openTime(Instant.ofEpochMilli(kline.getOpenTime()))
+        //             .closeTime(Instant.ofEpochMilli(kline.getCloseTime()))
+        //             .open(new BigDecimal(kline.getOpen()))
+        //             .high(new BigDecimal(kline.getHigh()))
+        //             .low(new BigDecimal(kline.getLow()))
+        //             .close(new BigDecimal(kline.getClose()))
+        //             .volume(new BigDecimal(kline.getVolume()))
+        //             .trades(kline.getTrades())
+        //             .createdAt(LocalDateTime.now())
+        //             .build();
 
-            priceCandleRepository.save(entity);
-            log.info("Saved closed candle: {} {}", symbol, kline.getInterval());
-        } catch (Exception e) {
-            log.error("Failed to save candle: {}", e.getMessage());
-        }
+        //     priceCandleRepository.save(entity);
+        //     log.info("Saved closed candle: {} {}", symbol, kline.getInterval());
+        // } catch (Exception e) {
+        //     log.error("Failed to save candle: {}", e.getMessage());
+        // }
     }
 
     private void scheduleReconnect(String symbol) {

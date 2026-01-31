@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
@@ -13,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Document(collection = "price_candles")
+@CompoundIndex(name = "symbol_interval_openTime_idx", def = "{'symbol': 1, 'interval': 1, 'openTime': -1}")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
