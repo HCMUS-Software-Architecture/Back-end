@@ -55,14 +55,14 @@ From [DatabaseDesign.md](../core/DatabaseDesign.md) - Phase 3 additions:
 
 ```
 ┌───────────────────────────────────────────────────────────────┐
-│                         API Gateway                            │
-│                    (Spring Cloud Gateway)                      │
+│                         API Gateway                           │
+│                    (Spring Cloud Gateway)                     │
 └─────────────────────────────┬─────────────────────────────────┘
                               │
     ┌─────────────────────────┼─────────────────────────────┐
     │                         │                             │
 ┌───┴────┐              ┌─────┴─────┐              ┌────────┴───────┐
-│  API   │              │  Crawler  │              │ Price Service  │
+│ User   |              │  Crawler  │              │ Price Service  │
 │Service │              │  Service  │              │                │
 └───┬────┘              └─────┬─────┘              └────────┬───────┘
     │                         │                             │

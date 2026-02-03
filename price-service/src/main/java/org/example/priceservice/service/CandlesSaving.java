@@ -32,6 +32,7 @@ public class CandlesSaving {
     private final CandleMapper candleMapper;
     private final MongoTemplate mongoTemplate;
     private final Executor candleTaskExecutor;
+    private final PriceCandleCacheService cacheService;
 
     @Value("${price.symbols:btcusdt,ethusdt}")
     private String symbolsConfig;
@@ -83,6 +84,9 @@ public class CandlesSaving {
             // 3. Bulk Upsert vào MongoDB (Hiệu năng cao + Chống trùng lặp)
             bulkUpsert(candles);
             log.info("Successfully saved {} candles for {} {}", candles.size(), symbol, interval);
+
+            // 4. Invalidate Redis cache cho symbol và interval này
+            cacheService.invalidateCache(symbol, interval);
 
         } catch (Exception e) {
             // Log lỗi để không ảnh hưởng các luồng khác

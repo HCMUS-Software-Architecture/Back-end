@@ -19,4 +19,6 @@ public class UserDto {
     private SubscriptionType subscriptionType;
     private Boolean emailVerified;
     private LocalDateTime createdAt;
+    private String phone;
+    private String country;
 }

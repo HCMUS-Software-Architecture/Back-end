@@ -23,6 +23,8 @@ public class User {
     private String email;
     private String password;
     private String fullName;
+    private String phone;
+    private String country;
 
     // Subscription fields
     @Builder.Default

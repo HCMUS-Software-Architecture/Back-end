@@ -69,6 +69,8 @@ public class UserService {
                 .subscriptionType(user.getSubscriptionType())
                 .emailVerified(user.getEmailVerified())
                 .createdAt(user.getCreatedAt())
+                .phone(user.getPhone())
+                .country(user.getCountry())
                 .build();
     }
 }

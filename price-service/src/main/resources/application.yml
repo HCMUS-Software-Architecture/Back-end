@@ -16,6 +16,17 @@ spring:
     stomp:
       port: ${SPRING_RABBITMQ_STOMP_PORT:61613}
 
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:redis123}
+      timeout: 2000ms
+
+cache:
+  candle:
+    ttl-minutes: ${CACHE_CANDLE_TTL:5}
+
 
 
 eureka:
