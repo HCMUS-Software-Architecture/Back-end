@@ -36,8 +36,13 @@ public class UserService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         user.setFullName(updateDto.getFullName());
+        if(updateDto.getPhoneNumber() != null) {
+            user.setPhone(updateDto.getPhoneNumber());
+        }
+        if(updateDto.getCountry() != null) {
+            user.setCountry(updateDto.getCountry());
+        }
         user.setUpdatedAt(java.time.LocalDateTime.now());
-
         User saved = userRepository.save(user);
         return mapToUserDto(saved);
     }
